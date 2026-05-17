@@ -109,6 +109,11 @@ firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.md
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.pdf
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.png
 firmware_builds/systems/*/tb_int/REPORT/nshd_guard_*.log
+firmware_builds/systems/*/tb_int/REPORT/qsys_type1_delay/
+firmware_builds/systems/*/tb_int/REPORT/qsys_filelists_probe/
+firmware_builds/systems/*/tb_int/work_qsys_type1_delay_*/
+firmware_builds/systems/*/tb_int/dual_port_rom_init.txt
+/work_qsys_type1_delay_*/
 
 # --- More build cache artifacts ---
 **/*.map.guard

@@ -320,7 +320,7 @@ static int read_meta_bins(const char *path, panel_t panels[N_RATES]) {
     if (!ready) {
       continue;
     }
-    latency = atoi(tokens[11]);
+    latency = atoi(tokens[10]);
     if (latency < 0) {
       fprintf(stderr, "negative metadata latency %d for case %s\n", latency, tokens[0]);
       fclose(fp);

@@ -3,7 +3,8 @@
 
 set -u
 
-: "${MU3E_IP_CORES_ROOT:=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
+_QSYS_SEARCH_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+: "${MU3E_IP_CORES_ROOT:=$(realpath -m -- "${_QSYS_SEARCH_SCRIPT_DIR}/../../../..")}"
 
 SEARCH_PATHS="${SEARCH_PATHS:-}"
 USER_COMPONENT_PATHS="${USER_COMPONENT_PATHS:-}"
@@ -20,6 +21,8 @@ qsys_is_forbidden_path() {
     case "${resolved_candidate}" in
         "${resolved_root}/firmware_builds/systems/"*/syn|\
         "${resolved_root}/firmware_builds/systems/"*/syn/*|\
+        "${resolved_root}/firmware_builds/systems/"*/ip/hit_type0_tap2|\
+        "${resolved_root}/firmware_builds/systems/"*/ip/hit_type0_tap2/*|\
         "${resolved_root}/firmware_builds/systems/system_20260427_testplanphase5"|\
         "${resolved_root}/firmware_builds/systems/system_20260427_testplanphase5/"*|\
         "${resolved_root}/.git"|\

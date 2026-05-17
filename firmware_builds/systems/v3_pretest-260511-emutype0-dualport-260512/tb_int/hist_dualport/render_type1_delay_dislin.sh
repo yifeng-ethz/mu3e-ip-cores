@@ -43,13 +43,17 @@ find_dislin_dir() {
 
 DISLIN_DIR="$(find_dislin_dir)"
 BUILD_DIR="${REPORT_DIR}/dislin_work/type1_delay"
-BIN="${BUILD_DIR}/type1_delay_dislin"
+RUN_ID="${BASHPID:-$$}"
+BIN="${BUILD_DIR}/type1_delay_dislin_${RUN_ID}"
 LOG="${OUT_PREFIX}.log"
 PNG="${OUT_PREFIX}.png"
 PDF="${OUT_PREFIX}.pdf"
 META_CSV="${TYPE1_META_CSV:-${DELAY_BINS_CSV%_delay_bins.csv}_type1_meta.csv}"
+TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/mu3e_type1_delay.XXXXXX")"
+TEMP_PREFIX="${TMP_DIR}/plot"
 
 mkdir -p "${BUILD_DIR}" "$(dirname -- "${OUT_PREFIX}")"
+trap 'rm -f "${BIN}"; rm -rf "${TMP_DIR}"' EXIT
 
 gcc -O2 -Wall -Wextra -std=c11 \
     -I"${DISLIN_DIR}" \
@@ -60,13 +64,29 @@ gcc -O2 -Wall -Wextra -std=c11 \
     -o "${BIN}"
 
 : > "${LOG}"
-if [[ -f "${META_CSV}" ]]; then
-    "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${PATTERN_SUFFIX}" "${PNG}" "${META_CSV}" | tee -a "${LOG}"
-    "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${PATTERN_SUFFIX}" "${PDF}" "${META_CSV}" | tee -a "${LOG}"
-else
-    "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${PATTERN_SUFFIX}" "${PNG}" | tee -a "${LOG}"
-    "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${PATTERN_SUFFIX}" "${PDF}" | tee -a "${LOG}"
-fi
+
+render_one() {
+    local final_path="$1"
+    local temp_path="$2"
+    rm -f "${temp_path}" "${final_path}"
+    if [[ -f "${META_CSV}" ]]; then
+        "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${PATTERN_SUFFIX}" "${temp_path}" "${META_CSV}" | tee -a "${LOG}"
+    else
+        "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${PATTERN_SUFFIX}" "${temp_path}" | tee -a "${LOG}"
+    fi
+    if [[ ! -s "${temp_path}" ]]; then
+        echo "DISLIN did not create ${temp_path}" >&2
+        return 1
+    fi
+    cp "${temp_path}" "${final_path}"
+    if [[ ! -s "${final_path}" ]]; then
+        echo "failed to copy DISLIN output to ${final_path}" >&2
+        return 1
+    fi
+}
+
+render_one "${PNG}" "${TEMP_PREFIX}.png"
+render_one "${PDF}" "${TEMP_PREFIX}.pdf"
 
 printf 'TYPE1_DELAY_DISLIN_PASS source=%s pattern=%s png=%s pdf=%s log=%s\n' \
     "${SOURCE_NAME}" \

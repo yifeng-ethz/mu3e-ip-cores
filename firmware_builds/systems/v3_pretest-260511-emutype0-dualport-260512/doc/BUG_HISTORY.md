@@ -30,8 +30,71 @@ Severity legend:
 | [BUG-013-H](#bug-013-h-direct-histogram-harness-modeled-16-active-asics-instead-of-the-febs-8-asic-topology) | H | non-datapath-refactor | `common (generated-FEB histogram direct simulation and Type0 plot evidence)` | fixed | FEB generated histogram simulation review, 2026-05-17 | this commit | The direct histogram harness modeled 16 active ASIC sources, but this FEB has 8 ASICs total: 4 upper bank and 4 lower bank. |
 | [BUG-014-I](#bug-014-i-feb-ip-packaging-could-drift-back-to-256-subheaders) | I | non-datapath-refactor | `common (Qsys/IP regeneration if an N_SHD override is missed or changed)` | fixed | FEB/SWB N_SHD audit, 2026-05-17 | this commit | `feb_frame_assembly` still defaulted to 256 subheaders and FEB rbCAM packaging still allowed non-128 `N_SHD`, so a missed override could regenerate a FEB source shape that SWB reports as 256 subheaders. |
 | [BUG-015-H](#bug-015-h-type1-delay-plot-evidence-did-not-lock-the-one-channel-header-sync-delta-contract) | H | non-datapath-refactor | `directed-only (Type1 latency plot evidence)` | fixed | FEB generated Type1 delay plot review, 2026-05-17 | this commit | The generated-RTL delay evidence had no four-rate Type1 latency plot for the header-synced one-channel-per-ASIC mode, no per-hit ingress metadata checkpoint, and no hard metadata-vs-CSR bin check. |
+| [BUG-016-R](#bug-016-r-hit_type0_fanout8-did-not-lane-phase-the-encoded-mutrig-timestamp) | R | soft error | `directed-only (generated-Qsys header-sync Type1 delay mode)` | fixed | FEB generated-Qsys Type1 header-sync gate, 2026-05-17 | this commit | The build-local `hit_type0_fanout8` changed ASIC/channel metadata per lane but copied the same encoded MuTRiG TCC/ECC timestamp to every lane, so serialized lanes produced a multi-cycle latency spread instead of the expected header-sync delta. |
+| [BUG-017-H](#bug-017-h-dislin-plot-renderers-could-report-passing-artifacts-that-were-not-the-requested-files) | H | non-datapath-refactor | `directed-only (DISLIN plot evidence)` | fixed | FEB generated-Qsys plot evidence review, 2026-05-17 | this commit | The Type1 DISLIN metadata overlay read the wrong CSV column, and long DISLIN output paths could be silently truncated while the wrapper still printed the requested `.png/.pdf` path as passing. |
 
 ## 2026-05-17
+
+### BUG-017-H: DISLIN plot renderers could report passing artifacts that were not the requested files
+
+- First seen:
+  - FEB generated-Qsys Type1 plot review on 2026-05-17 while visually checking the periodic and header-sync DISLIN figures.
+- Symptom:
+  - The Type1 metadata overlay could show the wrong peak because the renderer read the metadata CSV `bin` column instead of `latency_cycles`.
+  - For long report paths, DISLIN silently truncated the output filename and produced an extensionless PDF-like artifact while the wrapper still printed the requested `.png`/`.pdf` names as a pass.
+- Root cause:
+  - `type1_delay_dislin.c` and `type1_header_sync_dislin.c` indexed `tokens[11]` instead of the `latency_cycles` field at `tokens[10]`.
+  - The render wrappers passed the final long evidence path directly into `setfil()` and did not assert that the requested output files existed and were nonempty.
+- Fix:
+  - Both Type1 renderers now read the metadata latency from `tokens[10]`.
+  - The Type0, Type1 periodic, and Type1 header-sync wrapper scripts now render into short `/tmp` paths, verify the DISLIN output exists, and only then copy to the long evidence path.
+  - The wrappers build process-unique helper binaries and temp paths so parallel render jobs cannot collide.
+- Evidence:
+  - `gcc -O2 -Wall -Wextra -std=c11` compile checks passed for the Type1 renderers after the metadata-column fix.
+  - Rerendered Qsys Type1 periodic plots for both banks:
+    - `qsys_type1_delay_20260517_fanoutphase1_periodic_type1_up_qsys_periodic.png/.pdf`
+    - `qsys_type1_delay_20260517_fanoutphase1_periodic_type1_down_qsys_periodic.png/.pdf`
+  - Rerendered Qsys header-sync plots for both banks:
+    - `qsys_type1_delay_20260517_fanoutphase1_hsyncup_type1_up_qsys_header_sync_910cyc.png/.pdf`
+    - `qsys_type1_delay_20260517_fanoutphase1_hsyncdown_type1_down_qsys_header_sync_910cyc.png/.pdf`
+  - Rerendered Type0 max-rate plot:
+    - `hist_direct_v3_type0_rate_max_20260517_195711_type0_rate_dislin.png/.pdf`
+  - Visual inspection confirmed the header-sync CSR and metadata overlays share the same 896-cycle bin for both Type1 banks, and the periodic plots remain within the rbCAM `[0,2000]` cycle window.
+- Residuals:
+  - Old extensionless truncated artifacts are ignored report evidence and are not used as passing artifacts after this fix.
+
+### BUG-016-R: hit_type0_fanout8 did not lane-phase the encoded MuTRiG timestamp
+
+- First seen:
+  - Generated-Qsys header-sync Type1 gate on 2026-05-17 with internal trigger period 910 cycles.
+- Symptom:
+  - The upper-bank header-sync run conserved hits but did not form a delta-function latency distribution.
+  - Raw metadata showed four lanes entering consecutive cycles with the same encoded hit timestamp, producing latencies 927, 928, 929, and 930 cycles instead of one constant value.
+- Root cause:
+  - The build-local `hit_type0_fanout8` modeled eight physical ASIC lanes by rewriting ASIC/channel metadata, but left the copied Type0 TCC/ECC timestamp identical on every fanout lane.
+  - The MTS input serializes bank lanes over consecutive cycles, so header-sync stimuli require the encoded MuTRiG timestamp to be lane-phase-qualified before the histogram ingress checkpoint.
+- Fix:
+  - `hit_type0_fanout8.sv` now advances the encoded Type0 TCC/ECC fields by the lane phase using PRBS15 stepping helpers, while still rewriting the ASIC metadata bits for each lane.
+  - `hit_type0_fanout8_hw.tcl` now packages the lane-qualified timestamp behavior as version `26.0.1.0517`.
+  - `update_dualport_histogram_topology.tcl` now re-adds the active Qsys fanout instance at that version and reconnects its eight outputs during topology regeneration.
+  - The topology still hard-enforces `emulator_mutrig_qsys_inst BYTE_STREAM_ENABLE=false`.
+- Evidence:
+  - RTL compile: `vlog -sv -work /tmp/hit_type0_fanout8_vlog_work .../hit_type0_fanout8.sv` completed with `Errors: 0, Warnings: 0`.
+  - RTL style check passed: `rtl_style_check.py .../hit_type0_fanout8.sv`.
+  - Qsys regeneration stamp `20260517_fanoutphase1` passed DEBUG0 and DEBUG2 validation plus synthesis/simulation generation with `exit_code=0`, `error_count=0`.
+  - Direct GUI open still exited early on the forwarded X11 display with one AWT/X11 error, but the generation hook retried under Xvfb and recorded `gui_mode=xvfb`, `early_exit_code=0`, `early_error_count=0`.
+  - Generated Qsys checks passed after regeneration: `ASIC_TOPOLOGY_16_ABSENT_OK`, `QSYS_N_SHD_128_OK`, `CODE_N_SHD_256_ABSENT_OK`, and `BYTE_STREAM_FALSE_OK`.
+  - Generated-Qsys Type1 periodic sweep over 10 ms RUNNING passed for `type1_up` and `type1_down` at 10 kHz, 100 kHz, 500 kHz, and 1 MHz:
+    - 10 kHz: `expected_hits=400`, `meta=400`, `bin_sum=400`, `last_total_sum=400`, `dropped=0`.
+    - 100 kHz: `expected_hits=4000`, `meta=4000`, `bin_sum=4000`, `last_total_sum=4000`, `dropped=0`.
+    - 500 kHz: `expected_hits=20000`, `meta=20000`, `bin_sum=20000`, `last_total_sum=20000`, `dropped=0`.
+    - 1 MHz: `expected_hits=40000`, `meta=40000`, `bin_sum=40000`, `last_total_sum=40000`, `dropped=0`.
+  - Generated-Qsys header-sync runs passed for both Type1 banks with `pulses=1373`, `expected_hits=5492`, `meta=5492`, `bin_sum=5492`, `last_total_sum=5492`, `dropped=0`, and `fail_count=0`.
+  - Upper-bank metadata after the fix shows the lane phase applied before ingress: ASIC1/2/3/0 entered on consecutive cycles with hit timestamps 910/911/912/913 and all raw latencies 927 cycles.
+  - Header-sync DISLIN plots for upper and lower banks show a single CSR/meta bin at 896 cycles, with `nonzero=1/256` and `100.000%` of hits in that bin.
+  - Type0 max-rate generated-RTL plot evidence was rerun after the Qsys regeneration: `type0_rate_1000k_allch` passed with `expected=80000`, `offered=80000`, `total=80000`, `bin_sum=80000`, `dropped=0`, and ten 1 ms in-RUNNING readouts of 8000 hits each.
+- Residuals:
+  - The direct forwarded X11 GUI path still fails in this shell, but the required GUI-open attempt is no longer hidden: the wrapper records the direct failure and verifies a successful Xvfb `qsys-edit` launch before generation proceeds.
 
 ### BUG-015-H: Type1 delay plot evidence did not lock the one-channel header-sync delta contract
 

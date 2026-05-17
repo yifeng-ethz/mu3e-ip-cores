@@ -65,6 +65,38 @@ assert_feb_nshd_128() {
     fi
 }
 
+assert_emulator_byte_stream_disabled() {
+    local guard_log="${QSYS_DIR}/${QSYS_BASE}_byte_stream_guard_${STAMP}.log"
+
+    : > "${guard_log}"
+    if ! awk '
+        /<module/ {
+            in_emulator = 0
+        }
+        /name="emulator_mutrig_qsys_inst"/ {
+            in_emulator = 1
+        }
+        in_emulator && /<parameter name="BYTE_STREAM_ENABLE"/ {
+            seen = 1
+            if ($0 !~ /value="false"/) {
+                printf "%s:%d:%s\n", FILENAME, FNR, $0
+                bad = 1
+            }
+        }
+        END {
+            if (!seen) {
+                printf "%s:missing emulator_mutrig_qsys_inst.BYTE_STREAM_ENABLE\n", FILENAME
+                bad = 1
+            }
+            exit bad ? 1 : 0
+        }
+    ' "${QSYS}" > "${guard_log}"; then
+        echo "ERROR: FEB Qsys BYTE_STREAM_ENABLE guard failed; emulator_mutrig_qsys_inst must stay false." >&2
+        cat "${guard_log}" >&2
+        exit 1
+    fi
+}
+
 run_top_patch_if_needed() {
     if [ "${QSYS_BASE}" = "feb_system_v3" ] && [ -f "${TOP_PATCH_SCRIPT}" ]; then
         "${QSYS_SCRIPT_BIN}" \
@@ -386,6 +418,7 @@ run_top_patch_if_needed
 set_arb_source_debug_level 0
 set_qsys_debug_level 0
 assert_feb_nshd_128
+assert_emulator_byte_stream_disabled
 validate_qsys 0
 launch_qsys_gui_background
 run_qsys_generate synthesis 0
@@ -393,6 +426,7 @@ run_qsys_generate synthesis 0
 set_arb_source_debug_level 2
 set_qsys_debug_level 2
 assert_feb_nshd_128
+assert_emulator_byte_stream_disabled
 validate_qsys 2
 run_qsys_generate simulation 2
 

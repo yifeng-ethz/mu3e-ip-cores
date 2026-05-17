@@ -470,115 +470,115 @@
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
- <module name="lane_0" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_0" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_1" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_1" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="1" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_2" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_2" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="2" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_3" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_3" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="3" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_4" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_4" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="4" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_5" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_5" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="5" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_6" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_6" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="6" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>
- <module name="lane_7" kind="arb_hit_type0" version="26.5.0.511" enabled="1">
-  <parameter name="BUILD" value="511" />
+ <module name="lane_7" kind="arb_hit_type0" version="26.6.0.512" enabled="1">
+  <parameter name="BUILD" value="512" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="FIFO_DEPTH" value="16" />
   <parameter name="INSTANCE_ID" value="7" />
   <parameter name="IP_UID" value="1095263280" />
   <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="VERSION_DATE" value="20260511" />
+  <parameter name="VERSION_DATE" value="20260512" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_MINOR" value="6" />
   <parameter name="VERSION_PATCH" value="0" />
   <parameter name="WATCHDOG_DEFAULT" value="500" />
  </module>

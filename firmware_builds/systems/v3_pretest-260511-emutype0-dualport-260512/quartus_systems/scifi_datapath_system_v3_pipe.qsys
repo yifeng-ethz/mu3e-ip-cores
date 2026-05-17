@@ -3,8 +3,8 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="3.0.5.0512"
-   description="Dual-port histogram topology: histogram_statistics_0.N_PORTS=2, histogram_ingress_bridge_0 feeds lanes 0..3 from mts_preprocessor_0, histogram_ingress_bridge_1 feeds lanes 4..7 from mts_preprocessor_1, both hit_type0 muxes are readyless, and the run-control/emulator-control splitters are readyless broadcasts."
+   version="1.0"
+   description="Direct V3 histogram topology: histogram_statistics_0.N_PORTS=8, type0_lane0..7 connect from hist_type0_lane*_tap.hist while tap.primary preserves the MTS mux path; type1_up/down connect from hist_type1_*_tap.out1 while tap.out0 preserves the hit-stack path; type1_up/down_ts connect directly from the matching MTS timestamp sideband. No histogram_ingress_bridge instance is part of the data path."
    tags=""
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
@@ -178,7 +178,7 @@
    {
       datum _sortIndex
       {
-         value = "69";
+         value = "309";
          type = "int";
       }
    }
@@ -214,19 +214,83 @@
          type = "int";
       }
    }
-   element histogram_ingress_bridge_0
+   element hist_type0_lane0_tap
    {
       datum _sortIndex
       {
-         value = "54";
+         value = "312";
          type = "int";
       }
    }
-   element histogram_ingress_bridge_1
+   element hist_type0_lane1_tap
    {
       datum _sortIndex
       {
-         value = "71";
+         value = "313";
+         type = "int";
+      }
+   }
+   element hist_type0_lane2_tap
+   {
+      datum _sortIndex
+      {
+         value = "314";
+         type = "int";
+      }
+   }
+   element hist_type0_lane3_tap
+   {
+      datum _sortIndex
+      {
+         value = "315";
+         type = "int";
+      }
+   }
+   element hist_type0_lane4_tap
+   {
+      datum _sortIndex
+      {
+         value = "316";
+         type = "int";
+      }
+   }
+   element hist_type0_lane5_tap
+   {
+      datum _sortIndex
+      {
+         value = "317";
+         type = "int";
+      }
+   }
+   element hist_type0_lane6_tap
+   {
+      datum _sortIndex
+      {
+         value = "318";
+         type = "int";
+      }
+   }
+   element hist_type0_lane7_tap
+   {
+      datum _sortIndex
+      {
+         value = "319";
+         type = "int";
+      }
+   }
+   element hist_type1_down_tap
+   {
+      datum _sortIndex
+      {
+         value = "321";
+         type = "int";
+      }
+   }
+   element hist_type1_up_tap
+   {
+      datum _sortIndex
+      {
+         value = "320";
          type = "int";
       }
    }
@@ -280,38 +344,6 @@
       {
          value = "1";
          type = "boolean";
-      }
-   }
-   element hit_stack_subsystem_0.ring_buffer_cam_0_csr
-   {
-      datum baseAddress
-      {
-         value = "135168";
-         type = "String";
-      }
-   }
-   element hit_stack_subsystem_0.ring_buffer_cam_1_csr
-   {
-      datum baseAddress
-      {
-         value = "135296";
-         type = "String";
-      }
-   }
-   element hit_stack_subsystem_0.ring_buffer_cam_2_csr
-   {
-      datum baseAddress
-      {
-         value = "135424";
-         type = "String";
-      }
-   }
-   element hit_stack_subsystem_0.ring_buffer_cam_3_csr
-   {
-      datum baseAddress
-      {
-         value = "135552";
-         type = "String";
       }
    }
    element hit_stack_subsystem_1
@@ -393,14 +425,6 @@
       datum _sortIndex
       {
          value = "65";
-         type = "int";
-      }
-   }
-   element mm_pipeline_lvds_csr_hitstack_frame
-   {
-      datum _sortIndex
-      {
-         value = "67";
          type = "int";
       }
    }
@@ -720,7 +744,7 @@
    {
       datum _sortIndex
       {
-         value = "74";
+         value = "310";
          type = "int";
       }
    }
@@ -728,7 +752,7 @@
    {
       datum _sortIndex
       {
-         value = "75";
+         value = "311";
          type = "int";
       }
    }
@@ -1218,7 +1242,7 @@
  <module
    name="emulator_hit_type0_fanout"
    kind="hit_type0_fanout8"
-   version="26.0.0.512"
+   version="26.0.1.517"
    enabled="1">
   <parameter name="CHANNEL_WIDTH" value="4" />
   <parameter name="DATA_WIDTH" value="45" />
@@ -1232,10 +1256,10 @@
  <module
    name="emulator_mutrig_qsys_inst"
    kind="emulator_mutrig"
-   version="26.3.1.513"
+   version="26.3.3.517"
    enabled="1">
   <parameter name="ASIC_ID_DEFAULT" value="0" />
-  <parameter name="BUILD" value="513" />
+  <parameter name="BUILD" value="517" />
   <parameter name="BYTE_STREAM_ENABLE" value="false" />
   <parameter name="CLUSTER_CENTER_GLOBAL_DEFAULT" value="16" />
   <parameter name="CLUSTER_CROSS_ASIC_DEFAULT" value="0" />
@@ -1247,11 +1271,11 @@
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1162696020" />
-  <parameter name="VERSION_DATE" value="20260513" />
+  <parameter name="VERSION_DATE" value="20260517" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="1" />
+  <parameter name="VERSION_PATCH" value="3" />
  </module>
  <module
    name="hist_post_cdc_0"
@@ -1293,77 +1317,141 @@
   <parameter name="USE_VALID" value="1" />
  </module>
  <module
-   name="histogram_ingress_bridge_0"
-   kind="histogram_ingress_bridge"
-   version="26.0.2.425"
+   name="hist_type0_lane0_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
    enabled="1">
-  <parameter name="BUILD" value="512" />
-  <parameter name="DEFAULT_SELECT_POST" value="0" />
-  <parameter name="ENABLE_POST_FORWARD" value="0" />
-  <parameter name="FILTER_POST_HIT_WORDS" value="1" />
-  <parameter name="INSTANCE_ID" value="0" />
-  <parameter name="IP_UID" value="1212764994" />
-  <parameter name="VERSION_DATE" value="20260512" />
-  <parameter name="VERSION_GIT" value="481097348" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="5" />
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
  </module>
  <module
-   name="histogram_ingress_bridge_1"
-   kind="histogram_ingress_bridge"
-   version="26.0.2.425"
+   name="hist_type0_lane1_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
    enabled="1">
-  <parameter name="BUILD" value="512" />
-  <parameter name="DEFAULT_SELECT_POST" value="0" />
-  <parameter name="ENABLE_POST_FORWARD" value="0" />
-  <parameter name="FILTER_POST_HIT_WORDS" value="1" />
-  <parameter name="INSTANCE_ID" value="1" />
-  <parameter name="IP_UID" value="1212764994" />
-  <parameter name="VERSION_DATE" value="20260512" />
-  <parameter name="VERSION_GIT" value="481097348" />
-  <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="5" />
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type0_lane2_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type0_lane3_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type0_lane4_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type0_lane5_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type0_lane6_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type0_lane7_tap"
+   kind="hit_type0_tap2"
+   version="26.0.0.517"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="45" />
+  <parameter name="ERROR_WIDTH" value="3" />
+ </module>
+ <module
+   name="hist_type1_down_tap"
+   kind="avst_snoop_splitter"
+   version="26.0.0.502"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="39" />
+  <parameter name="EMPTY_WIDTH" value="1" />
+  <parameter name="ERROR_WIDTH" value="1" />
+ </module>
+ <module
+   name="hist_type1_up_tap"
+   kind="avst_snoop_splitter"
+   version="26.0.0.502"
+   enabled="1">
+  <parameter name="CHANNEL_WIDTH" value="4" />
+  <parameter name="DATA_WIDTH" value="39" />
+  <parameter name="EMPTY_WIDTH" value="1" />
+  <parameter name="ERROR_WIDTH" value="1" />
  </module>
  <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.2.0.511"
+   version="26.3.4.517"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
-  <parameter name="AVST_DATA_WIDTH" value="39" />
+  <parameter name="AVST_DATA_WIDTH" value="45" />
   <parameter name="AVS_ADDR_WIDTH" value="8" />
-  <parameter name="BUILD" value="503" />
+  <parameter name="BUILD" value="517" />
   <parameter name="CHANNELS_PER_PORT" value="32" />
-  <parameter name="COAL_QUEUE_DEPTH" value="256" />
+  <parameter name="COAL_QUEUE_DEPTH" value="4" />
   <parameter name="DEBUG" value="0" />
   <parameter name="DEF_BIN_WIDTH" value="1" />
   <parameter name="DEF_INTERVAL_CLOCKS" value="125000000" />
   <parameter name="DEF_LEFT_BOUND" value="0" />
+  <parameter name="ENABLE_DEBUG_INPUTS" value="false" />
   <parameter name="ENABLE_PACKET" value="false" />
   <parameter name="ENABLE_PINGPONG" value="true" />
-  <parameter name="FIFO_ADDR_WIDTH" value="8" />
+  <parameter name="FIFO_ADDR_WIDTH" value="2" />
   <parameter name="FILTER_KEY_BIT_HI" value="38" />
   <parameter name="FILTER_KEY_BIT_LO" value="35" />
   <parameter name="GIT_STAMP_OVERRIDE" value="false" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1212765012" />
-  <parameter name="MAX_COUNT_BITS" value="32" />
+  <parameter name="KICK_COUNT_WIDTH" value="4" />
+  <parameter name="LOCK_KEY_RANGES" value="true" />
+  <parameter name="MAX_COUNT_BITS" value="20" />
   <parameter name="N_BINS" value="256" />
-  <parameter name="N_DEBUG_INTERFACE" value="6" />
-  <parameter name="N_PORTS" value="2" />
+  <parameter name="N_DEBUG_INTERFACE" value="0" />
+  <parameter name="N_PORTS" value="8" />
+  <parameter name="POWER2_BIN_WIDTH_ONLY" value="true" />
   <parameter name="SAR_KEY_WIDTH" value="8" />
-  <parameter name="SAR_TICK_WIDTH" value="16" />
+  <parameter name="SAR_TICK_WIDTH" value="21" />
   <parameter name="SNOOP_EN" value="false" />
+  <parameter name="TYPE0_DATA_WIDTH" value="45" />
+  <parameter name="TYPE1_DATA_WIDTH" value="39" />
   <parameter name="UPDATE_KEY_BIT_HI" value="34" />
   <parameter name="UPDATE_KEY_BIT_LO" value="30" />
   <parameter name="UPDATE_KEY_REPRESENTATION" value="SIGNED" />
-  <parameter name="VERSION_DATE" value="20260503" />
-  <parameter name="VERSION_GIT" value="72231161" />
+  <parameter name="VERSION_DATE" value="20260517" />
+  <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="1" />
-  <parameter name="VERSION_PATCH" value="10" />
+  <parameter name="VERSION_MINOR" value="3" />
+  <parameter name="VERSION_PATCH" value="4" />
  </module>
  <module
    name="hit_stack_subsystem_0"
@@ -1459,7 +1547,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="0" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="8" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="0" />
@@ -1477,7 +1565,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1495,27 +1583,9 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
-  <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
-  <parameter name="USE_RESPONSE" value="0" />
- </module>
- <module
-   name="mm_pipeline_lvds_csr_hitstack_frame"
-   kind="altera_avalon_mm_bridge"
-   version="18.1"
-   enabled="1">
-  <parameter name="ADDRESS_UNITS" value="WORDS" />
-  <parameter name="ADDRESS_WIDTH" value="12" />
-  <parameter name="DATA_WIDTH" value="32" />
-  <parameter name="LINEWRAPBURSTS" value="0" />
-  <parameter name="MAX_BURST_SIZE" value="1" />
-  <parameter name="MAX_PENDING_RESPONSES" value="4" />
-  <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
-  <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="7" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1531,9 +1601,9 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="SYSINFO_ADDR_WIDTH" value="11" />
+  <parameter name="SYSINFO_ADDR_WIDTH" value="10" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
   <parameter name="USE_RESPONSE" value="0" />
  </module>
@@ -1549,7 +1619,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="13" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1567,7 +1637,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="5" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1585,7 +1655,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1603,7 +1673,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1621,7 +1691,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1639,7 +1709,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1657,7 +1727,7 @@
   <parameter name="MAX_BURST_SIZE" value="1" />
   <parameter name="MAX_PENDING_RESPONSES" value="4" />
   <parameter name="PIPELINE_COMMAND" value="1" />
-  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="1" />
   <parameter name="SYMBOL_WIDTH" value="8" />
   <parameter name="SYSINFO_ADDR_WIDTH" value="12" />
   <parameter name="USE_AUTO_ADDRESS_WIDTH" value="1" />
@@ -1706,10 +1776,10 @@
  <module
    name="mts_preprocessor_0"
    kind="mts_preprocessor"
-   version="26.3.0.512"
+   version="26.3.3.517"
    enabled="1">
   <parameter name="BANK" value="UP" />
-  <parameter name="BUILD" value="512" />
+  <parameter name="BUILD" value="517" />
   <parameter name="CRCERR_BIT_LOC" value="1" />
   <parameter name="DEBUG" value="0" />
   <parameter name="DV_COUNTER_SEED_ENABLE" value="0" />
@@ -1724,19 +1794,19 @@
   <parameter name="MUTRIG_BUFFER_EXPECTED_LATENCY_8N" value="2000" />
   <parameter name="MUTRIG_OVERFLOW_LOOKBACK_8N" value="2000" />
   <parameter name="PADDING_EOP_WAIT_CYCLE" value="512" />
-  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_DATE" value="20260517" />
   <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="VERSION_PATCH" value="3" />
  </module>
  <module
    name="mts_preprocessor_1"
    kind="mts_preprocessor"
-   version="26.3.0.512"
+   version="26.3.3.517"
    enabled="1">
   <parameter name="BANK" value="DW" />
-  <parameter name="BUILD" value="512" />
+  <parameter name="BUILD" value="517" />
   <parameter name="CRCERR_BIT_LOC" value="1" />
   <parameter name="DEBUG" value="0" />
   <parameter name="DV_COUNTER_SEED_ENABLE" value="0" />
@@ -1751,16 +1821,16 @@
   <parameter name="MUTRIG_BUFFER_EXPECTED_LATENCY_8N" value="2000" />
   <parameter name="MUTRIG_OVERFLOW_LOOKBACK_8N" value="2000" />
   <parameter name="PADDING_EOP_WAIT_CYCLE" value="512" />
-  <parameter name="VERSION_DATE" value="20260512" />
+  <parameter name="VERSION_DATE" value="20260517" />
   <parameter name="VERSION_GIT" value="30068584" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="0" />
+  <parameter name="VERSION_PATCH" value="3" />
  </module>
  <module
    name="mutrig_datapath_subsystem_0"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1774,7 +1844,7 @@
  <module
    name="mutrig_datapath_subsystem_1"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1788,7 +1858,7 @@
  <module
    name="mutrig_datapath_subsystem_2"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1802,7 +1872,7 @@
  <module
    name="mutrig_datapath_subsystem_3"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1816,7 +1886,7 @@
  <module
    name="mutrig_datapath_subsystem_4"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1830,7 +1900,7 @@
  <module
    name="mutrig_datapath_subsystem_5"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1844,7 +1914,7 @@
  <module
    name="mutrig_datapath_subsystem_6"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1858,7 +1928,7 @@
  <module
    name="mutrig_datapath_subsystem_7"
    kind="mutrig_datapath_system_v3"
-   version="3.0.1.511"
+   version="1.0"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1872,17 +1942,17 @@
  <module
    name="mutrig_injector_0"
    kind="mutrig_injector_multiheader"
-   version="26.1.0.511"
+   version="26.1.1.517"
    enabled="1">
-  <parameter name="BUILD" value="429" />
+  <parameter name="BUILD" value="517" />
   <parameter name="HEADERINFO_CHANNEL_W" value="4" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1296649802" />
-  <parameter name="VERSION_DATE" value="20260429" />
-  <parameter name="VERSION_GIT" value="1385020117" />
+  <parameter name="VERSION_DATE" value="20260517" />
+  <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="0" />
-  <parameter name="VERSION_PATCH" value="3" />
+  <parameter name="VERSION_MINOR" value="1" />
+  <parameter name="VERSION_PATCH" value="1" />
  </module>
  <module
    name="mutrig_reset_controller_0"
@@ -2049,15 +2119,6 @@
    kind="avalon"
    version="18.1"
    start="mm_pipeline_lvds_csr_hist.m0"
-   end="histogram_ingress_bridge_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0c00" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hist.m0"
    end="histogram_statistics_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0400" />
@@ -2106,15 +2167,6 @@
    end="emulator_mutrig_qsys_inst.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hist.m0"
-   end="histogram_ingress_bridge_1.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0c10" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2192,24 +2244,6 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_frame.m0"
-   end="hit_stack_subsystem_0.feb_frame_assembly_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_frame.m0"
-   end="hit_stack_subsystem_1.feb_frame_assembly_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0040" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
    start="mm_pipeline_lvds_csr_hist.m0"
    end="histogram_statistics_0.hist_bin">
   <parameter name="arbitrationPriority" value="1" />
@@ -2223,78 +2257,6 @@
    end="mutrig_reset_controller_0.reconfig_mgmt">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_0.ring_buffer_cam_0_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_1.ring_buffer_cam_0_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0400" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_0.ring_buffer_cam_1_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0080" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_1.ring_buffer_cam_1_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0480" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_0.ring_buffer_cam_2_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0100" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_1.ring_buffer_cam_2_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0500" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_0.ring_buffer_cam_3_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0180" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_hitstack_ring.m0"
-   end="hit_stack_subsystem_1.ring_buffer_cam_3_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0580" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2394,15 +2356,6 @@
    end="mm_pipeline_lvds_csr_hitstack_ring.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0xb000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_clock_crossing_bridge.m0"
-   end="mm_pipeline_lvds_csr_hitstack_frame.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0xd000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2535,27 +2488,9 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="histogram_ingress_bridge_0.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00020c00" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
    end="emulator_mutrig_qsys_inst.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x2000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="histogram_ingress_bridge_1.csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00020c10" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2634,99 +2569,9 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="hit_stack_subsystem_0.feb_frame_assembly_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00025000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_1.feb_frame_assembly_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00025040" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
    end="histogram_statistics_0.hist_bin">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00020000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_1.ring_buffer_cam_0_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00023000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_0.ring_buffer_cam_0_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00021000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_1.ring_buffer_cam_1_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00023080" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_0.ring_buffer_cam_1_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00021080" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_1.ring_buffer_cam_2_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00023100" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_0.ring_buffer_cam_2_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00021100" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_1.ring_buffer_cam_3_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00023180" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="hit_stack_subsystem_0.ring_buffer_cam_3_csr">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00021180" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2786,23 +2631,83 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="histogram_ingress_bridge_1.hist_out"
-   end="histogram_statistics_0.fill_in_1" />
+   start="mutrig_datapath_subsystem_0.headerinfo"
+   end="mutrig_injector_0.headerinfo0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="histogram_ingress_bridge_0.hist_out"
-   end="histogram_statistics_0.hist_fill_in" />
+   start="mutrig_datapath_subsystem_1.headerinfo"
+   end="mutrig_injector_0.headerinfo1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hit_stack_subsystem_0.frame_debug_delay8loss"
-   end="histogram_statistics_0.debug_1" />
+   start="mutrig_datapath_subsystem_2.headerinfo"
+   end="mutrig_injector_0.headerinfo2" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hit_stack_subsystem_1.frame_debug_delay8loss"
-   end="histogram_statistics_0.debug_2" />
+   start="mutrig_datapath_subsystem_3.headerinfo"
+   end="mutrig_injector_0.headerinfo3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_4.headerinfo"
+   end="mutrig_injector_0.headerinfo4" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_5.headerinfo"
+   end="mutrig_injector_0.headerinfo5" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_6.headerinfo"
+   end="mutrig_injector_0.headerinfo6" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="mutrig_datapath_subsystem_7.headerinfo"
+   end="mutrig_injector_0.headerinfo7" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane0_tap.hist"
+   end="histogram_statistics_0.type0_lane0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane1_tap.hist"
+   end="histogram_statistics_0.type0_lane1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane2_tap.hist"
+   end="histogram_statistics_0.type0_lane2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane3_tap.hist"
+   end="histogram_statistics_0.type0_lane3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane4_tap.hist"
+   end="histogram_statistics_0.type0_lane4" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane5_tap.hist"
+   end="histogram_statistics_0.type0_lane5" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane6_tap.hist"
+   end="histogram_statistics_0.type0_lane6" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane7_tap.hist"
+   end="histogram_statistics_0.type0_lane7" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -2852,17 +2757,12 @@
    kind="avalon_streaming"
    version="18.1"
    start="mts_preprocessor_0.hit_type1_out"
-   end="histogram_ingress_bridge_0.pre_in" />
+   end="hist_type1_up_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mts_preprocessor_1.hit_type1_out"
-   end="histogram_ingress_bridge_1.pre_in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="hit_stack_subsystem_0.hit_type3"
-   end="hist_post_splitter_0.in" />
+   end="hist_type1_down_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -2921,11 +2821,6 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="hist_post_cdc_0.out"
-   end="histogram_ingress_bridge_0.post_in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
    start="run_control_splitter.out0"
    end="histogram_statistics_0.ctrl" />
  <connection
@@ -2938,6 +2833,16 @@
    version="18.1"
    start="emulator_hit_type0_fanout.out0"
    end="arb_hit_type0_supercore_0.emu_in_0" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type1_up_tap.out0"
+   end="hit_stack_subsystem_0.hit_type_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type1_down_tap.out0"
+   end="hit_stack_subsystem_1.hit_type_1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -2958,6 +2863,16 @@
    version="18.1"
    start="emulator_ctrl_splitter.out1"
    end="arb_hit_type0_supercore_0.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type1_down_tap.out1"
+   end="histogram_statistics_0.type1_down" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type1_up_tap.out1"
+   end="histogram_statistics_0.type1_up" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3021,53 +2936,83 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="histogram_ingress_bridge_0.pre_out"
-   end="hit_stack_subsystem_0.hit_type_1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="histogram_ingress_bridge_1.pre_out"
-   end="hit_stack_subsystem_1.hit_type_1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_0"
+   start="hist_type0_lane0_tap.primary"
    end="mux_mutrig2processor.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_1"
-   end="mux_mutrig2processor.in1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_2"
-   end="mux_mutrig2processor.in2" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_3"
-   end="mux_mutrig2processor.in3" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_4"
+   start="hist_type0_lane4_tap.primary"
    end="mux_mutrig2processor_0.in0" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_5"
+   start="hist_type0_lane1_tap.primary"
+   end="mux_mutrig2processor.in1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane5_tap.primary"
    end="mux_mutrig2processor_0.in1" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_6"
+   start="hist_type0_lane2_tap.primary"
+   end="mux_mutrig2processor.in2" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane6_tap.primary"
    end="mux_mutrig2processor_0.in2" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_7"
+   start="hist_type0_lane3_tap.primary"
+   end="mux_mutrig2processor.in3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hist_type0_lane7_tap.primary"
    end="mux_mutrig2processor_0.in3" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_0"
+   end="hist_type0_lane0_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_1"
+   end="hist_type0_lane1_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_2"
+   end="hist_type0_lane2_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_3"
+   end="hist_type0_lane3_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_4"
+   end="hist_type0_lane4_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_5"
+   end="hist_type0_lane5_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_6"
+   end="hist_type0_lane6_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="arb_hit_type0_supercore_0.selected_out_7"
+   end="hist_type0_lane7_tap.in" />
  <connection
    kind="clock"
    version="18.1"
@@ -3307,17 +3252,12 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
-   end="mm_pipeline_lvds_csr_hitstack_frame.clk" />
+   end="arb_hit_type0_supercore_0.clk" />
  <connection
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
    end="emulator_hit_type0_fanout.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="arb_hit_type0_supercore_0.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -3332,17 +3272,57 @@
    kind="clock"
    version="18.1"
    start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane0_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane1_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane2_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane3_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane4_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane5_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane6_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type0_lane7_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type1_up_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
+   end="hist_type1_down_tap.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="lvds_rx_28nm_0.outclock"
    end="histogram_statistics_0.clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="histogram_ingress_bridge_0.clock" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="lvds_rx_28nm_0.outclock"
-   end="histogram_ingress_bridge_1.clock" />
  <connection
    kind="clock"
    version="18.1"
@@ -3417,6 +3397,28 @@
  <connection
    kind="conduit"
    version="18.1"
+   start="mts_preprocessor_1.hit_type1_ts"
+   end="histogram_statistics_0.type1_down_ts">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="mts_preprocessor_0.hit_type1_ts"
+   end="histogram_statistics_0.type1_up_ts">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
    start="mutrig_injector_0.inject"
    end="emulator_inject_fanout.inject_in">
   <parameter name="endPort" value="" />
@@ -3461,61 +3463,6 @@
    kind="reset"
    version="18.1"
    start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_low.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_emu_dbg.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_mutrig3.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_mutrig4_mts0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_mutrig5.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_mutrig6.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_mutrig7.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_mts1.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_hist.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_hitstack_ring.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
-   end="mm_pipeline_lvds_csr_hitstack_frame.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_clock_125.clk_reset"
    end="monitor_reset_sync.reset_in0" />
  <connection
    kind="reset"
@@ -3530,286 +3477,6 @@
  <connection
    kind="reset"
    version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_0.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_1.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_2.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_3.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_4.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_5.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_6.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_fifo_7.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="emulator_mutrig_qsys_inst.data_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="hit_stack_subsystem_1.datapath_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="hit_stack_subsystem_0.datapath_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_reset_controller_0.dpa_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_clock_crossing_bridge.m0_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="hist_post_cdc_0.out_clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_7.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_6.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_5.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_4.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="run_control_splitter.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="run_control_mux.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_3.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_2.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_1.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_datapath_subsystem_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="histogram_statistics_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="emulator_ctrl_splitter.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="emulator_inject_fanout.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_1.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_2.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_3.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_4.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_5.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_6.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="decoded_lane_mux_7.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="histogram_ingress_bridge_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_low.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_emu_dbg.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_mutrig3.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_mutrig4_mts0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_mutrig5.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_mutrig6.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_mutrig7.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_mts1.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_hist.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_hitstack_ring.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mm_pipeline_lvds_csr_hitstack_frame.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="histogram_ingress_bridge_1.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="dbg_mm2runctrl_0.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mutrig_injector_0.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mts_preprocessor_1.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mts_preprocessor_0.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="emulator_hit_type0_fanout.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="arb_hit_type0_supercore_0.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mux_mutrig2processor.rst" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="master_datapath.master_reset"
-   end="mux_mutrig2processor_0.rst" />
- <connection
-   kind="reset"
-   version="18.1"
    start="reset_bridge_export.out_reset"
    end="histogram_statistics_0.interval_reset" />
  <connection
@@ -3817,6 +3484,46 @@
    version="18.1"
    start="monitor_reset_sync.reset_out"
    end="master_datapath.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_0.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_1.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_2.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_3.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_4.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_5.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_6.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_fifo_7.clk_reset" />
  <connection
    kind="reset"
    version="18.1"
@@ -3831,6 +3538,21 @@
    kind="reset"
    version="18.1"
    start="monitor_reset_sync.reset_out"
+   end="emulator_mutrig_qsys_inst.data_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hit_stack_subsystem_0.datapath_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hit_stack_subsystem_1.datapath_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
    end="mutrig_reset_controller_0.dpa_reset" />
  <connection
    kind="reset"
@@ -3841,7 +3563,257 @@
    kind="reset"
    version="18.1"
    start="monitor_reset_sync.reset_out"
+   end="hist_post_cdc_0.out_clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
    end="mm_pipeline_jtagmaster2rstctrl.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_2.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_4.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="decoded_lane_mux_7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="emulator_ctrl_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="emulator_inject_fanout.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="histogram_statistics_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="run_control_splitter.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="run_control_mux.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_2.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_4.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_datapath_subsystem_7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_low.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_emu_dbg.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_mutrig3.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_mutrig4_mts0.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_mutrig5.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_mutrig6.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_mutrig7.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_mts1.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_hist.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mm_pipeline_lvds_csr_hitstack_ring.reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="dbg_mm2runctrl_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mutrig_injector_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mts_preprocessor_0.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mts_preprocessor_1.reset_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="arb_hit_type0_supercore_0.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="emulator_hit_type0_fanout.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mux_mutrig2processor.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="mux_mutrig2processor_0.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane0_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane1_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane2_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane3_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane4_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane5_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane6_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type0_lane7_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type1_up_tap.rst" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="monitor_reset_sync.reset_out"
+   end="hist_type1_down_tap.rst" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="AUTO" />
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />

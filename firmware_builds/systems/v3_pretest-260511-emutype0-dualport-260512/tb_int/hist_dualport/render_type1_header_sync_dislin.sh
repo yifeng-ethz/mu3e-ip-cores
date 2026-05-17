@@ -6,14 +6,14 @@ SYSTEM_DIR="$(realpath -m -- "${SCRIPT_DIR}/../..")"
 REPORT_DIR="${SYSTEM_DIR}/tb_int/REPORT"
 DISLIN_DIR="${DISLIN_DIR:-}"
 
-INTERVAL_CSV="${1:?usage: render_type0_rate_dislin.sh <intervals.csv> <summary.csv> [case_name] [output_prefix]}"
-SUMMARY_CSV="${2:?usage: render_type0_rate_dislin.sh <intervals.csv> <summary.csv> [case_name] [output_prefix]}"
-CASE_NAME="${3:-type0_rate_1000k_allch}"
+DELAY_BINS_CSV="${1:?usage: render_type1_header_sync_dislin.sh <delay_bins.csv> <summary.csv> [source_name] [output_prefix]}"
+SUMMARY_CSV="${2:?usage: render_type1_header_sync_dislin.sh <delay_bins.csv> <summary.csv> [source_name] [output_prefix]}"
+SOURCE_NAME="${3:-type1_up}"
 if [[ $# -ge 4 ]]; then
     OUT_PREFIX="$4"
 else
-    base="$(basename -- "${INTERVAL_CSV}")"
-    OUT_PREFIX="${REPORT_DIR}/${base%_intervals.csv}_type0_rate_dislin"
+    base="$(basename -- "${DELAY_BINS_CSV}")"
+    OUT_PREFIX="${REPORT_DIR}/${base%_delay_bins.csv}_${SOURCE_NAME}_qsys_header_sync_910cyc_delay_dislin"
 fi
 
 find_dislin_dir() {
@@ -37,13 +37,14 @@ find_dislin_dir() {
 }
 
 DISLIN_DIR="$(find_dislin_dir)"
-BUILD_DIR="${REPORT_DIR}/dislin_work/type0_rate"
+BUILD_DIR="${REPORT_DIR}/dislin_work/type1_header_sync"
 RUN_ID="${BASHPID:-$$}"
-BIN="${BUILD_DIR}/type0_rate_dislin_${RUN_ID}"
+BIN="${BUILD_DIR}/type1_header_sync_dislin_${RUN_ID}"
 LOG="${OUT_PREFIX}.log"
 PNG="${OUT_PREFIX}.png"
 PDF="${OUT_PREFIX}.pdf"
-TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/mu3e_type0_rate.XXXXXX")"
+META_CSV="${TYPE1_META_CSV:-${DELAY_BINS_CSV%_delay_bins.csv}_type1_meta.csv}"
+TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/mu3e_type1_header.XXXXXX")"
 TEMP_PREFIX="${TMP_DIR}/plot"
 
 mkdir -p "${BUILD_DIR}" "$(dirname -- "${OUT_PREFIX}")"
@@ -51,7 +52,7 @@ trap 'rm -f "${BIN}"; rm -rf "${TMP_DIR}"' EXIT
 
 gcc -O2 -Wall -Wextra -std=c11 \
     -I"${DISLIN_DIR}" \
-    "${SCRIPT_DIR}/type0_rate_dislin.c" \
+    "${SCRIPT_DIR}/type1_header_sync_dislin.c" \
     -L"${DISLIN_DIR}" \
     -Wl,-rpath,"${DISLIN_DIR}" \
     -ldislin -lm \
@@ -63,7 +64,11 @@ render_one() {
     local final_path="$1"
     local temp_path="$2"
     rm -f "${temp_path}" "${final_path}"
-    "${BIN}" "${INTERVAL_CSV}" "${SUMMARY_CSV}" "${CASE_NAME}" "${temp_path}" | tee -a "${LOG}"
+    if [[ -f "${META_CSV}" ]]; then
+        "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${temp_path}" "${META_CSV}" | tee -a "${LOG}"
+    else
+        "${BIN}" "${DELAY_BINS_CSV}" "${SUMMARY_CSV}" "${SOURCE_NAME}" "${temp_path}" | tee -a "${LOG}"
+    fi
     if [[ ! -s "${temp_path}" ]]; then
         echo "DISLIN did not create ${temp_path}" >&2
         return 1
@@ -78,8 +83,8 @@ render_one() {
 render_one "${PNG}" "${TEMP_PREFIX}.png"
 render_one "${PDF}" "${TEMP_PREFIX}.pdf"
 
-printf 'TYPE0_RATE_DISLIN_PASS case=%s png=%s pdf=%s log=%s\n' \
-    "${CASE_NAME}" \
+printf 'TYPE1_HEADER_SYNC_DISLIN_PASS source=%s png=%s pdf=%s log=%s\n' \
+    "${SOURCE_NAME}" \
     "${PNG}" \
     "${PDF}" \
     "${LOG}"
