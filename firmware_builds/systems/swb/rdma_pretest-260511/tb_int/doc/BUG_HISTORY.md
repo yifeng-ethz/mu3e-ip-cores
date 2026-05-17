@@ -42,6 +42,103 @@ Historical formal note:
 | [BUG-006-H](#bug-006-h-board-rate-hist-readout-sampled-the-empty-post-run-1-ms-bank) | H | non-datapath-refactor | `common (board histogram readback after END_RUN)` | fixed-harness / board-rerun-pending | RN.BASIC.001 pre/post rbCAM board pair, 2026-05-14 | `pending` | The board runner compared post-END `hist_bin` data even though the 1 ms ping-pong histogram had already advanced into empty post-run intervals. |
 | [BUG-007-R](#bug-007-r-histogram-ingress-bridge-can-remain-pending-on-a-stale-packet-state) | R | non-datapath-refactor | `common (pre/post histogram source switching after partial traffic)` | open | RN.BASIC.001 live RUNNING hist samples, 2026-05-14 | `pending` | The histogram ingress bridge can report a pending pre/post switch while a stale packet-active bit prevents the requested source from becoming live. |
 | [BUG-008-R](#bug-008-r-swb-demerger-dropped-feb-v3-data-frames-before-opq) | R | datapath-contract | `common (FEB v3 data frames with 0xA5 preamble)` | fixed-sim / firmware-compiled / board-STP-pending | SWB active-run STP + `SWB_FEB_XCVR_DEMERGER_REPLAY` | `pending` | The SWB data/SC/RC demerger did not classify the FEB v3 `0xA50000BC` SOP as data, so legal frames stayed before OPQ ingress. |
+| [BUG-009-R](#bug-009-r-pcie-app-dma-engines-observe-raw-hip-ready-without-source-grant) | R | datapath-contract | `common (posted host writes under PCIe TX arbitration)` | fixed-rtl / board-rerun-pending | `B065_HOST_REALISTIC` and `B066_HOST_REALISTIC`, 2026-05-17 | `this commit` | The legacy PCIe app let DMA/controlinfo posted writes advance on raw HIP ready even when the completer had not granted that DMA source, so RQE/CQE/DMA posted-write lineage could disappear without an ACK. |
+
+## 2026-05-17
+
+### BUG-009-R: PCIe app DMA engines observe raw HIP ready without source grant
+- First seen in:
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/sim/B065_HOST_REALISTIC/transcript`
+  - `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/sim/B066_HOST_REALISTIC/transcript`
+- Symptom:
+  - Host-realistic tb_int now models the rc_tool/dma_tool side as PCIe posted
+    Memory Writes into host RQ/CQ memory instead of directly forcing internal
+    RQE, CQE, or DMA completion interfaces.
+  - `B066_HOST_REALISTIC` observes the host RQE post plus PCIe RC and HIP RX
+    MWr checkpoints, then sees no internal RQE, no CQE, no HIP TX MWr, and no
+    host CQE observation:
+    `host_rqe=1 host_missing_rqe=1 host_missing_cqe=1/0 pcie_rc_mwr=1 hip_rx_mwr=1 hip_tx_mwr=0 host_cqe=0`.
+  - `B065_HOST_REALISTIC` gives the same missing ingress/egress shape and also
+    loses the expected DMA event:
+    `rqe_ingress actual=0 expected=1`, `dma_beats actual=0 expected=1`,
+    `dma_events actual=0 expected=1`, with
+    `host_rqe=1 host_missing_rqe=1 pcie_rc_mwr=1 hip_rx_mwr=1 hip_tx_mwr=0`.
+  - Both host-realistic runs intentionally fail with `UVM_ERROR : 5` and
+    `UVM_FATAL : 1`; this is reproduction evidence, not a workaround to make
+    the test pass.
+- Root cause:
+  - In the legacy PCIe app, both `dma_engine` instances are wired to raw HIP
+    `i_tx_st_ready0` through their `tx_ready` inputs while `pcie_completer`
+    exposes but does not drive the intended DMA source-ready handshakes.
+  - `pcie_completer.vhd` only forwards `i_dma_tx` or `i_dma2_tx` in its `dma`
+    or `dma2` states. Other completion and memory-response states can own the
+    HIP TX interface while raw HIP ready is still asserted.
+  - `dma_engine.vhd` advances packet/controlinfo states and raises `dma_done`
+    from `tx_ready`/`tx_ready_last`, so a posted write can be consumed by the
+    DMA source before the completer has selected that source for the HIP TX
+    beat. Posted Memory Writes have no completion ACK, so a lost CQE/controlinfo
+    or data write is only visible through local HIP TX accept and host-memory
+    checkpoints.
+- Fix status:
+  - state:
+    - fixed in RTL with a source-gated DMA ready path; board rerun still
+      pending
+  - mechanism applied:
+    - `pcie_application.vhd` now connects `dma_engine.tx_ready` to the
+      completer-owned `dma_tx_ready` / `dma2_tx_ready` handshakes instead of
+      raw HIP `i_tx_st_ready0`
+    - `pcie_completer.vhd` now drives each DMA ready low by default and forwards
+      `tx_st_ready0_next` only while the FSM is in the matching `dma` or `dma2`
+      source-forwarding state
+    - no UVM workaround was applied; the host-realistic failure remains valid
+      as the reproduction of the board-relevant posted-write loss boundary
+  - longer-term architecture recommendation:
+    - replace the legacy completer/DMA coupling with a single PCIe TX source
+      arbiter carrying explicit `valid/ready/grant` per source
+    - add posted-write checkpoints and counters for offered, granted, accepted,
+      stalled, and dropped packets by class and transaction id
+    - keep host-memory validation based on HIP TX accept plus host memory
+      mutation; do not expect a PCIe completion ACK for these writes
+  - before_fix_outcome:
+    - synthetic/direct `B066` still passes because the old sequence directly
+      drives the internal RQE/CQE/DMA observables
+    - host-realistic `B065_HOST_REALISTIC` and `B066_HOST_REALISTIC` fail at
+      the board-relevant RQ/CQ posted-write boundary
+  - after_fix_outcome:
+    - RTL diff is limited to the PCIe APP source-ready contract:
+      `pcie_application.vhd` and `pcie_completer.vhd`
+    - `make flow_map` in
+      `firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10`
+      completed with `0 errors, 213 warnings`
+    - `make flow` completed map, fit, assembler, and STA with `0 errors, 338
+      warnings`; generated SOF:
+      `output_files/top.sof`,
+      `sha256=9ea0d11e3230831c25121bb26d16774635179afed950abea5997cb807aa90fb7`
+    - STA still reports a max-skew critical warning and incomplete constraints,
+      so this is a board/offline-test candidate rather than final timing
+      signoff
+  - potential_hazard:
+    - medium after the RTL gate; the CQE loss symptom is strongly explained by
+      this posted-write source arbitration bug, but additional independent bugs
+      may still exist
+    - CQE is likely the first visible mismatch, but the same old handshake error
+      applied to all host posted-write packets sourced through the legacy
+      DMA/controlinfo path, including rxbuffer data pushes
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run for this RTL patch
+- Runtime / coverage context:
+  - host-realistic targets:
+    - `make run_B065_HOST_REALISTIC`
+    - `make run_B066_HOST_REALISTIC`
+  - Qsys debug split:
+    - synthesis remains at `DEBUG_LEVEL=0`
+    - simulation Qsys has a saved `DEBUG_LEVEL=2` DUT image for checkpoint
+      exposure
+    - `DEBUG_LEVEL=1` exports FIFO fill-level/counter observability and is
+      synthesizable, but is not timing-closed and must not be used for
+      synthesis signoff
+- Commit:
+  - this commit
 
 ## 2026-05-16
 

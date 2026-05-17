@@ -383,6 +383,8 @@ begin
 
 
         tx_st_ready0 <= '0';
+        dma_tx_ready <= '0';
+        dma2_tx_ready <= '0';
         nreadycount <= (others => '0');
         dma_granted_r <= '0';
         dma2_granted_r <= '0';
@@ -442,8 +444,16 @@ begin
         testout_r( 63 downto 20) <= (others => '0');
         testout_r( 15 downto  8) <= (others => '0');
 
-        -- forward ready status to dma engine with 1cc delay
-        --dma_tx_ready <= tx_st_ready0_next;
+        -- Forward HIP ready only to the DMA source currently granted onto
+        -- o_tx_st. Raw HIP ready must not be visible to non-selected DMA
+        -- engines because Memory Writes are posted and have no completion ACK.
+        dma_tx_ready <= '0';
+        dma2_tx_ready <= '0';
+        if(state = dma) then
+            dma_tx_ready <= tx_st_ready0_next;
+        elsif(state = dma2) then
+            dma2_tx_ready <= tx_st_ready0_next;
+        end if;
 
         testout <= testout_r;
         if(tx_st_ready0_next = '0' and tx_st_ready0 = '1') then

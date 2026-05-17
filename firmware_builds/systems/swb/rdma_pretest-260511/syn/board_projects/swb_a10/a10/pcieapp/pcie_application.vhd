@@ -434,7 +434,7 @@ begin
         dma_request                 => dma_request,
         dma_granted                 => dma_granted,
         dma_done                    => dma_done,
-        tx_ready                    => i_tx_st_ready0,
+        tx_ready                    => dma_tx_ready,
         o_tx                        => dma_tx,
 
         -- Interrupt stuff
@@ -487,7 +487,7 @@ begin
         dma_request                 => dma2_request,
         dma_granted                 => dma2_granted,
         dma_done                    => dma2_done,
-        tx_ready                    => i_tx_st_ready0,
+        tx_ready                    => dma2_tx_ready,
         o_tx                        => dma2_tx,
 
         -- Interrupt stuff
