@@ -1359,7 +1359,7 @@
   <parameter name="USE_DATA" value="1" />
   <parameter name="USE_ERROR" value="0" />
   <parameter name="USE_PACKETS" value="1" />
-  <parameter name="USE_READY" value="0" />
+  <parameter name="USE_READY" value="1" />
   <parameter name="USE_VALID" value="1" />
  </module>
  <module

@@ -39,8 +39,12 @@ else ifeq ($(MODE),direct)
 VLOG_DEFS := +define+FEB_UPLOAD_DIRECT_READY
 VSIM_ARGS := +EXPECT_FIXED=1
 GEN_SRC := $(COMMON_GEN_SRC)
+else ifeq ($(MODE),ready_adapter)
+VLOG_DEFS := +define+FEB_UPLOAD_READY_ADAPTER
+VSIM_ARGS := +EXPECT_FIXED=1
+GEN_SRC := $(BROKEN_GEN_SRC) $(COMMON_GEN_SRC)
 else
-$(error MODE must be broken or direct)
+$(error MODE must be broken, direct, or ready_adapter)
 endif
 
 .PHONY: run compile
