@@ -5,6 +5,13 @@ export LC_ALL=C
 QSYS=$1
 
 QSYS="$(realpath -- "$QSYS")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SYSTEM_DIR_CANDIDATE="$(realpath -m -- "${SCRIPT_DIR}/../../../../../../..")"
+DUAL_DEBUG_GENERATOR="${SYSTEM_DIR_CANDIDATE}/script/generate_qsys_debug_pair.sh"
+if [ -x "${DUAL_DEBUG_GENERATOR}" ]; then
+    exec "${DUAL_DEBUG_GENERATOR}" "${QSYS}"
+fi
+
 QSYS_DIR=$(dirname -- "$QSYS")
 SEARCH_PATHS=""
 USER_COMPONENT_PATHS=""
@@ -31,12 +38,15 @@ fi
 QSYS_BASENAME=$(basename -- "$QSYS" .qsys)
 GENERATED_DIR="${QSYS_DIR}/${QSYS_BASENAME}"
 OUTPUT_DIR="${GENERATED_DIR}/synthesis"
+SIMULATION_DIR="${GENERATED_DIR}/simulation"
+SIMULATION_GENERATE_DIR="${GENERATED_DIR}/.simulation_debug2_gen"
 
 if [ -d "${GENERATED_DIR}" ]; then
     chmod -R u+w "${GENERATED_DIR}"
 fi
 mkdir -p "${OUTPUT_DIR}"
 
+export DEBUG_LEVEL=0
 if qsys-generate \
     --synthesis=VHDL \
     --output-directory="${GENERATED_DIR}" \
@@ -46,6 +56,32 @@ if qsys-generate \
         chmod -R a-w "${OUTPUT_DIR}"
     fi
     find "${GENERATED_DIR}" -maxdepth 1 \( -name '*.qsys' -o -name '*.sopcinfo' \) -exec chmod a-w {} +
+else
+    exit $?
+fi
+
+if [ -d "${SIMULATION_GENERATE_DIR}" ]; then
+    chmod -R u+w "${SIMULATION_GENERATE_DIR}"
+    rm -rf -- "${SIMULATION_GENERATE_DIR}"
+fi
+mkdir -p "${SIMULATION_GENERATE_DIR}"
+
+export DEBUG_LEVEL=2
+if qsys-generate \
+    --synthesis=VHDL \
+    --output-directory="${SIMULATION_GENERATE_DIR}" \
+    --clear-output-directory \
+    --search-path="${SEARCH_PATHS},\$" \
+    "$QSYS"; then
+    if [ -d "${SIMULATION_DIR}" ]; then
+        chmod -R u+w "${SIMULATION_DIR}"
+        rm -rf -- "${SIMULATION_DIR}"
+    fi
+    mv -- "${SIMULATION_GENERATE_DIR}/synthesis" "${SIMULATION_DIR}"
+    rm -rf -- "${SIMULATION_GENERATE_DIR}"
+    if [ -d "${SIMULATION_DIR}" ]; then
+        chmod -R a-w "${SIMULATION_DIR}"
+    fi
 else
     exit $?
 fi

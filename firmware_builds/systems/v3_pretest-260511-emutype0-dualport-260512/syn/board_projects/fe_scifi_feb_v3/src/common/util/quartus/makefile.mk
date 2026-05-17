@@ -162,7 +162,7 @@ $(PREFIX)/%.qsys : %.tcl device.tcl
 	$(call find_file,tcl2qsys.sh) "$<" "$@" 2>&1 | awk '{ sub(/^([0-9]+[.:]?)+ /, "") ; print $0 }'
 
 $(PREFIX)/%.sopcinfo : $(PREFIX)/%.qsys
-	# find and exec qsys-generate.sh
+	# find and exec qsys-generate.sh; this emits synthesis/ DEBUG_LEVEL=0 and simulation/ DEBUG_LEVEL=2.
 	$(call find_file,qsys-generate.sh) "$<" 2>&1 | awk '{ sub(/^([0-9]+[.:]?)+ /, "") ; print $0 }'
 
 .PHONY : pre_flow

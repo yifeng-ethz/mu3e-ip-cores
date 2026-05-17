@@ -3,12 +3,19 @@ set -euo pipefail
 
 CASE="${1:-smoke}"
 
-BUILD_DIR="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
-REPO_DIR="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -n "${MU3E_IP_CORES_ROOT:-}" ]]; then
+    REPO_DIR="${MU3E_IP_CORES_ROOT}"
+    BUILD_DIR="${REPO_DIR}/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
+else
+    BUILD_DIR="$(realpath -m -- "${SCRIPT_DIR}/../..")"
+    REPO_DIR="$(realpath -m -- "${BUILD_DIR}/../../..")"
+fi
 TB_DIR="${BUILD_DIR}/tb_int/hist_dualport"
 REPORT_DIR="${BUILD_DIR}/tb_int/REPORT"
+SIM_RTL_DIR="${BUILD_DIR}/quartus_systems/scifi_datapath_system_v3/simulation/submodules"
 STAMP="$(date +%Y%m%d_%H%M%S)"
-PREFIX="${REPORT_DIR}/${CASE}_${STAMP}"
+PREFIX="${REPORT_DIR}/hist_direct_v3_${CASE}_${STAMP}"
 WORK_DIR="${REPORT_DIR}/questa_work_${CASE}_${STAMP}"
 QUESTA_HOME="${QUESTA_HOME:-/data1/questaone_sim/questasim}"
 QUESTA_BIN="${QUESTA_HOME}/linux_x86_64"
@@ -23,60 +30,131 @@ export PATH="${QUESTA_BIN}:${PATH}"
 
 case "${CASE}" in
     smoke)
-        TEST_HITS=1000
-        TEST_INTERVAL=2000
-        TEST_INTERVALS=1
-        HIT_PERIOD=2
-        LIVE_READBACK=1
-        TITLE="Dual-port smoke simulation"
-        STABLE_MD="${REPORT_DIR}/dualport_smoke.md"
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_smoke_summary.csv"
         ;;
-    soak)
-        TEST_HITS=100000
-        TEST_INTERVAL=1250000
-        TEST_INTERVALS=10
-        HIT_PERIOD=249
-        LIVE_READBACK=0
-        TITLE="100k single-channel 10ms ping-pong soak simulation"
-        STABLE_MD="${REPORT_DIR}/100k_single_channel_soak.md"
+    matrix)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_matrix_summary.csv"
+        ;;
+    type0_rate_max)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type0_rate_max_summary.csv"
+        ;;
+    type1_delay_sweep)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_summary.csv"
+        STABLE_DELAY_BINS="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_delay_bins.csv"
+        STABLE_TYPE1_META="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_type1_meta.csv"
+        ;;
+    type1_delay_sweep_allch)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_allch_summary.csv"
+        STABLE_DELAY_BINS="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_allch_delay_bins.csv"
+        STABLE_TYPE1_META="${REPORT_DIR}/hist_direct_v3_type1_delay_sweep_allch_type1_meta.csv"
         ;;
     *)
-        echo "unknown case: ${CASE}" >&2
+        echo "unknown case: ${CASE} (expected smoke, matrix, type0_rate_max, type1_delay_sweep, or type1_delay_sweep_allch)" >&2
         exit 2
         ;;
 esac
 
-"${QUESTA_BIN}/vlib" "${WORK_DIR}" > "${PREFIX}_compile.log"
+for required in \
+    histogram_statistics_v2_pkg.vhd \
+    true_dual_port_ram_single_clock.vhd \
+    hit_fifo.vhd \
+    rr_arbiter.vhd \
+    bin_divider.vhd \
+    coalescing_queue.vhd \
+    pingpong_sram.vhd \
+    histogram_statistics_v2.vhd; do
+    if [[ ! -f "${SIM_RTL_DIR}/${required}" ]]; then
+        echo "missing generated FEB simulation RTL: ${SIM_RTL_DIR}/${required}" >&2
+        exit 2
+    fi
+done
 
-"${QUESTA_BIN}/vcom" -2008 -work "${WORK_DIR}" \
-    "${REPO_DIR}/histogram_statistics/rtl/histogram_statistics_v2_pkg.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/true_dual_port_ram_single_clock.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/hit_fifo.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/rr_arbiter.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/bin_divider.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/coalescing_queue.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/pingpong_sram.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/histogram_ingress_bridge.vhd" \
-    "${REPO_DIR}/histogram_statistics/rtl/histogram_statistics_v2.vhd" \
-    "${TB_DIR}/tb_hist_dualport.vhd" \
+cp "${QSIM_INI}" "${WORK_DIR}/modelsim.ini"
+chmod u+w "${WORK_DIR}/modelsim.ini"
+"${QUESTA_BIN}/vlib" "${WORK_DIR}/work" > "${PREFIX}_compile.log"
+"${QUESTA_BIN}/vlib" "${WORK_DIR}/lpm" >> "${PREFIX}_compile.log"
+"${QUESTA_BIN}/vlib" "${WORK_DIR}/altera_mf" >> "${PREFIX}_compile.log"
+"${QUESTA_BIN}/vmap" -modelsimini "${WORK_DIR}/modelsim.ini" work "${WORK_DIR}/work" >> "${PREFIX}_compile.log"
+"${QUESTA_BIN}/vmap" -modelsimini "${WORK_DIR}/modelsim.ini" lpm "${WORK_DIR}/lpm" >> "${PREFIX}_compile.log"
+"${QUESTA_BIN}/vmap" -modelsimini "${WORK_DIR}/modelsim.ini" altera_mf "${WORK_DIR}/altera_mf" >> "${PREFIX}_compile.log"
+
+"${QUESTA_BIN}/vcom" -modelsimini "${WORK_DIR}/modelsim.ini" -2008 -work lpm \
+    "/data1/intelFPGA/18.1/quartus/eda/sim_lib/220pack.vhd" \
+    "/data1/intelFPGA/18.1/quartus/eda/sim_lib/220model.vhd" \
     >> "${PREFIX}_compile.log"
 
-"${QUESTA_BIN}/vsim" -c -lib "${WORK_DIR}" tb_hist_dualport \
-    -gTEST_NAME="${CASE}" \
-    -gREPORT_PREFIX="${PREFIX}" \
-    -gTEST_HITS_TOTAL="${TEST_HITS}" \
-    -gTEST_INTERVAL_CYCLES="${TEST_INTERVAL}" \
-    -gTEST_INTERVAL_COUNT="${TEST_INTERVALS}" \
-    -gHIT_PERIOD_CYCLES="${HIT_PERIOD}" \
-    -gLIVE_BIN_READBACK="${LIVE_READBACK}" \
-    -do "run -all; quit -f" | tee "${PREFIX}_transcript.log"
+"${QUESTA_BIN}/vcom" -modelsimini "${WORK_DIR}/modelsim.ini" -2008 -work altera_mf \
+    "/data1/intelFPGA/18.1/quartus/eda/sim_lib/altera_mf_components.vhd" \
+    "/data1/intelFPGA/18.1/quartus/eda/sim_lib/altera_mf.vhd" \
+    >> "${PREFIX}_compile.log"
 
-python3 "${TB_DIR}/summarize_hist_dualport.py" "${PREFIX}" "${PREFIX}.md" "${TITLE}"
+"${QUESTA_BIN}/vcom" -modelsimini "${WORK_DIR}/modelsim.ini" -2008 -work work \
+    "${SIM_RTL_DIR}/histogram_statistics_v2_pkg.vhd" \
+    "${SIM_RTL_DIR}/true_dual_port_ram_single_clock.vhd" \
+    "${SIM_RTL_DIR}/hit_fifo.vhd" \
+    "${SIM_RTL_DIR}/rr_arbiter.vhd" \
+    "${SIM_RTL_DIR}/bin_divider.vhd" \
+    "${SIM_RTL_DIR}/coalescing_queue.vhd" \
+    "${SIM_RTL_DIR}/pingpong_sram.vhd" \
+    "${SIM_RTL_DIR}/histogram_statistics_v2.vhd" \
+    >> "${PREFIX}_compile.log"
 
-if [[ -e "${STABLE_MD}" ]]; then
-    mv "${STABLE_MD}" "${STABLE_MD}.${STAMP}.bak"
+"${QUESTA_BIN}/vlog" -modelsimini "${WORK_DIR}/modelsim.ini" -sv -work work \
+    "${TB_DIR}/tb_hist_direct_v3.sv" \
+    >> "${PREFIX}_compile.log"
+
+"${QUESTA_BIN}/vsim" -modelsimini "${WORK_DIR}/modelsim.ini" -c -work work -t ps \
+    -voptargs=+acc -suppress 19 -suppress 3009 -suppress 3473 \
+    tb_hist_direct_v3 \
+    +CASE="${CASE}" \
+    +RUN_CYCLES="${RUN_CYCLES}" \
+    +INTERVAL_CYCLES="${INTERVAL_CYCLES}" \
+    +SEED="${SEED:-20260517}" \
+    +REPORT_PREFIX="${PREFIX}" \
+    -do "quietly set NumericStdNoWarnings 1; quietly set StdArithNoWarnings 1; run -all; quit -f" \
+    | tee "${PREFIX}_transcript.log"
+
+if grep -Eq "CASE_FAIL|\\*\\* Fatal|Errors: [1-9][0-9]*" "${PREFIX}_transcript.log"; then
+    echo "tb_hist_direct_v3 failed; see ${PREFIX}_transcript.log" >&2
+    exit 1
 fi
-cp "${PREFIX}.md" "${STABLE_MD}"
 
-echo "report=${PREFIX}.md"
-echo "stable_report=${STABLE_MD}"
+if [[ -e "${STABLE_SUMMARY}" ]]; then
+    mv "${STABLE_SUMMARY}" "${STABLE_SUMMARY}.${STAMP}.bak"
+fi
+cp "${PREFIX}_summary.csv" "${STABLE_SUMMARY}"
+if [[ -n "${STABLE_DELAY_BINS:-}" ]]; then
+    if [[ -e "${STABLE_DELAY_BINS}" ]]; then
+        mv "${STABLE_DELAY_BINS}" "${STABLE_DELAY_BINS}.${STAMP}.bak"
+    fi
+    cp "${PREFIX}_delay_bins.csv" "${STABLE_DELAY_BINS}"
+fi
+if [[ -n "${STABLE_TYPE1_META:-}" ]]; then
+    if [[ -e "${STABLE_TYPE1_META}" ]]; then
+        mv "${STABLE_TYPE1_META}" "${STABLE_TYPE1_META}.${STAMP}.bak"
+    fi
+    cp "${PREFIX}_type1_meta.csv" "${STABLE_TYPE1_META}"
+fi
+
+echo "summary=${PREFIX}_summary.csv"
+echo "intervals=${PREFIX}_intervals.csv"
+echo "delay_bins=${PREFIX}_delay_bins.csv"
+echo "type1_meta=${PREFIX}_type1_meta.csv"
+echo "transcript=${PREFIX}_transcript.log"
+echo "stable_summary=${STABLE_SUMMARY}"
+if [[ -n "${STABLE_DELAY_BINS:-}" ]]; then
+    echo "stable_delay_bins=${STABLE_DELAY_BINS}"
+fi
+if [[ -n "${STABLE_TYPE1_META:-}" ]]; then
+    echo "stable_type1_meta=${STABLE_TYPE1_META}"
+fi

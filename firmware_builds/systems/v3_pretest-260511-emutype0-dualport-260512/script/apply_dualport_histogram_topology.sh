@@ -2,8 +2,14 @@
 set -eu
 export LC_ALL=C
 
-ROOT="${MU3E_IP_CORES_ROOT:-/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores}"
-SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -n "${MU3E_IP_CORES_ROOT:-}" ]; then
+    ROOT="${MU3E_IP_CORES_ROOT}"
+    SYSTEM_DIR="${ROOT}/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512"
+else
+    SYSTEM_DIR="$(realpath -m -- "${SCRIPT_DIR}/..")"
+    ROOT="$(realpath -m -- "${SYSTEM_DIR}/../../..")"
+fi
 TOPOLOGY_SCRIPT="${SYSTEM_DIR}/script/update_dualport_histogram_topology.tcl"
 VERSION_SCRIPT="${SYSTEM_DIR}/script/update_feb_system_v3_dualport_version.tcl"
 export SYSTEM_DIR
