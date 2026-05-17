@@ -61,6 +61,14 @@ firmware_builds/systems/*/syn/board_projects/*/db/
 firmware_builds/systems/*/syn/board_projects/*/incremental_db/
 firmware_builds/systems/*/syn/board_projects/*/output_files/
 firmware_builds/systems/*/syn/board_projects/*/qdb/
+firmware_builds/systems/*/syn/reports/
+
+# --- Generated Qsys evidence for system-local quartus_systems/ trees ---
+firmware_builds/systems/*/quartus_systems/*.sopcinfo
+firmware_builds/systems/*/quartus_systems/*.log
+firmware_builds/systems/*/quartus_systems/*.pid
+firmware_builds/systems/*/quartus_systems/*.status
+firmware_builds/systems/*/quartus_systems/*/
 
 # --- Old phase5 captures + run reports (not git-tracked artifacts) ---
 firmware_builds/systems/*/reports/
@@ -86,9 +94,17 @@ firmware_builds/systems/*/syn/board_projects/*/incremental_db/
 firmware_builds/systems/*/syn/board_projects/*/output_files/
 firmware_builds/systems/*/syn/board_projects/*/*.cmp
 firmware_builds/systems/*/syn/board_projects/*/c5_pin_model_dump.txt
+firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/syn/board_projects/fe_scifi_feb_v3/
 firmware_builds/systems/*/script/qdb/
 firmware_builds/systems/*/script/DNI/
 firmware_builds/systems/*/signaltap/*.log
+firmware_builds/systems/*/signaltap/*_nodecheck*.md
+firmware_builds/systems/*/signaltap/direct_hist_v3*.stp
+firmware_builds/systems/*/board/REPORT/
+firmware_builds/systems/*/tb_int/REPORT/questa_work_*/
+firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.csv
+firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.log
+firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.md
 
 # --- More build cache artifacts ---
 **/*.map.guard
@@ -111,6 +127,8 @@ firmware_builds/systems/*/syn/board_projects/*/ip/
 
 # --- Qsys generate logs and orphan generated subtrees ---
 firmware_builds/systems/*/syn/*.log
+firmware_builds/systems/*/syn/*.pid
+firmware_builds/systems/*/syn/*.status
 firmware_builds/systems/*/syn/qsys_generate_*.log
 firmware_builds/systems/*/syn/program_*.log
 firmware_builds/systems/*/syn/feb_system_v3_pipe/
@@ -123,4 +141,4 @@ firmware_builds/systems/*/syn/hit_stack_system_rbcam_snoop.qsys
 firmware_builds/systems/*/syn/scifi_datapath_system_v3_pipe/
 firmware_builds/systems/*/syn/syn/
 /scripts/check_ip_lib_update.py
-
+tools/run_script/build/

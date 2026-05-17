@@ -26,8 +26,39 @@ Severity legend:
 | [BUG-009-H](#bug-009-h-feb-stp-generator-used-whole-vector-probes-that-synthesized-into-partial-signaltap-connections) | H | non-datapath-refactor | `directed-only (SignalTap observability build)` | fixed-debug-loadable | FEB STP map gate, 2026-05-14 | this checkpoint | The first FEB rbCAM-gap STP used whole-vector probes that Node Finder accepted but Quartus map only partially connected; the fixed generator emits bit-expanded instance-port probes and map reports all 631 SignalTap inputs/clocks/pins connected. |
 | [BUG-010-H](#bug-010-h-febswb-corun-smoke-did-not-model-the-declared-128-subheader-frame) | H | non-datapath-refactor | `directed-only (FEB/SWB corun smoke and monitor harness)` | fixed | FEB/SWB corun UVM smoke, 2026-05-14 | this checkpoint | The corun smoke declared 128 subheaders but drove only the active subheader, and the monitors reconstructed true timestamps without rejecting a declared-versus-seen subheader mismatch. |
 | [BUG-011-I](#bug-011-i-make-side-qsys-generation-did-not-produce-the-debug2-synthesis-dut-tree-for-tb_int) | I | non-datapath-refactor | `common (realistic tb_int setup and Qsys regeneration)` | fixed | FEB v3 debug Qsys generation, 2026-05-17 | this working tree | The Make-side Qsys generate hook produced only the normal `synthesis/` tree, leaving no parallel DEBUG_LEVEL=2 synthesis HDL tree for realistic `tb_int`; the arb supercore build Tcl also referenced stale `arb_hit_type0` version `26.5.0.0511`. |
+| [BUG-012-H](#bug-012-h-feb-generated-histogram-smoke-did-not-require-declared-hit-counts-for-all-type0type1-modes) | H | non-datapath-refactor | `common (generated-FEB histogram direct simulation)` | fixed | FEB generated histogram simulation, 2026-05-17 | this working tree | The direct histogram smoke could pass without proving the declared 10 ms, 100 kHz one-random-channel-per-ASIC hit count for Type0 rate plus Type1 rate and latency modes on both MTS banks; it also compiled raw repo RTL instead of the regenerated FEB `simulation/submodules` tree. |
 
 ## 2026-05-17
+
+### BUG-012-H: FEB generated histogram smoke did not require declared hit counts for all Type0/Type1 modes
+
+- First seen:
+  - FEB generated histogram simulation review on 2026-05-17 while checking Type0 rate and Type1 rate/latency behavior from the regenerated `scifi_datapath_system_v3/simulation/submodules` RTL.
+- Symptom:
+  - The previous `tb_int/hist_dualport` smoke did not cover the Type1-down rate and Type1-down latency paths.
+  - The pass condition compared internal totals against offered hits, but did not independently require the declared 10 ms, 100 kHz, one-random-channel-per-ASIC stimulus count.
+  - The compile path used the repo-local raw `histogram_statistics/rtl` files instead of the generated FEB simulation RTL, so it was not a strict check of the regenerated Qsys `simulation/` tree.
+- Root cause:
+  - The smoke was originally a focused dual-port histogram datapath check. It did not encode the full FEB evidence contract for Type0 rate, Type1 rate, Type1 latency, and both Type1 MTS banks.
+  - The old `nohit` mode allowed zero-hit cases to be treated as valid, which made the harness too permissive for this bug class.
+- Fix:
+  - `tb_int/hist_dualport/run_hist_dualport.sh` now compiles the regenerated FEB RTL from `quartus_systems/scifi_datapath_system_v3/simulation/submodules`.
+  - `tb_hist_direct_v3.sv` now computes the exact expected hit count from `CLK_HZ`, `run_cycles`, `N_ASICS`, and `rate_hz`, and fails if expected, offered, accepted, interval total, or bin sum disagree.
+  - The 10 ms smoke now runs five 100 kHz one-random-channel-per-ASIC cases: Type0 rate, Type1-up rate, Type1-up latency, Type1-down rate, and Type1-down latency.
+  - The zero-hit mode was removed from this runner so a missing injection cannot pass as a valid directed smoke.
+- Evidence:
+  - `script/generate_qsys_debug_pair.sh` rerun on `quartus_systems/scifi_datapath_system_v3.qsys` with stamp `20260517_strict_hitcount_gui_xvfb2`: DEBUG0 validate/generate and DEBUG2 validate/generate all reported `exit_code=0`, `error_count=0`.
+  - Regenerated HDL evidence: `synthesis/scifi_datapath_system_v3.vhd` contains `DEBUG_LEVEL => 0`, `simulation/scifi_datapath_system_v3.vhd` contains `DEBUG_LEVEL => 2`, and the generated arb submodule under `simulation/submodules/` contains eight lane instances with `DEBUG_LEVEL => 2`.
+  - `tb_int/hist_dualport/run_hist_dualport.sh smoke` passed on 2026-05-17 after regeneration, with `RUN_CYCLES=1250000`, `INTERVAL_CYCLES=125000`, and seed `20260517`.
+  - The smoke transcript reported:
+    - `CASE_PASS type0_rate_100k_onech expected=16000 offered=16000 total=16000`
+    - `CASE_PASS type1_up_rate_100k_onech expected=16000 offered=16000 total=16000`
+    - `CASE_PASS type1_up_latency_100k_onech expected=16000 offered=16000 total=16000`
+    - `CASE_PASS type1_down_rate_100k_onech expected=16000 offered=16000 total=16000`
+    - `CASE_PASS type1_down_latency_100k_onech expected=16000 offered=16000 total=16000`
+  - Questa summary: `pass_count=5`, `fail_count=0`, `Errors=0`, `Warnings=2`.
+- Residuals:
+  - No raw RTL defect was exposed by the stricter generated-FEB simulation; the fix is the harness/evidence contract and generated-RTL compile path.
 
 ### BUG-011-I: Make-side Qsys generation did not produce the DEBUG2 synthesis DUT tree for tb_int
 
@@ -42,16 +73,16 @@ Severity legend:
 - Fix:
   - The Make-side `qsys-generate.sh` now routes this system through `script/generate_qsys_debug_pair.sh`.
   - The wrapper validates and generates the same Qsys twice: `synthesis/` with DEBUG_LEVEL=0 and `simulation/` with DEBUG_LEVEL=2, where `simulation/` is populated from a second `--synthesis=VHDL` generation rather than Platform Designer simulation models.
-  - The wrapper launches `qsys-edit` in the background before generation and records an explicit warning/status if the GUI exits early.
+  - The wrapper launches `qsys-edit` in the background before generation, normalizes forwarded `localhost:*` displays for Java, and retries under a private Xvfb display if the forwarded X11 path exits early with an AWT/X11 error.
   - `build_arb_hit_type0_supercore_qsys.tcl` now accepts `::debug_level` or `DEBUG_LEVEL`, uses system-relative paths, and binds `arb_hit_type0` version `26.6.0.0512`.
 - Evidence:
   - Make-facing invocation on `quartus_systems/arb_hit_type0_supercore.qsys`, stamp `20260517_make_object_dual_probe`: DEBUG0 and DEBUG2 `validate_system` both reported `exit_code=0`, `error_count=0`; both `qsys-generate` runs reported `exit_code=0`, `error_count=0`.
   - Generated arb evidence: `quartus_systems/arb_hit_type0_supercore/synthesis/arb_hit_type0_supercore.vhd` contains eight `DEBUG_LEVEL => 0` lane generics, while `quartus_systems/arb_hit_type0_supercore/simulation/arb_hit_type0_supercore.vhd` contains eight `DEBUG_LEVEL => 2` lane generics.
   - Make-facing invocation on `quartus_systems/scifi_datapath_system_v3.qsys`, stamp `20260517_make_object_scifi_dual`: DEBUG0 and DEBUG2 `validate_system` both reported `exit_code=0`, `error_count=0`; both `qsys-generate` runs reported `exit_code=0`, `error_count=0`.
   - Generated datapath evidence: `quartus_systems/scifi_datapath_system_v3/synthesis/scifi_datapath_system_v3.vhd` contains `DEBUG_LEVEL => 0`, and `quartus_systems/scifi_datapath_system_v3/simulation/scifi_datapath_system_v3.vhd` contains `DEBUG_LEVEL => 2`; the generated arb submodule under `simulation/submodules/` also contains eight `DEBUG_LEVEL => 2` lane generics.
+  - GUI retry evidence on `quartus_systems/scifi_datapath_system_v3.qsys`, stamp `20260517_strict_hitcount_gui_xvfb2`: the forwarded X11 launch failed with one Java AWT/X11 error, then the Xvfb retry status recorded `gui_mode=xvfb`, `early_exit_code=0`, and `early_error_count=0`.
 - Residuals:
-  - In this shell the requested background `qsys-edit` GUI exits early with an X11/GUI error; the wrapper records this as a warning instead of hiding it. CLI validation and generation are still zero-error.
-  - Realistic `tb_int` still needs to be pointed at `quartus_systems/scifi_datapath_system_v3/simulation/` and run for the type0/type1 hit evidence.
+  - In this shell the forwarded X11 display still fails for Quartus Java/AWT, so the reliable automated GUI-open path is the Xvfb retry. CLI validation and generation are still zero-error.
 
 ## 2026-05-14
 

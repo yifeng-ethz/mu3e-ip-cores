@@ -101,20 +101,44 @@ validate_qsys() {
     fi
 }
 
-launch_qsys_gui_background() {
-    local log="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}.log"
-    local pidfile="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}.pid"
-    local status="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}.status"
-    local exit_code=0
-    local error_count=0
+find_free_xvfb_display() {
+    local n="${QSYS_GUI_XVFB_DISPLAY:-99}"
+
+    while [ "${n}" -lt 200 ]; do
+        if [ -e "/tmp/.X${n}-lock" ]; then
+            local lock_pid
+            lock_pid="$(cat "/tmp/.X${n}-lock" 2>/dev/null | tr -d '[:space:]' || true)"
+            if [ -n "${lock_pid}" ] && ! kill -0 "${lock_pid}" 2>/dev/null; then
+                rm -f -- "/tmp/.X${n}-lock"
+            fi
+        fi
+        if [ ! -e "/tmp/.X${n}-lock" ]; then
+            printf ':%s\n' "${n}"
+            return 0
+        fi
+        n=$((n + 1))
+    done
+    return 1
+}
+
+launch_qsys_edit_attempt() {
+    local mode="$1"
+    local display_name="$2"
+    local java_options="$3"
+    local log="$4"
+    local pidfile="$5"
 
     {
         printf 'DISPLAY=%s\n' "${DISPLAY:-}"
+        printf 'QSYS_GUI_DISPLAY=%s\n' "${display_name}"
         printf 'XAUTHORITY=%s\n' "${XAUTHORITY:-}"
+        printf '_JAVA_OPTIONS=%s\n' "${java_options}"
+        printf 'GUI_MODE=%s\n' "${mode}"
         printf 'QSYS=%s\n' "${QSYS}"
         printf 'SEARCH_PATH_COUNT=%s\n' "${QSYS_SEARCH_PATH_COUNT}"
         printf 'LAUNCH_TIME=%s\n' "$(date -Iseconds)"
-        export _JAVA_OPTIONS="${_JAVA_OPTIONS:--Dsun.java2d.xrender=false}"
+        export DISPLAY="${display_name}"
+        export _JAVA_OPTIONS="${java_options}"
         "${QSYS_EDIT_BIN}" \
             --search-path="${SEARCH_PATHS},\$" \
             --family="Arria V" \
@@ -123,6 +147,48 @@ launch_qsys_gui_background() {
             "${QSYS}"
     } > "${log}" 2>&1 &
     printf '%s\n' "$!" > "${pidfile}"
+}
+
+qsys_gui_error_count() {
+    local log="$1"
+
+    grep -Ei -c '(^|[[:space:]])(Error:|Exception|AWTError|Can.t connect|No protocol specified|X11)' "${log}" || true
+}
+
+launch_qsys_gui_background() {
+    local log="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}.log"
+    local pidfile="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}.pid"
+    local status="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}.status"
+    local exit_code=0
+    local error_count=0
+    local initial_exit_code=0
+    local initial_error_count=0
+    local initial_log="${log}"
+    local initial_pidfile="${pidfile}"
+    local gui_mode="x11"
+    local gui_display="${QSYS_GUI_DISPLAY:-${DISPLAY:-}}"
+    local java_options="${_JAVA_OPTIONS:-}"
+    local xvfb_display=""
+    local xvfb_server_pidfile="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}_xvfb_server.pid"
+    local xvfb_log="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}_xvfb_server.log"
+    local xvfb_pid=""
+
+    case "${gui_display}" in
+        localhost:*)
+            gui_display="127.0.0.1:${gui_display#localhost:}"
+            ;;
+    esac
+    case " ${java_options} " in
+        *" -Dsun.java2d.xrender="*) ;;
+        *) java_options="${java_options} -Dsun.java2d.xrender=false" ;;
+    esac
+    case " ${java_options} " in
+        *" -Djava.net.preferIPv4Stack="*) ;;
+        *) java_options="${java_options} -Djava.net.preferIPv4Stack=true" ;;
+    esac
+    java_options="${java_options# }"
+
+    launch_qsys_edit_attempt "${gui_mode}" "${gui_display}" "${java_options}" "${log}" "${pidfile}"
 
     sleep "${QSYS_GUI_CHECK_DELAY:-5}"
     if ! kill -0 "$(cat "${pidfile}")" 2>/dev/null; then
@@ -130,13 +196,67 @@ launch_qsys_gui_background() {
         wait "$(cat "${pidfile}")"
         exit_code=$?
         set -e
-        error_count="$(grep -Ei -c '(^|[[:space:]])(Error:|Exception|AWTError|Can.t connect|No protocol specified)' "${log}" || true)"
+        error_count="$(qsys_gui_error_count "${log}")"
+        initial_exit_code="${exit_code}"
+        initial_error_count="${error_count}"
         echo "WARNING: qsys-edit GUI exited early for ${QSYS_BASE}; exit=${exit_code}, errors=${error_count}; see ${log}" >&2
+
+        if [ "${QSYS_GUI_XVFB_FALLBACK:-1}" != "0" ] \
+            && command -v Xvfb >/dev/null 2>&1 \
+            && grep -Eiq '(AWTError|Can.t connect|No protocol specified|X11)' "${log}"; then
+            xvfb_display="$(find_free_xvfb_display || true)"
+            if [ -n "${xvfb_display}" ]; then
+                Xvfb "${xvfb_display}" \
+                    -screen 0 "${QSYS_GUI_XVFB_SCREEN:-1920x1200x24}" \
+                    -nolisten tcp > "${xvfb_log}" 2>&1 &
+                xvfb_pid="$!"
+                printf '%s\n' "${xvfb_pid}" > "${xvfb_server_pidfile}"
+                sleep "${QSYS_GUI_XVFB_DELAY:-2}"
+                if kill -0 "${xvfb_pid}" 2>/dev/null; then
+                    gui_mode="xvfb"
+                    log="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}_xvfb.log"
+                    pidfile="${QSYS_DIR}/${QSYS_BASE}_qsys_edit_${STAMP}_xvfb.pid"
+                    exit_code=0
+                    error_count=0
+                    echo "INFO: retrying qsys-edit GUI for ${QSYS_BASE} under Xvfb display ${xvfb_display}" >&2
+                    launch_qsys_edit_attempt "${gui_mode}" "${xvfb_display}" "${java_options}" "${log}" "${pidfile}"
+                    sleep "${QSYS_GUI_CHECK_DELAY:-5}"
+                    if ! kill -0 "$(cat "${pidfile}")" 2>/dev/null; then
+                        set +e
+                        wait "$(cat "${pidfile}")"
+                        exit_code=$?
+                        set -e
+                        error_count="$(qsys_gui_error_count "${log}")"
+                        gui_mode="xvfb-failed"
+                        echo "WARNING: qsys-edit Xvfb retry exited early for ${QSYS_BASE}; exit=${exit_code}, errors=${error_count}; see ${log}" >&2
+                        kill "${xvfb_pid}" 2>/dev/null || true
+                    fi
+                else
+                    gui_mode="xvfb-server-failed"
+                    error_count=$((error_count + 1))
+                    echo "WARNING: Xvfb failed to start for qsys-edit GUI; see ${xvfb_log}" >&2
+                fi
+            else
+                gui_mode="xvfb-no-display"
+                error_count=$((error_count + 1))
+                echo "WARNING: no free Xvfb display found for qsys-edit GUI retry" >&2
+            fi
+        fi
     fi
     {
         printf 'qsys=%s\n' "${QSYS}"
         printf 'pid=%s\n' "$(cat "${pidfile}")"
         printf 'log=%s\n' "${log}"
+        printf 'gui_mode=%s\n' "${gui_mode}"
+        printf 'display=%s\n' "${gui_display}"
+        printf 'xvfb_display=%s\n' "${xvfb_display}"
+        printf 'xvfb_pid=%s\n' "${xvfb_pid}"
+        printf 'xvfb_pidfile=%s\n' "${xvfb_server_pidfile}"
+        printf 'xvfb_log=%s\n' "${xvfb_log}"
+        printf 'initial_pid=%s\n' "$(cat "${initial_pidfile}")"
+        printf 'initial_log=%s\n' "${initial_log}"
+        printf 'initial_early_exit_code=%s\n' "${initial_exit_code}"
+        printf 'initial_early_error_count=%s\n' "${initial_error_count}"
         printf 'early_exit_code=%s\n' "${exit_code}"
         printf 'early_error_count=%s\n' "${error_count}"
     } > "${status}"
