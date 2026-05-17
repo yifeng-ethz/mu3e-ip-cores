@@ -1313,7 +1313,7 @@
   <parameter name="USE_DATA" value="1" />
   <parameter name="USE_ERROR" value="0" />
   <parameter name="USE_PACKETS" value="1" />
-  <parameter name="USE_READY" value="0" />
+  <parameter name="USE_READY" value="1" />
   <parameter name="USE_VALID" value="1" />
  </module>
  <module
@@ -2848,6 +2848,11 @@
    version="18.1"
    start="emulator_hit_type0_fanout.out1"
    end="arb_hit_type0_supercore_0.emu_in_1" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="hit_stack_subsystem_0.hit_type3"
+   end="hist_post_splitter_0.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
