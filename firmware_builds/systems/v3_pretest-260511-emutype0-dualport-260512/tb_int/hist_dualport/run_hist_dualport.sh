@@ -39,8 +39,13 @@ case "${CASE}" in
         INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
         STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_matrix_summary.csv"
         ;;
+    type0_rate_max)
+        RUN_CYCLES="${RUN_CYCLES:-1250000}"
+        INTERVAL_CYCLES="${INTERVAL_CYCLES:-125000}"
+        STABLE_SUMMARY="${REPORT_DIR}/hist_direct_v3_type0_rate_max_summary.csv"
+        ;;
     *)
-        echo "unknown case: ${CASE} (expected smoke or matrix)" >&2
+        echo "unknown case: ${CASE} (expected smoke, matrix, or type0_rate_max)" >&2
         exit 2
         ;;
 esac

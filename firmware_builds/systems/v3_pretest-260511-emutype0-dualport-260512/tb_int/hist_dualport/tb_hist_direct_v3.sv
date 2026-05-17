@@ -886,13 +886,17 @@ module tb_hist_direct_v3;
     end
   endtask
 
-	  task automatic run_smoke();
-	    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 100_000, 1'b0);
-	    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b0, 100_000, 1'b0);
-	    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, 100_000, 1'b0);
-	    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b0, 100_000, 1'b0);
-	    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, 100_000, 1'b0);
-	  endtask
+  task automatic run_smoke();
+    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 100_000, 1'b0);
+    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b0, 100_000, 1'b0);
+    run_hist_case("type1_up", SOURCE_TYPE1_UP, 1'b1, 100_000, 1'b0);
+    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b0, 100_000, 1'b0);
+    run_hist_case("type1_down", SOURCE_TYPE1_DOWN, 1'b1, 100_000, 1'b0);
+  endtask
+
+  task automatic run_type0_rate_max();
+    run_hist_case("type0", SOURCE_TYPE0, 1'b0, 1_000_000, 1'b1);
+  endtask
 
   initial begin
     report_prefix = "tb_int/REPORT/hist_direct_v3";
@@ -927,11 +931,13 @@ module tb_hist_direct_v3;
 
     $display("TB_INT_DIRECT_V3_START case=%s run_cycles=%0d interval_cycles=%0d seed=%0d report_prefix=%s",
              case_select, run_cycles, interval_cycles, prng_state, report_prefix);
-	    if (case_select == "smoke") begin
-	      run_smoke();
-	    end else begin
-	      run_matrix();
-	    end
+    if (case_select == "smoke") begin
+      run_smoke();
+    end else if (case_select == "type0_rate_max") begin
+      run_type0_rate_max();
+    end else begin
+      run_matrix();
+    end
 
     $fclose(summary_fd);
     $fclose(interval_fd);

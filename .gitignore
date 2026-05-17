@@ -102,9 +102,12 @@ firmware_builds/systems/*/signaltap/*_nodecheck*.md
 firmware_builds/systems/*/signaltap/direct_hist_v3*.stp
 firmware_builds/systems/*/board/REPORT/
 firmware_builds/systems/*/tb_int/REPORT/questa_work_*/
+firmware_builds/systems/*/tb_int/REPORT/dislin_work/
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.csv
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.log
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.md
+firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.pdf
+firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.png
 
 # --- More build cache artifacts ---
 **/*.map.guard
