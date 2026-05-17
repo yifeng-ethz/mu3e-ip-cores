@@ -1,5 +1,5 @@
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane --family="Arria 10" --part=10AS066H1F34E1SG
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/a10/merger/qsys/opq_upstream_4lane_native_sv/opq_upstream_4lane --family="Arria 10" --part=10AS066H1F34E1SG
 Progress: Loading opq_upstream_4lane_native_sv/opq_upstream_4lane.qsys
 Progress: Reading input file
 Progress: Adding clk_bridge [altera_clock_bridge 18.1]
@@ -48,11 +48,11 @@ Info: p2b_adapter: Running transform generation_view_transform took 0.000s
 Info: opq_upstream_4lane: Running transform merlin_avalon_transform
 Info: Interconnect is inserted between master csr_jtag_master.master and slave opq_0.csr because the master has address signal 32 bit wide, but the slave is 9 bit wide.
 Info: Interconnect is inserted between master csr_jtag_master.master and slave opq_0.csr because the master has byteenable signal 4 bit wide, but the slave is 0 bit wide.
-Info: opq_upstream_4lane: Running transform merlin_avalon_transform took 0.214s
+Info: opq_upstream_4lane: Running transform merlin_avalon_transform took 0.215s
 Info: csr_jtag_master: Running transform merlin_avalon_transform
 Info: csr_jtag_master: Running transform merlin_avalon_transform took 0.010s
 Info: mm_interconnect_0: Running transform merlin_avalon_transform
-Info: mm_interconnect_0: Running transform merlin_avalon_transform took 0.033s
+Info: mm_interconnect_0: Running transform merlin_avalon_transform took 0.032s
 Info: opq_upstream_4lane: "Naming system components in system: opq_upstream_4lane"
 Info: opq_upstream_4lane: "Processing generation queue"
 Info: opq_upstream_4lane: "Generating: opq_upstream_4lane"

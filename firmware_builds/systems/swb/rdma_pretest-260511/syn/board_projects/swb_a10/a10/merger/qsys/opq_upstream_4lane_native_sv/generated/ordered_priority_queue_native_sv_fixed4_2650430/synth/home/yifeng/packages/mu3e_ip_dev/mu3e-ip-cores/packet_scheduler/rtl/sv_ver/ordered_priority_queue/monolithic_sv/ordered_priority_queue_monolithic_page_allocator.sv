@@ -1,10 +1,10 @@
 //------------------------------------------------------------------------------
 // ordered_priority_queue_monolithic_page_allocator
 // Author  : Yifeng Wang (original OPQ) / native SV staging by Codex
-// Version : 26.4.15
-// Date    : 20260514
-// Change  : Preserve legal zero-hit subheaders in the allocated page stream
-//           while keeping zero-length body blocks out of handle FIFOs.
+// Version : 26.5.3
+// Date    : 20260517
+// Change  : Add a staged same-timestamp body-ticket fast path that can commit
+//           all active lanes without depleting ticket FIFO credit.
 //------------------------------------------------------------------------------
 
 module ordered_priority_queue_monolithic_page_allocator #(
@@ -215,6 +215,8 @@ module ordered_priority_queue_monolithic_page_allocator #(
     PAGE_ALLOCATOR_PREDICT_TICKET,
     PAGE_ALLOCATOR_DECIDE_TICKET,
     PAGE_ALLOCATOR_APPLY_TICKET,
+    PAGE_ALLOCATOR_FAST_ZERO_ISSUE,
+    PAGE_ALLOCATOR_FAST_ZERO_COMMIT,
     PAGE_ALLOCATOR_WRITE_HEAD,
     PAGE_ALLOCATOR_WRITE_TAIL,
     PAGE_ALLOCATOR_ALLOC_PAGE,
@@ -247,6 +249,7 @@ module ordered_priority_queue_monolithic_page_allocator #(
   localparam int unsigned FUTURE_FRAME_FINAL_COUNT = (FUTURE_FRAME_REDUCE_COUNT + 1) / 2;
   localparam int unsigned FETCH_READY_PAIR_COUNT = (N_LANE + 1) / 2;
   localparam int unsigned FETCH_READY_REDUCE_COUNT = (FETCH_READY_PAIR_COUNT + 1) / 2;
+  localparam int unsigned FAST_ZERO_PAIR_COUNT = (N_LANE + 1) / 2;
   localparam int unsigned FUTURE_FRAME_LANE_WIDTH = (N_LANE <= 1) ? 1 : $clog2(N_LANE);
   localparam int unsigned TAIL_STATUS_WRAP_WIDTH =
     (FRAME_SERIAL_SIZE > TICKET_FIFO_ADDR_WIDTH) ? (FRAME_SERIAL_SIZE - TICKET_FIFO_ADDR_WIDTH) : 1;
@@ -411,6 +414,7 @@ module ordered_priority_queue_monolithic_page_allocator #(
       tail_status_wrap = wrap_v;
     end
   endfunction
+
 `ifndef SYNTHESIS
 `endif
 
@@ -527,6 +531,17 @@ module ordered_priority_queue_monolithic_page_allocator #(
   logic [N_LANE-1:0][FIFO_RAW_DELAY:1] page_allocator_is_pending_ticket_d;
   logic [N_LANE-1:0][FIFO_RAW_DELAY:1][TICKET_FIFO_ADDR_WIDTH-1:0] page_allocator_ticket_rptr_d;
   ticket_raws_t ticket_fifos_rd_data_stage_q;
+  page_length_t fast_zero_block_length;
+  page_length_t fast_zero_lane_offset [N_LANE];
+  page_length_t fast_zero_lane_length [N_LANE];
+  page_length_t fast_zero_pair_length [FAST_ZERO_PAIR_COUNT];
+  logic fast_zero_commit_valid;
+  logic [N_LANE-1:0] fast_zero_commit_lane_onehot_q;
+  tickets_t fast_zero_commit_ticket_q;
+  page_length_t fast_zero_commit_block_length_q;
+  page_length_t fast_zero_commit_lane_offset_q [N_LANE];
+  page_ram_addr_t fast_zero_commit_page_addr_q;
+  logic [PAGE_RAM_DATA_WIDTH-1:0] fast_zero_commit_page_data_q;
   (* preserve *) logic [N_LANE-1:0] fetch_pending_q;
   (* preserve *) tickets_t fetch_ticket_q;
   (* preserve *) ticket_raws_t fetch_ticket_raw_q;
@@ -634,10 +649,14 @@ module ordered_priority_queue_monolithic_page_allocator #(
   page_allocator_if_read_ticket_ticket_t page_allocator_if_read_ticket_ticket;
   page_allocator_if_read_ticket_ticket_sop_t page_allocator_if_read_ticket_ticket_sop;
   logic [PAGE_RAM_DATA_WIDTH-1:0] page_allocator_if_write_page_shr_data;
+  logic [PAGE_RAM_DATA_WIDTH-1:0] page_allocator_if_write_fast_page_shr_data;
   logic [PAGE_RAM_DATA_WIDTH-1:0] page_allocator_if_write_page_hdr_data;
   logic [PAGE_RAM_DATA_WIDTH-1:0] page_allocator_if_write_page_trl_data;
   logic all_lanes_fetch_ready;
   logic all_lanes_fetch_ready_live;
+  logic fast_zero_valid;
+  logic [N_LANE-1:0] fast_zero_lane_onehot;
+  logic [N_LANE-1:0] fast_zero_stage_lane_onehot;
   logic [N_LANE-1:0] idle_fetch_ready_lane;
   logic [N_LANE-1:0] idle_fetch_ready_lane_q;
   logic [FETCH_READY_PAIR_COUNT-1:0] idle_fetch_ready_pair;
@@ -757,6 +776,13 @@ module ordered_priority_queue_monolithic_page_allocator #(
     total_hit_v = 0;
     all_lanes_fetch_ready = 1'b1;
     all_lanes_fetch_ready_live = 1'b1;
+    fast_zero_valid = 1'b0;
+    fast_zero_block_length = '0;
+    fast_zero_lane_offset = '{default:'0};
+    fast_zero_lane_length = '{default:'0};
+    fast_zero_pair_length = '{default:'0};
+    fast_zero_lane_onehot = '0;
+    fast_zero_stage_lane_onehot = '0;
     all_present_tk_sop = 1'b1;
     any_pending_ticket = 1'b0;
     any_pending_curr_sop_ticket = 1'b0;
@@ -785,6 +811,7 @@ module ordered_priority_queue_monolithic_page_allocator #(
     header_lane_selected_v = 1'b0;
     page_allocator_if_read_ticket_ticket_sop = '0;
     page_allocator_if_write_page_shr_data = '0;
+    page_allocator_if_write_fast_page_shr_data = '0;
     page_allocator_if_write_page_hdr_data = '0;
     page_allocator_if_write_page_trl_data = '0;
     page_allocator_is_tk_sop = '0;
@@ -803,11 +830,16 @@ module ordered_priority_queue_monolithic_page_allocator #(
     handle_credit_reserve = '0;
     fetch_handle_slot_needed = '0;
     fetch_handle_slots_ready = 1'b1;
+    fast_zero_commit_valid =
+      (page_allocator_state == PAGE_ALLOCATOR_FAST_ZERO_COMMIT) &&
+      (fast_zero_commit_lane_onehot_q != '0) &&
+      (frame_hit_cnt_t'(fast_zero_commit_block_length_q) <= page_allocator.frame_hit_room);
 
     page_allocator_if_write_page_shr_data[35:32] = 4'b0001;
     page_allocator_if_write_page_shr_data[31:24] = page_allocator.running_ts[11:4];
     page_allocator_if_write_page_shr_data[23:8] = 16'(page_allocator.page_length);
     page_allocator_if_write_page_shr_data[7:0] = K237;
+    page_allocator_if_write_fast_page_shr_data = page_allocator_if_write_page_shr_data;
 
     if (page_allocator.frame_lane_active != '0) begin
       page_allocator_ticket_serial_ref = page_allocator.frame_serial_this;
@@ -1031,6 +1063,65 @@ module ordered_priority_queue_monolithic_page_allocator #(
       end
     end
 
+    for (int i = 0; i < N_LANE; i++) begin
+      fast_zero_stage_lane_onehot[i] =
+        page_allocator.frame_lane_active[i] &&
+        page_allocator_is_pending_ticket[i] &&
+        page_allocator_is_pending_ticket_lane[i] &&
+        page_allocator_ticket_q_valid[i] &&
+        !ticket_fifos_rd_data_stage_q[i][TICKET_ALT_SOP_LOC] &&
+        !ticket_fifos_rd_data_stage_q[i][TICKET_ALT_EOP_LOC] &&
+        (page_allocator_if_read_ticket_ticket[i].frame_serial == page_allocator.frame_serial_this) &&
+        (page_allocator_if_read_ticket_ticket[i].ticket_ts == page_allocator.running_ts) &&
+        ((page_allocator_if_read_ticket_ticket[i].block_length == '0) ||
+         handle_credit_available[i]);
+    end
+    fast_zero_lane_onehot = fast_zero_stage_lane_onehot;
+    if (fast_zero_lane_onehot != '0) begin
+      for (int i = 0; i < N_LANE; i++) begin
+        if (fast_zero_lane_onehot[i]) begin
+          fast_zero_lane_length[i] =
+            page_length_t'(page_allocator_if_read_ticket_ticket[i].block_length);
+        end
+      end
+      for (int i = 0; i < FAST_ZERO_PAIR_COUNT; i++) begin
+        fast_zero_pair_length[i] = fast_zero_lane_length[2*i];
+        if ((2*i + 1) < N_LANE) begin
+          fast_zero_pair_length[i] =
+            fast_zero_pair_length[i] + fast_zero_lane_length[2*i + 1];
+        end
+      end
+      for (int i = 0; i < N_LANE; i++) begin
+        for (int pair_idx = 0; pair_idx < (i / 2); pair_idx++) begin
+          fast_zero_lane_offset[i] =
+            fast_zero_lane_offset[i] + fast_zero_pair_length[pair_idx];
+        end
+        if ((i % 2) != 0) begin
+          fast_zero_lane_offset[i] =
+            fast_zero_lane_offset[i] + fast_zero_lane_length[i - 1];
+        end
+      end
+      for (int i = 0; i < FAST_ZERO_PAIR_COUNT; i++) begin
+        fast_zero_block_length = fast_zero_block_length + fast_zero_pair_length[i];
+      end
+    end
+    fast_zero_valid =
+      (page_allocator_state == PAGE_ALLOCATOR_IDLE) &&
+      (page_allocator.frame_lane_active != '0) &&
+      (fast_zero_lane_onehot == page_allocator.frame_lane_active) &&
+      (inactive_frame_join_pending_lane == '0) &&
+      !inactive_frame_join_sop_pending &&
+      !idle_tail_flush_ready_decision;
+
+    if (fast_zero_commit_valid) begin
+      for (int i = 0; i < N_LANE; i++) begin
+        if (fast_zero_commit_lane_onehot_q[i] &&
+            (fast_zero_commit_ticket_q[i].block_length != '0)) begin
+          handle_credit_reserve[i] = 1'b1;
+        end
+      end
+    end
+
     if (page_allocator_state == PAGE_ALLOCATOR_COMMIT_PAGE) begin
       logic alloc_handle_skip_comb_v;
       alloc_handle_skip_comb_v = alloc_lane_skipped_q || alloc_lane_skip_q;
@@ -1064,6 +1155,7 @@ module ordered_priority_queue_monolithic_page_allocator #(
     if ((page_allocator.frame_join_wait != '0) &&
         (page_allocator.frame_lane_active != '0) &&
         (page_allocator.frame_lane_active != '1) &&
+        !all_active_lanes_tail_ready &&
         !inactive_frame_join_sop_pending) begin
       frame_join_hold = 1'b1;
     end
@@ -1077,9 +1169,16 @@ module ordered_priority_queue_monolithic_page_allocator #(
       !frame_join_hold;
     page_allocator_if_read_ticket_ticket_sop.n_subh = frame_shr_cnt_t'(total_subh_v);
     page_allocator_if_read_ticket_ticket_sop.n_hit = frame_hit_cnt_t'(total_hit_v);
+    page_allocator_if_write_fast_page_shr_data = page_allocator_if_write_page_shr_data;
+    page_allocator_if_write_fast_page_shr_data[23:8] = 16'(fast_zero_block_length);
 
-    page_we_o = page_allocator.page_we;
-    page_waddr_o = page_allocator.page_waddr;
+    page_we_o =
+      page_allocator.page_we ||
+      fast_zero_commit_valid;
+    page_waddr_o =
+      (page_allocator_state == PAGE_ALLOCATOR_FAST_ZERO_COMMIT) ?
+        fast_zero_commit_page_addr_q :
+        page_allocator.page_waddr;
     fetch_ticket_active_o =
       (page_allocator_state == PAGE_ALLOCATOR_FETCH_TICKET) ||
       (page_allocator_state == PAGE_ALLOCATOR_SAMPLE_TAIL) ||
@@ -1101,7 +1200,9 @@ module ordered_priority_queue_monolithic_page_allocator #(
       (page_allocator_state == PAGE_ALLOCATOR_COMMIT_PAGE);
     write_head_active_o = (page_allocator_state == PAGE_ALLOCATOR_WRITE_HEAD);
     write_tail_active_o = (page_allocator_state == PAGE_ALLOCATOR_WRITE_TAIL);
-    write_page_active_o = (page_allocator_state == PAGE_ALLOCATOR_WRITE_PAGE);
+    write_page_active_o =
+      (page_allocator_state == PAGE_ALLOCATOR_WRITE_PAGE) ||
+      fast_zero_commit_valid;
     write_meta_flow_o = page_allocator.write_meta_flow;
     write_meta_flow_d1_o = page_allocator.write_meta_flow_d1;
     frame_start_addr_o = page_allocator.frame_start_addr;
@@ -1117,12 +1218,16 @@ module ordered_priority_queue_monolithic_page_allocator #(
     packet_complete_shr_cnt_o = packet_complete_shr_cnt;
     packet_complete_hit_cnt_o = packet_complete_hit_cnt;
     packet_complete_pulse_o = packet_complete_pulse;
-    unique case (page_allocator_state)
-      PAGE_ALLOCATOR_WRITE_PAGE: page_wdata_o = page_allocator_if_write_page_shr_data;
-      PAGE_ALLOCATOR_WRITE_HEAD,
-      PAGE_ALLOCATOR_WRITE_TAIL: page_wdata_o = page_allocator_if_write_page_hdr_data;
-      default: page_wdata_o = '0;
-    endcase
+    if (fast_zero_commit_valid) begin
+      page_wdata_o = fast_zero_commit_page_data_q;
+    end else begin
+      unique case (page_allocator_state)
+        PAGE_ALLOCATOR_WRITE_PAGE: page_wdata_o = page_allocator_if_write_page_shr_data;
+        PAGE_ALLOCATOR_WRITE_HEAD,
+        PAGE_ALLOCATOR_WRITE_TAIL: page_wdata_o = page_allocator_if_write_page_hdr_data;
+        default: page_wdata_o = '0;
+      endcase
+    end
   end
 
   always_ff @(posedge d_clk) begin : proc_handle_credit
@@ -1228,6 +1333,8 @@ module ordered_priority_queue_monolithic_page_allocator #(
             end
 `endif
           page_allocator_state <= PAGE_ALLOCATOR_PREPARE_WRITE_TAIL;
+        end else if (fast_zero_valid) begin
+          page_allocator_state <= PAGE_ALLOCATOR_FAST_ZERO_ISSUE;
         end else if (idle_fetch_ready_q && !frame_join_hold) begin
 `ifndef SYNTHESIS
           if (opq_trace_boundary_en && ($time >= opq_trace_after_ps)) begin
@@ -1270,6 +1377,38 @@ module ordered_priority_queue_monolithic_page_allocator #(
 `endif
           page_allocator_state <= PAGE_ALLOCATOR_FETCH_TICKET;
         end
+        end
+
+      PAGE_ALLOCATOR_FAST_ZERO_ISSUE: begin
+          fast_zero_commit_lane_onehot_q <= fast_zero_lane_onehot;
+          fast_zero_commit_ticket_q <= '{default:TICKET_DEFAULT};
+          fast_zero_commit_block_length_q <= fast_zero_block_length;
+          fast_zero_commit_lane_offset_q <= fast_zero_lane_offset;
+          fast_zero_commit_page_addr_q <= page_allocator.page_start_addr;
+          fast_zero_commit_page_data_q <= page_allocator_if_write_fast_page_shr_data;
+          for (int i = 0; i < N_LANE; i++) begin
+            if (fast_zero_lane_onehot[i]) begin
+              fast_zero_commit_ticket_q[i] <= page_allocator_if_read_ticket_ticket[i];
+`ifndef SYNTHESIS
+              if (opq_trace_boundary_en && ($time >= opq_trace_after_ps)) begin
+                $display(
+                  "[opq_pa_fast_issue] t=%0t lane=%0d ts=0x%0h serial=0x%0h len=%0d lane_offset=%0d total_len=%0d running_ts=0x%0h page_addr=0x%0h join_wait=%0d",
+                  $time,
+                  i,
+                  page_allocator_if_read_ticket_ticket[i].ticket_ts,
+                  page_allocator_if_read_ticket_ticket[i].frame_serial,
+                  page_allocator_if_read_ticket_ticket[i].block_length,
+                  fast_zero_lane_offset[i],
+                  fast_zero_block_length,
+                  page_allocator.running_ts,
+                  page_allocator.page_start_addr,
+                  page_allocator.frame_join_wait
+                );
+              end
+`endif
+            end
+          end
+          page_allocator_state <= PAGE_ALLOCATOR_FAST_ZERO_COMMIT;
         end
 
       PAGE_ALLOCATOR_PREPARE_WRITE_TAIL: begin
@@ -2109,6 +2248,59 @@ module ordered_priority_queue_monolithic_page_allocator #(
         end
         end
 
+      PAGE_ALLOCATOR_FAST_ZERO_COMMIT: begin
+        if (fast_zero_commit_valid) begin
+          for (int i = 0; i < N_LANE; i++) begin
+            page_allocator.ticket_credit_update[i] <= ticket_fifo_addr_t'(1);
+            page_allocator.ticket_credit_update_valid[i] <= fast_zero_commit_lane_onehot_q[i];
+            if (fast_zero_commit_lane_onehot_q[i]) begin
+              ticket_t fast_ticket_v;
+              logic [HANDLE_LENGTH-1:0] fast_handle_data_v;
+
+              fast_ticket_v = fast_zero_commit_ticket_q[i];
+              fast_handle_data_v = '0;
+              fast_handle_data_v[HANDLE_SRC_HI:HANDLE_SRC_LO] =
+                fast_ticket_v.lane_fifo_rd_offset;
+              fast_handle_data_v[HANDLE_DST_HI:HANDLE_DST_LO] =
+                fast_zero_commit_page_addr_q +
+                page_ram_addr_t'(SHD_SIZE) +
+                page_ram_addr_t'(fast_zero_commit_lane_offset_q[i]);
+              fast_handle_data_v[HANDLE_LEN_HI:HANDLE_LEN_LO] =
+                fast_ticket_v.block_length;
+
+              page_allocator.ticket_rptr[i] <= page_allocator.ticket_rptr[i] + ticket_fifo_addr_t'(1);
+              page_allocator.frame_lane_shd_cnt[i] <=
+                page_allocator.frame_lane_shd_cnt[i] + frame_shr_cnt_t'(1);
+              page_allocator.frame_lane_hit_cnt[i] <=
+                page_allocator.frame_lane_hit_cnt[i] + frame_hit_cnt_t'(fast_ticket_v.block_length);
+              if (fast_ticket_v.block_length != '0) begin
+                page_allocator.handle_wdata[i] <= {1'b0, fast_handle_data_v};
+                page_allocator.handle_waddr[i] <= page_allocator.handle_wptr[i];
+                page_allocator.handle_wptr[i] <=
+                  page_allocator.handle_wptr[i] + handle_fifo_addr_t'(1);
+                page_allocator.handle_we[i] <= 1'b1;
+              end
+            end
+          end
+
+          page_allocator.frame_shr_cnt <= page_allocator.frame_shr_cnt + frame_shr_cnt_t'(1);
+          page_allocator.frame_hit_cnt <=
+            page_allocator.frame_hit_cnt + frame_hit_cnt_t'(fast_zero_commit_block_length_q);
+          page_allocator.frame_hit_room <=
+            page_allocator.frame_hit_room - frame_hit_cnt_t'(fast_zero_commit_block_length_q);
+          page_allocator.page_length <= fast_zero_commit_block_length_q;
+          page_allocator.subheader_has_accepted_lane <= 1'b0;
+          page_allocator.running_ts[47:4] <= page_allocator.running_ts[47:4] + 1'b1;
+          page_allocator.page_start_addr <=
+            fast_zero_commit_page_addr_q +
+            page_ram_addr_t'(fast_zero_commit_block_length_q) +
+            page_ram_addr_t'(SHD_SIZE);
+          page_allocator_state <= PAGE_ALLOCATOR_IDLE;
+        end else begin
+          page_allocator_state <= PAGE_ALLOCATOR_FETCH_TICKET;
+        end
+        end
+
       PAGE_ALLOCATOR_WRITE_HEAD: begin
         if (int'(page_allocator.write_meta_flow) < 2) begin
           page_allocator.page_we <= 1'b1;
@@ -2527,6 +2719,12 @@ module ordered_priority_queue_monolithic_page_allocator #(
       fetch_ticket_q <= '{default:TICKET_DEFAULT};
       fetch_ticket_raw_q <= '0;
       ticket_fifos_rd_data_stage_q <= '0;
+      fast_zero_commit_lane_onehot_q <= '0;
+      fast_zero_commit_ticket_q <= '{default:TICKET_DEFAULT};
+      fast_zero_commit_block_length_q <= '0;
+      fast_zero_commit_lane_offset_q <= '{default:'0};
+      fast_zero_commit_page_addr_q <= '0;
+      fast_zero_commit_page_data_q <= '0;
       idle_fetch_ready_lane_q <= '0;
       all_lanes_fetch_ready_q <= 1'b0;
       any_pending_ticket_q <= 1'b0;
@@ -2651,7 +2849,8 @@ module ordered_priority_queue_monolithic_page_allocator #(
       ((page_allocator_state == PAGE_ALLOCATOR_IDLE) &&
        !idle_tail_flush_ready_decision &&
        idle_fetch_ready_q &&
-       !frame_join_hold)
+       !frame_join_hold &&
+       !fast_zero_valid)
       |=> (page_allocator_state == PAGE_ALLOCATOR_FETCH_TICKET);
   endproperty
   ap_page_allocator_idle_fetch_requires_all_lanes: assert property (p_page_allocator_idle_fetch_requires_all_lanes);

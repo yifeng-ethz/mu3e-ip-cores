@@ -43,6 +43,7 @@ Historical formal note:
 | [BUG-007-R](#bug-007-r-histogram-ingress-bridge-can-remain-pending-on-a-stale-packet-state) | R | non-datapath-refactor | `common (pre/post histogram source switching after partial traffic)` | open | RN.BASIC.001 live RUNNING hist samples, 2026-05-14 | `pending` | The histogram ingress bridge can report a pending pre/post switch while a stale packet-active bit prevents the requested source from becoming live. |
 | [BUG-008-R](#bug-008-r-swb-demerger-dropped-feb-v3-data-frames-before-opq) | R | datapath-contract | `common (FEB v3 data frames with 0xA5 preamble)` | fixed-sim / firmware-compiled / board-STP-pending | SWB active-run STP + `SWB_FEB_XCVR_DEMERGER_REPLAY` | `pending` | The SWB data/SC/RC demerger did not classify the FEB v3 `0xA50000BC` SOP as data, so legal frames stayed before OPQ ingress. |
 | [BUG-009-R](#bug-009-r-pcie-app-dma-engines-observe-raw-hip-ready-without-source-grant) | R | datapath-contract | `common (posted host writes under PCIe TX arbitration)` | fixed-rtl / board-rerun-pending | `B065_HOST_REALISTIC` and `B066_HOST_REALISTIC`, 2026-05-17 | `this commit` | The legacy PCIe app let DMA/controlinfo posted writes advance on raw HIP ready even when the completer had not granted that DMA source, so RQE/CQE/DMA posted-write lineage could disappear without an ACK. |
+| [BUG-010-R](#bug-010-r-pcie-app-rx-parsers-accepted-requests-without-completer-fifo-credit) | R | datapath-contract | `common (host BAR request bursts while HIP TX is stalled)` | fixed-rtl / board-rerun-pending | `PCIE_COMPLETER_RREG_FIFO_LOSS`, 2026-05-17 | `this commit` | The PCIe APP RX parsers advertised ready without completer FIFO credit, so accepted host BAR requests beyond the 32-entry FIFO could be dropped before any PCIe completion was transmitted. |
 
 ## 2026-05-17
 
@@ -137,6 +138,95 @@ Historical formal note:
     - `DEBUG_LEVEL=1` exports FIFO fill-level/counter observability and is
       synthesizable, but is not timing-closed and must not be used for
       synthesis signoff
+- Commit:
+  - this commit
+
+### BUG-010-R: PCIe app RX parsers accepted requests without completer FIFO credit
+- First seen in:
+  - focused simulation target:
+    `firmware_builds/systems/swb/rdma_pretest-260511/tb_int/sim/PCIE_COMPLETER_RREG_FIFO_LOSS/transcript`
+  - pre-fix focused run, 2026-05-17, before the RTL credit patch:
+    `PCIE_APP_ACCEPTED_PACKET_LOSS: rreg_readen accepted 40 requests while HIP
+    TX was stalled, but only 32 completions reached tx_st`
+- Symptom:
+  - A sustained host BAR read burst can be accepted by the PCIe RX side while
+    HIP TX is stalled by downstream arbitration or backpressure.
+  - The completer request FIFOs are depth 32, but `pcie_application.rx_st_ready0`
+    was only the AND of parser-local reset-ready signals.
+  - The register and memory read/write parser blocks had no visibility of
+    `pcie_completer` FIFO full or almost-full status, so request pulses could
+    continue after the destination FIFO was full.
+  - This can lose legal PCIe host requests before a completion or internal
+    checkpoint exists. CQE was the first observed mismatch on board, but the
+    same missing-credit shape affects all PCIe APP RX request classes that feed
+    the completer FIFOs.
+- Root cause:
+  - `pcie_completer.vhd` generated `full_*_fifo` status for the four request
+    FIFOs but did not export those states to the RX parser blocks.
+  - `pcie_readable_registers.vhd`, `pcie_writeable_registers.vhd`,
+    `pcie_readable_memory.vhd`, and `pcie_writeable_memory.vhd` each latched
+    the incoming Avalon-ST beat every clock and decoded it independently of a
+    global RX accepted handshake.
+  - While global ready was eventually deasserted, the parser side had no
+    per-destination credit and no accepted-beat guard, so a held or overrun
+    beat could be decoded into a FIFO write without enough storage behind it.
+- Fix status:
+  - state:
+    - fixed in RTL for PCIe APP RX request FIFOs; board rerun still pending
+  - mechanism applied:
+    - `pcie_completer.vhd` now exports `*_request_ready` for register read,
+      register write, memory read, and memory write request FIFOs.
+    - The exported ready uses FIFO `full`, `almost_full`, and used-word state
+      to reserve three FIFO entries, covering the RX parser acceptance latency.
+    - Each RX parser now gates its local ready by the corresponding completer
+      request credit and only decodes a beat that `pcie_application` marked as
+      globally accepted.
+    - The old overflow debug latch now records a true architectural overflow:
+      request write asserted while the destination FIFO is full.
+  - architecture contract:
+    - OPQ/RDMA/PCIe/host buffers are lossless and must backpressure by ready or
+      credit.
+    - OPQ page RAM is the only permitted intentional drop point.
+    - For OPQ egress and upstream OPQ-chain sizing, the minimum credit rule is
+      `4 * MAX_FRAME_LENGTH_WORDS`, where
+      `MAX_FRAME_LENGTH_WORDS = (255 hits per subheader + subheader) * N_SHD +
+      header + trailer`.
+    - Host rxbuffer jitter capacity is aggregate across posted RQEs, not a
+      per-RQE requirement. For the current Gen3 x8, 256-bit, 250 MHz APP
+      boundary, 10 ms of host replenish jitter is 80,000,000 bytes, rounded to
+      a 128 MiB posted rxbuffer pool.
+    - The host/RDMA model uses 2 MiB huge-page-sized segments. One SGL RQE may
+      describe at most two such segments, so a two-segment RQE exposes at most
+      4 MiB and the 128 MiB aggregate pool needs at least 32 active two-segment
+      RQEs or 64 active single-segment RQEs.
+  - before_fix_outcome:
+    - focused completer stress accepted 40 register-read requests during HIP TX
+      stall and transmitted only 32 completions, matching the FIFO depth and
+      proving accepted request loss.
+  - after_fix_outcome:
+    - `make -C firmware_builds/systems/swb/rdma_pretest-260511/tb_int run_PCIE_COMPLETER_RREG_FIFO_LOSS`
+      passes with `*** TEST PASSED ***` and `Errors: 0`.
+    - A wider manual `vcom -2008` compile of `pcie_application.vhd` with the
+      modified parser/completer interfaces completes with `Errors: 0`.
+    - After correcting the host rxbuffer model to 64 x 2 MiB segments
+      (128 MiB aggregate, 10 ms jitter budget), focused SWB UVM targets
+      `run_B065` and `run_B066` pass with `DEBUG_LEVEL=2`.
+    - RDMA subsystem focused targets `B017` and `B050` pass with the RQE SGL
+      model capped at two 2 MiB segments.
+  - potential_hazard:
+    - medium: this closes a concrete PCIe APP RX loss point, but it does not
+      yet prove the DMA TX posted-write path, RDMA host buffers, or OPQ upstream
+      FIFO sizing satisfy the full max-frame 4x credit contract.
+  - Claude Opus 4.7 xhigh review decision:
+    - pending / not run for this RTL patch
+- Runtime / coverage context:
+  - new focused target:
+    `make -C firmware_builds/systems/swb/rdma_pretest-260511/tb_int run_PCIE_COMPLETER_RREG_FIFO_LOSS`
+  - next closure target:
+    - audit and enlarge OPQ/RDMA/PCIe/host FIFO and credit depths against
+      `MIN_UPSTREAM_CREDIT_WORDS`
+    - add true simulation timestamp and transaction id checkpoints at host
+      memory, RDMA, OPQ, PCIe HIP RX, and PCIe HIP TX boundaries
 - Commit:
   - this commit
 

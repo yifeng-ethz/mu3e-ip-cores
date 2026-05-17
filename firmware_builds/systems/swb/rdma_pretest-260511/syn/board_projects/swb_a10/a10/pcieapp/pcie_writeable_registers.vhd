@@ -20,6 +20,7 @@ port (
 
     -- from IF
     i_rx_st         : in    work.util.avst256_t;
+    i_rx_st_accept  : in    std_logic := '1';
     o_rx_st_ready0  : out   std_logic;
     i_rx_bar        : in    std_logic;
 
@@ -28,6 +29,7 @@ port (
     regwritten      : out   std_logic_vector(63 downto 0);
 
     -- to response engine
+    i_request_ready : in    std_logic := '1';
     readaddr        : out   std_logic_vector(5 downto 0);
     readlength      : out   std_logic_vector(9 downto 0);
     header2         : out   std_logic_vector(31 downto 0);
@@ -43,6 +45,7 @@ architecture RTL of pcie_writeable_registers is
 
     signal rx_st : work.util.avst256_t;
     signal rx_bar : std_logic;
+    signal rx_st_accepted : std_logic;
 
     type receiver_state_type is (reset, waiting);
     signal state : receiver_state_type;
@@ -85,20 +88,24 @@ architecture RTL of pcie_writeable_registers is
 
 begin
 
+    o_rx_st_ready0 <= '1' when state /= reset and i_request_ready = '1' else '0';
+
     process(i_clk, i_reset_n)
     begin
     if ( i_reset_n = '0' ) then
-        o_rx_st_ready0 <= '0';
         rx_st <= work.util.c_AVST256_ZERO;
         rx_bar <= '0';
+        rx_st_accepted <= '0';
     elsif rising_edge(i_clk) then
-        if ( state = reset ) then
-            o_rx_st_ready0 <= '0';
+        if ( i_rx_st_accept = '1' ) then
+            rx_st <= i_rx_st;
+            rx_bar <= i_rx_bar;
+            rx_st_accepted <= '1';
         else
-            o_rx_st_ready0 <= '1';
+            rx_st <= work.util.c_AVST256_ZERO;
+            rx_bar <= '0';
+            rx_st_accepted <= '0';
         end if;
-        rx_st <= i_rx_st;
-        rx_bar <= i_rx_bar;
     end if;
     end process;
 
@@ -127,6 +134,7 @@ begin
         state <= reset;
         writeregs_r <= (others => (others => '0'));
         regwritten <= (others => '0');
+        readen <= '0';
         --
     elsif rising_edge(i_clk) then
         regwritten <= regwritten_r;
@@ -157,7 +165,7 @@ begin
             be3 <= '0';
             be4 <= '0';
 
-            if(rx_st.sop = '1' and rx_bar = '1') then --  and inaddr32 = x"fb480040"
+            if(rx_st_accepted = '1' and rx_st.sop = '1' and rx_bar = '1') then --  and inaddr32 = x"fb480040"
                 if(fmt = "10" and ptype = "00000") then -- 32 bit memory write request
                     if(inaddr32(2) = '1') then -- Unaligned write, first data word at word3
                         addr3 <= regaddr;

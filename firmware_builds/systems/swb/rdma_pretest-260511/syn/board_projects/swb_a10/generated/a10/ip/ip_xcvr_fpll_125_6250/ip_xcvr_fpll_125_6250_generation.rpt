@@ -1,5 +1,5 @@
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250 --family="Arria 10" --part=10AX115N2F45E1SG
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250 --family="Arria 10" --part=10AX115N2F45E1SG
 Progress: Loading ip/ip_xcvr_fpll_125_6250.qsys
 Progress: Reading input file
 Progress: Adding xcvr_fpll_a10_0 [altera_xcvr_fpll_a10 18.1]
@@ -20,24 +20,14 @@ Info: ip_xcvr_fpll_125_6250: Running transform merlin_avalon_transform took 0.02
 Info: ip_xcvr_fpll_125_6250: "Naming system components in system: ip_xcvr_fpll_125_6250"
 Info: ip_xcvr_fpll_125_6250: "Processing generation queue"
 Info: ip_xcvr_fpll_125_6250: "Generating: ip_xcvr_fpll_125_6250"
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/synth/ip_xcvr_fpll_125_6250.vhd could not be written to."
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/ip_xcvr_fpll_125_6250_pkg.vhd could not be written to."
 Info: ip_xcvr_fpll_125_6250: "Generating: altera_xcvr_fpll_a10"
 Info: xcvr_fpll_a10_0: add_fileset_file ./twentynm_xcvr_avmm.sv SYSTEM_VERILOG PATH ../../../alt_xcvr_core/nf/twentynm_xcvr_avmm.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/twentynm_xcvr_avmm.sv could not be written to."
 Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_resync.sv SYSTEM_VERILOG PATH ../../../../altera_xcvr_generic/ctrl/alt_xcvr_resync.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/alt_xcvr_resync.sv could not be written to."
 Info: xcvr_fpll_a10_0: add_fileset_file ./altera_xcvr_fpll_a10.sv SYSTEM_VERILOG PATH ../source/altera_xcvr_fpll_a10.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/altera_xcvr_fpll_a10.sv could not be written to."
 Info: xcvr_fpll_a10_0: add_fileset_file ./a10_avmm_h.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/a10_avmm_h.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/a10_avmm_h.sv could not be written to."
 Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_native_avmm_nf.sv SYSTEM_VERILOG PATH ../../../altera_xcvr_native_phy/altera_xcvr_native_vi/alt_xcvr_native_avmm_nf.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/alt_xcvr_native_avmm_nf.sv could not be written to."
 Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_pll_embedded_debug.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_embedded_debug.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/alt_xcvr_pll_embedded_debug.sv could not be written to."
 Info: xcvr_fpll_a10_0: add_fileset_file ./alt_xcvr_pll_avmm_csr.sv SYSTEM_VERILOG PATH ../../altera_xcvr_atx_pll_vi/source/alt_xcvr_pll_avmm_csr.sv
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/alt_xcvr_pll_avmm_csr.sv could not be written to."
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_fpll_125_6250/altera_xcvr_fpll_a10_181/synth/plain_files.txt could not be written to."
 Info: ip_xcvr_fpll_125_6250: Done "ip_xcvr_fpll_125_6250" with 2 modules, 10 files
-Error: qsys-generate failed with exit code 1: 10 Errors, 0 Warnings
+Info: qsys-generate succeeded.
 Info: Finished: Create HDL design files for synthesis

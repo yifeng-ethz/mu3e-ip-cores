@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.05.14.07:11:44"
- outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/">
+ date="2026.05.17.18:16:14"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/">
  <perimeter>
   <parameter
      name="AUTO_GENERATION_ID"
@@ -45,30 +45,30 @@
   </interface>
  </perimeter>
  <entity kind="ip_clkctrl" version="1.0" name="ip_clkctrl">
-  <parameter name="AUTO_GENERATION_ID" value="1778735504" />
+  <parameter name="AUTO_GENERATION_ID" value="1779034574" />
   <parameter name="AUTO_DEVICE" value="10AX115N2F45E1SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_UNIQUE_ID" value="" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd"
        attributes="IS_CONFIGURATION_PACKAGE" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd"
        attributes="CONTAINS_INLINE_CONFIGURATION" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd"
        attributes="IS_CONFIGURATION_PACKAGE" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd"
        attributes="CONTAINS_INLINE_CONFIGURATION" />
   </childGeneratedFiles>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl.qsys" />
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl.qsys" />
   </sourceFiles>
   <childSourceFiles>
    <file
@@ -93,12 +93,12 @@
   <parameter name="CLOCK_TYPE" value="0" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v"
        attributes="" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v"
        attributes="" />
   </childGeneratedFiles>
   <sourceFiles>

@@ -4,7 +4,7 @@ use ieee.numeric_std.all;
 
 package cmp is
 
-    constant GIT_HEAD : std_logic_vector(16*4-1 downto 0) := X"13e40bb7d31b375d";
+    constant GIT_HEAD : std_logic_vector(16*4-1 downto 0) := X"ba9eac8a11abb257";
 
 -- ./a10/ip/ip_clkctrl/ip_clkctrl.cmp
 	component ip_clkctrl is

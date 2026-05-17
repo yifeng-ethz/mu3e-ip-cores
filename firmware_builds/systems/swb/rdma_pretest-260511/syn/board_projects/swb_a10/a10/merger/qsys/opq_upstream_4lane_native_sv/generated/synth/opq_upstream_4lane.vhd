@@ -101,7 +101,8 @@ begin
 			BUILD         => 430,
 			VERSION_DATE  => 20260430,
 			VERSION_GIT   => 1332117425,
-			INSTANCE_ID   => 0
+			INSTANCE_ID   => 0,
+			DEBUG_LV      => 0
 		)
 		port map (
 			aso_egress_startofpacket    => egress_startofpacket,                      --        egress.startofpacket

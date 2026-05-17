@@ -2,7 +2,7 @@ package require -exact qsys 16.1
 
 set_module_property NAME                         ordered_priority_queue_native_sv_fixed4
 set_module_property DISPLAY_NAME                 "Ordered Priority Queue Native SV Fixed4"
-set_module_property VERSION                      26.5.0.0430
+set_module_property VERSION                      26.5.0.430
 set_module_property GROUP                        "Mu3e Data Plane/Modules"
 set_module_property DESCRIPTION                  "Fixed-profile 4-lane native-SV OPQ wrapper for MuSiP integration"
 set_module_property AUTHOR                       "Yifeng Wang / Codex local packaging"
@@ -123,6 +123,23 @@ add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_c
 add_fileset_file [opq_source_file "rtl/sv_ver/vendor/alt_ram/frame_table.v"] VERILOG PATH [opq_source_file "rtl/sv_ver/vendor/alt_ram/frame_table.v"]
 add_fileset_file [opq_source_file "rtl/sv_ver/vendor/alt_ram/tile_fifo.v"] VERILOG PATH [opq_source_file "rtl/sv_ver/vendor/alt_ram/tile_fifo.v"]
 
+add_fileset sim_verilog SIM_VERILOG
+set_fileset_property sim_verilog TOP_LEVEL ordered_priority_queue_dut_sv
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_dut_sv.sv"] SYSTEM_VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_dut_sv.sv"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv"] SYSTEM_VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic.sv"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_block_path.sv"] SYSTEM_VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_block_path.sv"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_frame_table_presenter.sv"] SYSTEM_VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ordered_priority_queue_monolithic_frame_table_presenter.sv"]
+add_fileset_file [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_basic_presenter.sv"] SYSTEM_VERILOG PATH [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_basic_presenter.sv"]
+add_fileset_file [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_frame_table_tracker.sv"] SYSTEM_VERILOG PATH [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_frame_table_tracker.sv"]
+add_fileset_file [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_ingress_parser.sv"] SYSTEM_VERILOG PATH [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_ingress_parser.sv"]
+add_fileset_file [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_page_allocator.sv"] SYSTEM_VERILOG PATH [opq_source_file "rtl/sv_ver/ordered_priority_queue/monolithic_sv/ordered_priority_queue_monolithic_page_allocator.sv"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/handle_fifo.v"] VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/handle_fifo.v"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/lane_fifo.v"] VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/lane_fifo.v"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/page_ram.v"] VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/page_ram.v"]
+add_fileset_file [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ticket_fifo.v"] VERILOG PATH [opq_source_file "syn/quartus/opq_native_sv_4lane_signoff/src_compat/ticket_fifo.v"]
+add_fileset_file [opq_source_file "rtl/sv_ver/vendor/alt_ram/frame_table.v"] VERILOG PATH [opq_source_file "rtl/sv_ver/vendor/alt_ram/frame_table.v"]
+add_fileset_file [opq_source_file "rtl/sv_ver/vendor/alt_ram/tile_fifo.v"] VERILOG PATH [opq_source_file "rtl/sv_ver/vendor/alt_ram/tile_fifo.v"]
+
 add_parameter IP_UID NATURAL $IP_UID_DEFAULT_CONST
 set_parameter_property IP_UID DISPLAY_NAME "UID"
 set_parameter_property IP_UID ALLOWED_RANGES 0:2147483647
@@ -178,6 +195,13 @@ set_parameter_property INSTANCE_ID HDL_PARAMETER true
 set_parameter_property INSTANCE_ID ENABLED true
 set_parameter_property INSTANCE_ID DESCRIPTION {Per-instance integration identifier exposed through META page 3.}
 
+add_parameter DEBUG_LV NATURAL 0
+set_parameter_property DEBUG_LV DISPLAY_NAME "Debug Level"
+set_parameter_property DEBUG_LV ALLOWED_RANGES {0 1 2}
+set_parameter_property DEBUG_LV HDL_PARAMETER true
+set_parameter_property DEBUG_LV ENABLED true
+set_parameter_property DEBUG_LV DESCRIPTION {0 = production synthesis, 1 = synthesizable FIFO fill-level export plus side-effect counters; not timing-closed for production synthesis, 2 = simulation-only debug/checkpoint exposure.}
+
 set TAB_CONFIGURATION "Configuration"
 set TAB_IDENTITY      "Identity"
 set TAB_INTERFACES    "Interfaces"
@@ -190,6 +214,8 @@ add_display_item "" $TAB_REGMAP        GROUP tab
 
 add_display_item $TAB_CONFIGURATION "Profile" GROUP
 add_html_text "Profile" profile_html "<html><b>Fixed4 profile</b><br/>MuSiP-local fixed 4-lane native-SystemVerilog wrapper for the Mu3e Demo OPQ profile. The RTL fallback profile is N_SHD=128 and N_HIT=255, with one expected hit loss for a 256-hit cluster. Packaged as <b>${OPQ_VERSION_STRING}</b> (git <b>${OPQ_GIT_HEX_STRING}</b>).</html>"
+add_display_item $TAB_CONFIGURATION "Debug" GROUP
+add_display_item "Debug" DEBUG_LV parameter
 
 add_display_item $TAB_IDENTITY "Versioning" GROUP
 add_html_text "Versioning" versioning_html $OPQ_VERSIONING_HTML

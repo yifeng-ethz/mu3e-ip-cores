@@ -12,7 +12,8 @@ package opq_upstream_4lane_pkg is
 			BUILD         : natural := 430;
 			VERSION_DATE  : natural := 20260430;
 			VERSION_GIT   : natural := 1332117425;
-			INSTANCE_ID   : natural := 0
+			INSTANCE_ID   : natural := 0;
+			DEBUG_LV      : natural := 0
 		);
 		port (
 			aso_egress_startofpacket    : out std_logic;                                        -- startofpacket

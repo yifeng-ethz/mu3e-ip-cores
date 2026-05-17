@@ -118,6 +118,7 @@
    version="26.5.0.430"
    enabled="1">
   <parameter name="BUILD" value="430" />
+  <parameter name="DEBUG_LV" value="0" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1330663757" />
   <parameter name="VERSION_DATE" value="20260430" />

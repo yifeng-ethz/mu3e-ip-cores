@@ -1,9 +1,9 @@
 //------------------------------------------------------------------------------
 // ordered_priority_queue_monolithic_ingress_parser
-// Version : 26.5.0
-// Date    : 20260430
-// Change  : Clamp over-limit subheader hit counts at N_HIT and pre-drop the
-//           excess beats so 256-hit clusters lose exactly one hit at N_HIT=255.
+// Version : 26.5.1
+// Date    : 20260517
+// Change  : Include same-cycle returned lane/ticket credit in ingress drop
+//           decisions for consecutive valid Mu3e frame beats.
 //------------------------------------------------------------------------------
 
 module ordered_priority_queue_monolithic_ingress_parser #(
@@ -329,6 +329,8 @@ module ordered_priority_queue_monolithic_ingress_parser #(
     bit hit_consume_v;
     bit hit_accept_v;
     bit hit_last_v;
+    bit ticket_credit_available_v;
+    int unsigned lane_credit_effective_v;
     pkt_length_t shd_seen_next_v;
     pkt_length_t shd_accept_next_v;
 
@@ -364,6 +366,13 @@ module ordered_priority_queue_monolithic_ingress_parser #(
     hit_last_v =
       hit_consume_v &&
       (shd_seen_next_v == ingress_parser.shd_decl_len);
+    ticket_credit_available_v =
+      (ingress_parser.ticket_credit != '0) ||
+      (ticket_credit_update_valid && (ticket_credit_update != '0));
+    lane_credit_effective_v = int'(ingress_parser.lane_credit);
+    if (lane_credit_update_valid) begin
+      lane_credit_effective_v += int'(lane_credit_update);
+    end
 
     if (lane_credit_update_valid) begin
       ingress_parser.lane_credit <= ingress_parser.lane_credit + lane_credit_update;
@@ -385,7 +394,7 @@ module ordered_priority_queue_monolithic_ingress_parser #(
             ingress_parser.shd_seen_cnt <= '0;
             ingress_parser.shd_pre_drop_remaining <= '0;
             if ((ingress_parser_if_subheader_hit_cnt_raw != '0) &&
-                (int'(ingress_parser_if_subheader_hit_cnt_raw) >= int'(ingress_parser.lane_credit))) begin
+                (int'(ingress_parser_if_subheader_hit_cnt_raw) >= lane_credit_effective_v)) begin
               credit_drop_valid_o <= 1'b1;
               credit_drop_lane_o <= 1'b1;
               credit_drop_pkg_cnt_o <= ingress_parser.pkg_cnt;
@@ -396,7 +405,7 @@ module ordered_priority_queue_monolithic_ingress_parser #(
               credit_drop_shd_cnt_o <= 16'd1;
               credit_drop_hit_cnt_o <= ingress_parser_if_subheader_hit_cnt_raw;
               ingress_parser_state <= INGRESS_PARSER_MASK_PKT;
-            end else if (ingress_parser.ticket_credit == '0) begin
+            end else if (!ticket_credit_available_v) begin
               credit_drop_valid_o <= 1'b1;
               credit_drop_ticket_o <= 1'b1;
               credit_drop_pkg_cnt_o <= ingress_parser.pkg_cnt;
@@ -492,7 +501,7 @@ module ordered_priority_queue_monolithic_ingress_parser #(
             2'd3: begin
               ingress_parser.send_ts <= asi_ingress_data[30:0];
               update_header_ts_flow <= '0;
-              if (ingress_parser.ticket_credit != '0) begin
+              if (ticket_credit_available_v) begin
                 ingress_parser.alert_sop <= 1'b0;
                 ingress_parser.ticket_we <= 1'b1;
 `ifdef OPQ_OSS_FORMAL
@@ -563,7 +572,7 @@ module ordered_priority_queue_monolithic_ingress_parser #(
             ingress_parser.shd_seen_cnt <= '0;
             ingress_parser.shd_pre_drop_remaining <= '0;
             if ((ingress_parser_if_subheader_hit_cnt_raw != '0) &&
-                (int'(ingress_parser_if_subheader_hit_cnt_raw) >= int'(ingress_parser.lane_credit))) begin
+                (int'(ingress_parser_if_subheader_hit_cnt_raw) >= lane_credit_effective_v)) begin
               credit_drop_valid_o <= 1'b1;
               credit_drop_lane_o <= 1'b1;
               credit_drop_pkg_cnt_o <= ingress_parser.pkg_cnt;
@@ -574,7 +583,7 @@ module ordered_priority_queue_monolithic_ingress_parser #(
               credit_drop_shd_cnt_o <= 16'd1;
               credit_drop_hit_cnt_o <= ingress_parser_if_subheader_hit_cnt_raw;
               ingress_parser_state <= INGRESS_PARSER_MASK_PKT;
-            end else if (ingress_parser.ticket_credit == '0) begin
+            end else if (!ticket_credit_available_v) begin
               credit_drop_valid_o <= 1'b1;
               credit_drop_ticket_o <= 1'b1;
               credit_drop_pkg_cnt_o <= ingress_parser.pkg_cnt;

@@ -31,24 +31,28 @@ port (
     rreg_readlength     : in    std_logic_vector(9 downto 0);
     rreg_header2        : in    std_logic_vector(31 downto 0);
     rreg_readen         : in    std_logic;
+    rreg_request_ready  : out   std_logic;
 
     -- from register write part
     wreg_readaddr       : in    std_logic_vector(5 downto 0);
     wreg_readlength     : in    std_logic_vector(9 downto 0);
     wreg_header2        : in    std_logic_vector(31 downto 0);
     wreg_readen         : in    std_logic;
+    wreg_request_ready  : out   std_logic;
 
     -- from memory read part
     rmem_readaddr       : in    std_logic_vector(15 downto 0);
     rmem_readlength     : in    std_logic_vector(9 downto 0);
     rmem_header2        : in    std_logic_vector(31 downto 0);
     rmem_readen         : in    std_logic;
+    rmem_request_ready  : out   std_logic;
 
     -- from memory write part
     wmem_readaddr       : in    std_logic_vector(15 downto 0);
     wmem_readlength     : in    std_logic_vector(9 downto 0);
     wmem_header2        : in    std_logic_vector(31 downto 0);
     wmem_readen         : in    std_logic;
+    wmem_request_ready  : out   std_logic;
 
     -- to and from writeable memory
     writemem_addr       : out   std_logic_vector(15 downto 0);
@@ -97,6 +101,8 @@ architecture RTL of pcie_completer is
     signal read_rreg_fifo       : std_logic;
     signal empty_rreg_fifo      : std_logic;
     signal full_rreg_fifo       : std_logic;
+    signal almost_full_rreg_fifo: std_logic;
+    signal usedw_rreg_fifo      : std_logic_vector(4 downto 0);
     signal overflow_rreg_fifo   : std_logic;
     signal datain_rreg_fifo     : std_logic_vector(47 downto 0);
     signal data_rreg_fifo       : std_logic_vector(47 downto 0);
@@ -106,6 +112,8 @@ architecture RTL of pcie_completer is
     signal read_wreg_fifo       : std_logic;
     signal empty_wreg_fifo      : std_logic;
     signal full_wreg_fifo       : std_logic;
+    signal almost_full_wreg_fifo: std_logic;
+    signal usedw_wreg_fifo      : std_logic_vector(4 downto 0);
     signal overflow_wreg_fifo   : std_logic;
     signal datain_wreg_fifo     : std_logic_vector(47 downto 0);
     signal data_wreg_fifo       : std_logic_vector(47 downto 0);
@@ -115,6 +123,8 @@ architecture RTL of pcie_completer is
     signal read_rmem_fifo       : std_logic;
     signal empty_rmem_fifo      : std_logic;
     signal full_rmem_fifo       : std_logic;
+    signal almost_full_rmem_fifo: std_logic;
+    signal usedw_rmem_fifo      : std_logic_vector(4 downto 0);
     signal overflow_rmem_fifo   : std_logic;
     signal datain_rmem_fifo     : std_logic_vector(63 downto 0);
     signal data_rmem_fifo       : std_logic_vector(63 downto 0);
@@ -125,6 +135,8 @@ architecture RTL of pcie_completer is
     signal read_wmem_fifo       : std_logic;
     signal empty_wmem_fifo      : std_logic;
     signal full_wmem_fifo       : std_logic;
+    signal almost_full_wmem_fifo: std_logic;
+    signal usedw_wmem_fifo      : std_logic_vector(4 downto 0);
     signal overflow_wmem_fifo   : std_logic;
     signal datain_wmem_fifo     : std_logic_vector(63 downto 0);
     signal data_wmem_fifo       : std_logic_vector(63 downto 0);
@@ -240,6 +252,13 @@ begin
 
     dummydata <= (others => '0');
 
+    -- RX parser requests reach these FIFOs two clocks after the HIP accepts a
+    -- TLP. Keep three entries reserved so backpressure can close without loss.
+    rreg_request_ready <= '1' when full_rreg_fifo = '0' and almost_full_rreg_fifo = '0' and to_integer(unsigned(usedw_rreg_fifo)) < 29 else '0';
+    wreg_request_ready <= '1' when full_wreg_fifo = '0' and almost_full_wreg_fifo = '0' and to_integer(unsigned(usedw_wreg_fifo)) < 29 else '0';
+    rmem_request_ready <= '1' when full_rmem_fifo = '0' and almost_full_rmem_fifo = '0' and to_integer(unsigned(usedw_rmem_fifo)) < 29 else '0';
+    wmem_request_ready <= '1' when full_wmem_fifo = '0' and almost_full_wmem_fifo = '0' and to_integer(unsigned(usedw_wmem_fifo)) < 29 else '0';
+
     datain_rreg_fifo <= rreg_readaddr & rreg_readlength & rreg_header2;
 
     e_rreg_fifo : entity work.ip_scfifo_v2
@@ -252,10 +271,12 @@ begin
         i_we            => rreg_readen,
         i_wdata         => datain_rreg_fifo,
         o_wfull         => full_rreg_fifo,
+        o_almost_full   => almost_full_rreg_fifo,
 
         i_rack          => read_rreg_fifo,
         o_rdata         => data_rreg_fifo,
         o_rempty        => empty_rreg_fifo,
+        o_usedw         => usedw_rreg_fifo,
 
         i_reset_n       => i_reset_n,
         i_clk           => i_clk--,
@@ -282,10 +303,12 @@ begin
         i_we            => wreg_readen,
         i_wdata         => datain_wreg_fifo,
         o_wfull         => full_wreg_fifo,
+        o_almost_full   => almost_full_wreg_fifo,
 
         i_rack          => read_wreg_fifo,
         o_rdata         => data_wreg_fifo,
         o_rempty        => empty_wreg_fifo,
+        o_usedw         => usedw_wreg_fifo,
 
         i_reset_n       => i_reset_n,
         i_clk           => i_clk--,
@@ -311,10 +334,12 @@ begin
         i_we            => rmem_readen,
         i_wdata         => datain_rmem_fifo,
         o_wfull         => full_rmem_fifo,
+        o_almost_full   => almost_full_rmem_fifo,
 
         i_rack          => read_rmem_fifo,
         o_rdata         => data_rmem_fifo,
         o_rempty        => empty_rmem_fifo,
+        o_usedw         => usedw_rmem_fifo,
 
         i_reset_n       => i_reset_n,
         i_clk           => i_clk--,
@@ -340,10 +365,12 @@ begin
         i_we        => wmem_readen,
         i_wdata     => datain_wmem_fifo,
         o_wfull     => full_wmem_fifo,
+        o_almost_full => almost_full_wmem_fifo,
 
         i_rack      => read_wmem_fifo,
         o_rdata     => data_wmem_fifo,
         o_rempty    => empty_wmem_fifo,
+        o_usedw     => usedw_wmem_fifo,
 
         i_reset_n   => i_reset_n,
         i_clk       => i_clk--,
@@ -411,17 +438,18 @@ begin
 
         o_tx_st.empty <= tx_st_empty0_r;
 
-        -- check for full FIFOs -> set overflow signal
-        if ( empty_wmem_fifo= '0' ) then
+        -- A request asserted while the destination FIFO is full is an
+        -- architectural loss point. Latch it for SignalTap/debug visibility.
+        if ( wmem_readen = '1' and full_wmem_fifo = '1' ) then
             overflow_wmem_fifo<= '1';
         end if;
-        if ( empty_rmem_fifo = '0' ) then
+        if ( rmem_readen = '1' and full_rmem_fifo = '1' ) then
             overflow_rmem_fifo<= '1';
         end if;
-        if ( empty_rreg_fifo= '0' ) then
+        if ( rreg_readen = '1' and full_rreg_fifo = '1' ) then
             overflow_rreg_fifo<= '1';
         end if;
-        if ( empty_wreg_fifo= '0' ) then
+        if ( wreg_readen = '1' and full_wreg_fifo = '1' ) then
             overflow_wreg_fifo<= '1';
         end if;
         if ( memtoggle = '1') then

@@ -1,30 +1,14 @@
 //------------------------------------------------------------------------------
 // ordered_priority_queue_dut_sv
 // Author  : Yifeng Wang (original OPQ) / native SV staging by Codex
-// Version : 26.5.0-syn
-// Date    : 20260430
-// Change  : Narrow fixed4 drop-delta adders before the CSR delta register to
-//           close the SWB 250 MHz integration path without changing the CSR map.
+// Version : 26.5.3-syn
+// Date    : 20260517
+// Change  : Add per-lane parser-visible frame/subframe counters for
+//           pre-drop N_SHD observability.
 //------------------------------------------------------------------------------
 
 `ifndef OPQ_N_SHD
 `define OPQ_N_SHD 128
-`endif
-
-`ifndef OPQ_PAGE_RAM_DEPTH
-`define OPQ_PAGE_RAM_DEPTH 65536
-`endif
-
-`ifndef OPQ_TICKET_FIFO_DEPTH
-`define OPQ_TICKET_FIFO_DEPTH 256
-`endif
-
-`ifndef OPQ_HANDLE_FIFO_DEPTH
-`define OPQ_HANDLE_FIFO_DEPTH 64
-`endif
-
-`ifndef OPQ_LANE_FIFO_DEPTH
-`define OPQ_LANE_FIFO_DEPTH 1024
 `endif
 
 `ifndef OPQ_N_LANE
@@ -33,6 +17,22 @@
 
 `ifndef OPQ_N_HIT
 `define OPQ_N_HIT 255
+`endif
+
+`ifndef OPQ_PAGE_RAM_DEPTH
+`define OPQ_PAGE_RAM_DEPTH 262144
+`endif
+
+`ifndef OPQ_TICKET_FIFO_DEPTH
+`define OPQ_TICKET_FIFO_DEPTH 262144
+`endif
+
+`ifndef OPQ_HANDLE_FIFO_DEPTH
+`define OPQ_HANDLE_FIFO_DEPTH 1024
+`endif
+
+`ifndef OPQ_LANE_FIFO_DEPTH
+`define OPQ_LANE_FIFO_DEPTH 262144
 `endif
 
 `ifndef OPQ_DEBUG_LEVEL
@@ -44,11 +44,12 @@ module ordered_priority_queue_dut_sv #(
   parameter int unsigned IP_UID = 32'h4F50_514D,
   parameter int unsigned VERSION_MAJOR = 26,
   parameter int unsigned VERSION_MINOR = 5,
-  parameter int unsigned VERSION_PATCH = 0,
-  parameter int unsigned BUILD = 430,
-  parameter int unsigned VERSION_DATE = 20260430,
+  parameter int unsigned VERSION_PATCH = 3,
+  parameter int unsigned BUILD = 517,
+  parameter int unsigned VERSION_DATE = 20260517,
   parameter int unsigned VERSION_GIT = 32'h4F66_7FB1,
-  parameter int unsigned INSTANCE_ID = 0
+  parameter int unsigned INSTANCE_ID = 0,
+  parameter int unsigned DEBUG_LV = `OPQ_DEBUG_LEVEL
 ) (
   input  logic [35:0] asi_ingress_0_data,
   input  logic [0:0]  asi_ingress_0_valid,
@@ -94,7 +95,7 @@ module ordered_priority_queue_dut_sv #(
 `ifdef OPQ_USE_NATIVE_SV
   localparam int unsigned OPQ_N_LANE_LOCAL = `OPQ_N_LANE;
   localparam int unsigned OPQ_N_SHD_LOCAL = `OPQ_N_SHD;
-  localparam int unsigned OPQ_DEBUG_LEVEL_CONST = `OPQ_DEBUG_LEVEL;
+  localparam int unsigned OPQ_DEBUG_LEVEL_CONST = DEBUG_LV;
   localparam int unsigned CHANNEL_WIDTH_CONST = 2;
   localparam int unsigned LANE_FIFO_DEPTH_CONST = `OPQ_LANE_FIFO_DEPTH;
   localparam int unsigned LANE_FIFO_ADDR_WIDTH_CONST = $clog2(LANE_FIFO_DEPTH_CONST);
@@ -146,6 +147,8 @@ module ordered_priority_queue_dut_sv #(
   localparam logic [8:0] CSR_WORD_FT_DROP_HDR_CONST = 9'h00E;
   localparam logic [8:0] CSR_WORD_FT_DROP_SHD_CONST = 9'h00F;
   localparam logic [8:0] CSR_WORD_FT_DROP_HIT_CONST = 9'h010;
+  localparam logic [8:0] CSR_WORD_INGRESS_FRAME_CNT_BASE_CONST = 9'h140;
+  localparam logic [8:0] CSR_WORD_INGRESS_SUBFRAME_CNT_BASE_CONST = 9'h150;
   localparam logic [8:0] CSR_LANE_REGION_BASE_CONST = 9'h040;
   localparam logic [8:0] CSR_LANE_REGION_STRIDE_CONST = 9'h010;
   localparam logic [3:0] CSR_LANE_WORD_DRR_ALLOWANCE_CONST = 4'hB;
@@ -181,6 +184,8 @@ module ordered_priority_queue_dut_sv #(
   logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_rd_hdr_cnt;
   logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_rd_shd_cnt;
   logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_rd_hit_cnt;
+  logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_ingress_frame_cnt;
+  logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_ingress_subframe_cnt;
   logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_drop_hdr_cnt;
   logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_drop_shd_cnt;
   logic [OPQ_N_LANE_LOCAL-1:0][31:0] csr_drop_hit_cnt;
@@ -322,7 +327,16 @@ module ordered_priority_queue_dut_sv #(
     logic [31:0] status_v;
     begin
       csr_word_v = '0;
-      if (addr_v >= CSR_LANE_REGION_BASE_CONST) begin
+      if ((int'(addr_v) >= int'(CSR_WORD_INGRESS_FRAME_CNT_BASE_CONST)) &&
+          (int'(addr_v) < (int'(CSR_WORD_INGRESS_FRAME_CNT_BASE_CONST) + OPQ_N_LANE_LOCAL))) begin
+        lane_v = int'(addr_v) - int'(CSR_WORD_INGRESS_FRAME_CNT_BASE_CONST);
+        csr_word_v = csr_ingress_frame_cnt[lane_v];
+      end else if ((int'(addr_v) >= int'(CSR_WORD_INGRESS_SUBFRAME_CNT_BASE_CONST)) &&
+                   (int'(addr_v) < (int'(CSR_WORD_INGRESS_SUBFRAME_CNT_BASE_CONST) +
+                                    OPQ_N_LANE_LOCAL))) begin
+        lane_v = int'(addr_v) - int'(CSR_WORD_INGRESS_SUBFRAME_CNT_BASE_CONST);
+        csr_word_v = csr_ingress_subframe_cnt[lane_v];
+      end else if (addr_v >= CSR_LANE_REGION_BASE_CONST) begin
         lane_v = (int'(addr_v) - int'(CSR_LANE_REGION_BASE_CONST)) / int'(CSR_LANE_REGION_STRIDE_CONST);
         lane_word_v = (int'(addr_v) - int'(CSR_LANE_REGION_BASE_CONST)) % int'(CSR_LANE_REGION_STRIDE_CONST);
         if ((lane_v >= 0) && (lane_v < OPQ_N_LANE_LOCAL)) begin
@@ -378,6 +392,7 @@ module ordered_priority_queue_dut_sv #(
           end
           CSR_WORD_CAP_CONST: begin
             csr_word_v[4:0] = 5'h1F;
+            csr_word_v[6] = 1'b1;
             csr_word_v[15:8] = CSR_LANE_REGION_STRIDE_CONST[7:0];
             csr_word_v[23:16] = CSR_LANE_REGION_BASE_CONST[7:0];
             csr_word_v[31:24] = OPQ_N_LANE_LOCAL[7:0];
@@ -537,6 +552,8 @@ module ordered_priority_queue_dut_sv #(
       csr_rd_hdr_cnt <= '0;
       csr_rd_shd_cnt <= '0;
       csr_rd_hit_cnt <= '0;
+      csr_ingress_frame_cnt <= '0;
+      csr_ingress_subframe_cnt <= '0;
       csr_drop_hdr_cnt <= '0;
       csr_drop_shd_cnt <= '0;
       csr_drop_hit_cnt <= '0;
@@ -609,6 +626,8 @@ module ordered_priority_queue_dut_sv #(
         csr_rd_hdr_cnt <= '0;
         csr_rd_shd_cnt <= '0;
         csr_rd_hit_cnt <= '0;
+        csr_ingress_frame_cnt <= '0;
+        csr_ingress_subframe_cnt <= '0;
         csr_drop_hdr_cnt <= '0;
         csr_drop_shd_cnt <= '0;
         csr_drop_hit_cnt <= '0;
@@ -658,6 +677,18 @@ module ordered_priority_queue_dut_sv #(
           end
           if (csr_drop_hit_delta_q[lane] != '0) begin
             csr_drop_hit_cnt[lane] <= sat_add32(csr_drop_hit_cnt[lane], csr_drop_hit_delta_q[lane]);
+          end
+
+          if (asi_ingress_valid_eff_bus[lane]) begin
+            if (asi_ingress_startofpacket_bus[lane] &&
+                is_preamble_word(asi_ingress_data_bus[lane]) &&
+                !asi_ingress_error_bus[lane][2]) begin
+              csr_ingress_frame_cnt[lane] <= sat_add32(csr_ingress_frame_cnt[lane], 32'd1);
+            end
+            if (is_subheader_word(asi_ingress_data_bus[lane]) &&
+                !asi_ingress_error_bus[lane][1]) begin
+              csr_ingress_subframe_cnt[lane] <= sat_add32(csr_ingress_subframe_cnt[lane], 32'd1);
+            end
           end
 
           if (asi_ingress_valid_bus[lane]) begin
@@ -931,8 +962,10 @@ module ordered_priority_queue_dut_sv #(
       );
       for (int lane = 0; lane < OPQ_N_LANE_LOCAL; lane++) begin
         $display(
-          "OPQ_NATIVE_LANE_SUMMARY lane=%0d wr_hdr=%0d wr_shd=%0d wr_hit=%0d rd_hdr=%0d rd_shd=%0d rd_hit=%0d drop_hdr=%0d drop_shd=%0d drop_hit=%0d mask_drop_shd=%0d mask_drop_hit=%0d credit_lane_drop_shd=%0d credit_lane_drop_hit=%0d credit_ticket_drop_shd=%0d credit_ticket_drop_hit=%0d credit_other_drop_shd=%0d credit_other_drop_hit=%0d handle_drop_shd=%0d handle_drop_hit=%0d drr_grant=%0d drr_beat=%0d drr_defer=%0d lane_credit_visible=%0d ticket_credit_visible=%0d",
+          "OPQ_NATIVE_LANE_SUMMARY lane=%0d ingress_frames=%0d ingress_subframes=%0d wr_hdr=%0d wr_shd=%0d wr_hit=%0d rd_hdr=%0d rd_shd=%0d rd_hit=%0d drop_hdr=%0d drop_shd=%0d drop_hit=%0d mask_drop_shd=%0d mask_drop_hit=%0d credit_lane_drop_shd=%0d credit_lane_drop_hit=%0d credit_ticket_drop_shd=%0d credit_ticket_drop_hit=%0d credit_other_drop_shd=%0d credit_other_drop_hit=%0d handle_drop_shd=%0d handle_drop_hit=%0d drr_grant=%0d drr_beat=%0d drr_defer=%0d lane_credit_visible=%0d ticket_credit_visible=%0d",
           lane,
+          csr_ingress_frame_cnt[lane],
+          csr_ingress_subframe_cnt[lane],
           csr_wr_hdr_cnt[lane],
           csr_wr_shd_cnt[lane],
           csr_wr_hit_cnt[lane],

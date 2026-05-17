@@ -16,6 +16,7 @@ WORK ?= work_tb_int
 SWB_VHDL_WORK ?= work_swb_demux
 SWB_BLOCK_WORK ?= work_swb_block_mask
 OPQ_NATIVE_WORK ?= work_opq_native_replay
+PCIE_APP_WORK ?= work_pcie_app_loss
 OPQ_NATIVE_PLUSARGS ?=
 TB_TOP := tb_int_top
 SEED ?= 1
@@ -24,6 +25,7 @@ STP_REPLAY_MEM ?=
 STP_REPLAY_LANE ?= 0
 STP_REPLAY_SIDE ?= ingress
 OPQ_NATIVE_SRC_ROOT ?= /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/packet_scheduler
+OPQ_SIM_DEBUG_LEVEL ?= 2
 UVM_HOME := $(QUESTA_HOME)/verilog_src/uvm-1.2/src
 QUESTA_UVM_HOME := $(QUESTA_HOME)/verilog_src/questa_uvm_pkg-1.2/src
 UVM_SRC := $(UVM_HOME)/uvm_pkg.sv
@@ -32,8 +34,10 @@ VLOG_OPTS := -sv -work $(WORK) -timescale 1ps/1ps +define+UVM_NO_DPI +define+TB_
 VSIM_OPTS := -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -nodpiexports -work $(WORK)
 OPQ_NATIVE_VLOG_OPTS := -sv -work $(OPQ_NATIVE_WORK) -timescale 1ns/1ps \
 	+define+OPQ_USE_NATIVE_SV +define+OPQ_N_LANE=4 +define+OPQ_N_SHD=128 \
-	+define+OPQ_N_HIT=255 +define+OPQ_TICKET_FIFO_DEPTH=1024 \
-	+define+OPQ_PAGE_RAM_DEPTH=65536 +define+OPQ_DEBUG_LEVEL=1
+	+define+OPQ_N_HIT=255 \
+	+define+OPQ_LANE_FIFO_DEPTH=262144 +define+OPQ_TICKET_FIFO_DEPTH=262144 \
+	+define+OPQ_HANDLE_FIFO_DEPTH=1024 +define+OPQ_PAGE_RAM_DEPTH=262144 \
+	+define+OPQ_DEBUG_LEVEL=$(OPQ_SIM_DEBUG_LEVEL)
 
 OPQ_NATIVE_RAM_SRCS := \
 	$(OPQ_NATIVE_SRC_ROOT)/rtl/sv_ver/vendor/alt_ram/frame_table.v \
@@ -59,7 +63,7 @@ ERROR_CASES := X001 X002 X003 X004 X005 X033 X065 X069
 PROF_CASES := P001 P002 P003 P065 P066 P068
 SELECTED_CASES := $(BASIC_CASES) $(EDGE_CASES) $(ERROR_CASES) $(PROF_CASES)
 
-.PHONY: docs check modelsim_ini lib comp_uvm comp_swb_demux_replay comp_swb_block_mask_replay comp_opq_native_replay comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY run_OPQ_NATIVE_LANE2_REPLAY run_SWB_FEB_XCVR_DEMERGER_REPLAY run_SWB_FEB_XCVR_STEERING_REPLAY run_SWB_FEB_SCIFI_MASK_REPLAY
+.PHONY: docs check modelsim_ini lib comp_uvm comp_swb_demux_replay comp_swb_block_mask_replay comp_opq_native_replay comp_pcie_completer_rreg_fifo_loss comp_uvm_wedge_fixed smoke basic edge error prof regress_selected structural_preflight static_screen clean $(addprefix run_,$(SELECTED_CASES)) run_B-RC-CSR-001 run_B-SC-JTG-001 run_E-SC-CONC-001 run_RC_DIRECTED run_RC_DIRECTED_WEDGE run_RC_DIRECTED_WEDGE_FIXED run_OPQ_FRAME_TS_SMOKE run_OPQ_FRAME_STP_REPLAY run_OPQ_NATIVE_LANE2_REPLAY run_PCIE_COMPLETER_RREG_FIFO_LOSS run_SWB_FEB_XCVR_DEMERGER_REPLAY run_SWB_FEB_XCVR_STEERING_REPLAY run_SWB_FEB_SCIFI_MASK_REPLAY
 
 docs:
 	python3 script/generate_swb_tb_int_assets.py
@@ -117,6 +121,19 @@ comp_opq_native_replay: modelsim.ini
 		$(OPQ_NATIVE_RAM_SRCS) \
 		$(OPQ_NATIVE_SV_SRCS) \
 		hdl/tb_opq_native_lane2_replay.sv
+
+comp_pcie_completer_rreg_fifo_loss: modelsim.ini
+	mkdir -p $(SIM_ROOT)
+	test -d $(PCIE_APP_WORK) || $(VLIB) $(PCIE_APP_WORK)
+	$(VMAP) -modelsimini modelsim.ini work $(PCIE_APP_WORK)
+	$(VCOM) -modelsimini modelsim.ini -2008 -work $(PCIE_APP_WORK) \
+		../syn/board_projects/swb_a10/util/util_slv.vhd \
+		../syn/board_projects/swb_a10/util/util_pkg.vhd \
+		../syn/board_projects/swb_a10/registers/mudaq.vhd \
+		../syn/board_projects/swb_a10/a10/swb/tb/ip_scfifo_v2_sim.vhd \
+		../syn/board_projects/swb_a10/a10/pcieapp/pcie_completion_bytecount.vhd \
+		../syn/board_projects/swb_a10/a10/pcieapp/pcie_completer.vhd \
+		hdl/tb_pcie_completer_rreg_fifo_loss.vhd
 
 define RUN_CASE_template
 run_$(1): comp_uvm
@@ -235,6 +252,11 @@ run_OPQ_NATIVE_LANE2_REPLAY: comp_opq_native_replay
 	mkdir -p $(SIM_ROOT)/OPQ_NATIVE_LANE2_REPLAY
 	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -work $(OPQ_NATIVE_WORK) tb_opq_native_lane2_replay $(OPQ_NATIVE_PLUSARGS) -l $(SIM_ROOT)/OPQ_NATIVE_LANE2_REPLAY/transcript -do "run -all; quit -f"
 	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/OPQ_NATIVE_LANE2_REPLAY/transcript
+
+run_PCIE_COMPLETER_RREG_FIFO_LOSS: comp_pcie_completer_rreg_fifo_loss
+	mkdir -p $(SIM_ROOT)/PCIE_COMPLETER_RREG_FIFO_LOSS
+	$(VSIM) -modelsimini modelsim.ini -c -suppress 19 -suppress 3009 -work $(PCIE_APP_WORK) tb_pcie_completer_rreg_fifo_loss -l $(SIM_ROOT)/PCIE_COMPLETER_RREG_FIFO_LOSS/transcript -do "run -all; quit -f"
+	rg "\*\*\* TEST PASSED \*\*\*" $(SIM_ROOT)/PCIE_COMPLETER_RREG_FIFO_LOSS/transcript
 
 run_SWB_FEB_XCVR_DEMERGER_REPLAY: comp_swb_demux_replay
 	mkdir -p $(SIM_ROOT)/SWB_FEB_XCVR_DEMERGER_REPLAY

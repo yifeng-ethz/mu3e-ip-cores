@@ -117,6 +117,8 @@ module swb_rdma_subsystem_bridge (
     logic [4:0]   msix_vector;
     logic         msix_ack;
     logic         rdma_opq_ready;
+    logic         pcie_posted_write_credit_valid;
+    logic [31:0]  pcie_posted_write_credit_words;
 
     logic         write_aw_seen;
     logic [3:0]   write_bid_latched;
@@ -386,6 +388,8 @@ module swb_rdma_subsystem_bridge (
     };
 
     assign msix_ack = 1'b1;
+    assign pcie_posted_write_credit_valid = 1'b1;
+    assign pcie_posted_write_credit_words = 32'hffff_ffff;
 
     rdma_subsystem_top rdma_subsystem_i (
         .clk               (clk),
@@ -395,6 +399,8 @@ module swb_rdma_subsystem_bridge (
         .s_axis_opq_tready (rdma_opq_ready),
         .s_axis_opq_tlast  (opq_eop),
         .s_axis_opq_tuser  ({1'b0, opq_sop}),
+        .pcie_posted_write_credit_valid(pcie_posted_write_credit_valid),
+        .pcie_posted_write_credit_words(pcie_posted_write_credit_words),
         .s_axil_awaddr     (s_axil_awaddr),
         .s_axil_awvalid    (s_axil_awvalid),
         .s_axil_awready    (s_axil_awready),

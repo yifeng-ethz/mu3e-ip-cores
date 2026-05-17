@@ -1,5 +1,5 @@
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl --family="Arria 10" --part=10AX115N2F45E1SG
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl --family="Arria 10" --part=10AX115N2F45E1SG
 Progress: Loading ip/ip_clkctrl.qsys
 Progress: Reading input file
 Progress: Adding altclkctrl_0 [altclkctrl 18.1]
@@ -17,15 +17,12 @@ Info: ip_clkctrl: Running transform generation_view_transform took 0.000s
 Info: altclkctrl_0: Running transform generation_view_transform
 Info: altclkctrl_0: Running transform generation_view_transform took 0.000s
 Info: ip_clkctrl: Running transform merlin_avalon_transform
-Info: ip_clkctrl: Running transform merlin_avalon_transform took 0.079s
+Info: ip_clkctrl: Running transform merlin_avalon_transform took 0.102s
 Info: ip_clkctrl: "Naming system components in system: ip_clkctrl"
 Info: ip_clkctrl: "Processing generation queue"
 Info: ip_clkctrl: "Generating: ip_clkctrl"
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/synth/ip_clkctrl.vhd could not be written to."
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_pkg.vhd could not be written to."
 Info: ip_clkctrl: "Generating: ip_clkctrl_altclkctrl_181_4ev4gqi"
 Info: altclkctrl_0: Generating top-level entity ip_clkctrl_altclkctrl_181_4ev4gqi.
-Error: "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_clkctrl/altclkctrl_181/synth/ip_clkctrl_altclkctrl_181_4ev4gqi.v could not be written to."
 Info: ip_clkctrl: Done "ip_clkctrl" with 2 modules, 3 files
-Error: qsys-generate failed with exit code 1: 3 Errors, 0 Warnings
+Info: qsys-generate succeeded.
 Info: Finished: Create HDL design files for synthesis

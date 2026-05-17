@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deploy
- date="2026.05.14.07:08:28"
- outputDirectory="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/">
+ date="2026.05.17.18:13:04"
+ outputDirectory="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/">
  <perimeter>
   <parameter
      name="AUTO_GENERATION_ID"
@@ -241,30 +241,30 @@
    kind="ip_xcvr_phy_4_40_125_5000_enh"
    version="1.0"
    name="ip_xcvr_phy_4_40_125_5000_enh">
-  <parameter name="AUTO_GENERATION_ID" value="1778735308" />
+  <parameter name="AUTO_GENERATION_ID" value="1779034383" />
   <parameter name="AUTO_DEVICE" value="10AX115N2F45E1SG" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
   <parameter name="AUTO_UNIQUE_ID" value="" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_pkg.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_pkg.vhd"
        attributes="IS_CONFIGURATION_PACKAGE" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/synth/ip_xcvr_phy_4_40_125_5000_enh.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/synth/ip_xcvr_phy_4_40_125_5000_enh.vhd"
        attributes="CONTAINS_INLINE_CONFIGURATION" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_pkg.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_pkg.vhd"
        attributes="IS_CONFIGURATION_PACKAGE" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/synth/ip_xcvr_phy_4_40_125_5000_enh.vhd"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/synth/ip_xcvr_phy_4_40_125_5000_enh.vhd"
        attributes="CONTAINS_INLINE_CONFIGURATION" />
   </childGeneratedFiles>
   <sourceFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh.qsys" />
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh.qsys" />
   </sourceFiles>
   <childSourceFiles>
    <file
@@ -2287,150 +2287,150 @@
      value="pipe_if_8gpcs" />
   <generatedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_resync.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_resync.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_arbiter.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_arbiter.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pcs.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pcs.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pma.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pma.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_avmm.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_avmm.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_native.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_native.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_functions_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_functions_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/a10_avmm_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/a10_avmm_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_pipe_retry.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_pipe_retry.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_avmm_csr.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_avmm_csr.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_prbs_accum.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_prbs_accum.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_odi_accel.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_odi_accel.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_arb.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_arb.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_false_paths.sdc"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_false_paths.sdc"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_params_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_params_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_commands_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_commands_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_functions_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_functions_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_program.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_program.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_cpu.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_cpu.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_master.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_master.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_ip.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_ip.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/plain_files.txt"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/plain_files.txt"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_altera_xcvr_native_a10_181_3sbkwga.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_altera_xcvr_native_a10_181_3sbkwga.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_opt_logic_3sbkwga.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_opt_logic_3sbkwga.sv"
        attributes="" />
   </generatedFiles>
   <childGeneratedFiles>
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_resync.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_resync.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_arbiter.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_arbiter.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pcs.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pcs.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pma.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_pma.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_avmm.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_avmm.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_native.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/twentynm_xcvr_native.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_functions_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_functions_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/a10_avmm_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/a10_avmm_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_pipe_retry.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_pipe_retry.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_avmm_csr.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_avmm_csr.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_prbs_accum.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_prbs_accum.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_odi_accel.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_odi_accel.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_arb.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_arb.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_false_paths.sdc"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_a10_false_paths.sdc"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_params_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_params_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_commands_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_commands_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_functions_h.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_functions_h.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_program.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_program.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_cpu.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_cpu.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_master.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/pcie_mgmt_master.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_ip.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/altera_xcvr_native_pcie_dfe_ip.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/plain_files.txt"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/plain_files.txt"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_altera_xcvr_native_a10_181_3sbkwga.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/ip_xcvr_phy_4_40_125_5000_enh_altera_xcvr_native_a10_181_3sbkwga.sv"
        attributes="" />
    <file
-       path="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_opt_logic_3sbkwga.sv"
+       path="/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/ip/ip_xcvr_phy_4_40_125_5000_enh/altera_xcvr_native_a10_181/synth/alt_xcvr_native_rcfg_opt_logic_3sbkwga.sv"
        attributes="" />
   </childGeneratedFiles>
   <sourceFiles>

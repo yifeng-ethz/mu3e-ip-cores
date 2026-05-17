@@ -1,5 +1,5 @@
 Info: Starting: Create HDL design files for synthesis
-Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x4_256.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x4_256 --family="Arria 10" --part=10AX115N2F45E1SG
+Info: qsys-generate /home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x4_256.qsys --synthesis=VHDL --output-directory=/home/yifeng/packages/mu3e_ip_dev/.worktrees/mu3e_ip_cores_pcie_app_ready_fix_20260517/firmware_builds/systems/swb/rdma_pretest-260511/syn/board_projects/swb_a10/generated/a10/pcieapp/ip_pcie_x4_256 --family="Arria 10" --part=10AX115N2F45E1SG
 Progress: Loading pcieapp/ip_pcie_x4_256.qsys
 Progress: Reading input file
 Progress: Adding pcie_a10_hip_0 [altera_pcie_a10_hip 18.1]

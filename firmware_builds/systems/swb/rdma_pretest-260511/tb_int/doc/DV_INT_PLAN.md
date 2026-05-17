@@ -109,7 +109,7 @@ responder on the supercore's AXI4 host master:
 |---|---|---|---|---|
 | **RQ (Receive Queue)** | `HOST_RQ_BASE` | Ring of 64-byte RQE entries (slot count `RQ_DEPTH`, default 256). Head/tail pointers shadowed in the rdma_run_manager CSR. | host_memory_model produces; rdma_rq_fetcher consumes | The host posts WQEs here; the SWB pulls RQEs and acts. |
 | **CQ (Completion Queue)** | `HOST_CQ_BASE` | Ring of 16-byte CQE entries (slot count `CQ_DEPTH`, default 256). Head/tail pointers shadowed in the rdma_run_manager CSR. | rdma_cq_pusher produces; host_memory_model consumes/observes | The SWB posts completions back; host reads to know what landed. |
-| **Data buffer (segmented)** | `HOST_DATA_BASE` | A pool of `N_SEGMENTS` segments (default 64), each `SEG_BYTES` (default 8 KB). Each segment is addressed by a base+stride scheme; the rdma_run_manager decides the destination segment per CQE. | rdma_dma_engine writes; host_memory_model captures | Per-event payload bytes go here. Segmented so OPQ-ordered events can spread across segments without wrap-around. |
+| **Data buffer (segmented)** | `HOST_DATA_BASE` | A pool of `N_SEGMENTS` segments (default 64), each `SEG_BYTES` (default 2 MiB). Each segment is addressed by a base+stride scheme; the rdma_run_manager decides the destination segment per CQE. | rdma_dma_engine writes; host_memory_model captures | Per-event payload bytes go here. Segmented so OPQ-ordered events can spread across many RQEs without requiring host memory contiguous beyond one huge page. |
 
 Behavioral contract:
 
@@ -127,6 +127,13 @@ Behavioral contract:
    bytes per-segment and exposes a `host_segment_check(seg_idx, expected_bytes[])`
    API so the scoreboard can compare against the OPQ-emitted payload at
    the SWB upstream tap. Segments are zero-initialised at reset.
+   Segment size is derived from the deployed SWB PCIe HIP configuration:
+   Gen3 x8, 256-bit APP data at 250 MHz gives 8 GB/s at the APP boundary.
+   With a 10 ms host RQ replenish jitter budget, the active RQE pool must absorb
+   80,000,000 bytes. The model rounds this aggregate to 128 MiB and covers it
+   with 64 posted 2 MiB segments. The RDMA subsystem SGL model keeps at most two
+   2 MiB segments per RQE, so a two-segment RQE exposes at most 4 MiB and at
+   least 32 active two-segment RQEs are needed for the aggregate budget.
 4. **AXI4 timing**: the model accepts any legal AXI4 burst size + length
    the supercore emits. Burst behaviour matches Linux DMA capabilities
    (4 KB-bounded bursts, no narrow transfers below 32 byte). The model
@@ -202,6 +209,41 @@ The SWB scoreboard is a per-stage ledger:
 The BASIC smoke contract is `1/0/0` at each observed stage: one legal event,
 zero errors, and zero drops. Any mismatch between nominal payload accounting and
 DEBUG_LEVEL 2 sidecar lineage is a closure blocker.
+
+### 2.2.1 Lossless backpressure and credit contract
+
+The SWB integration contract is lossless upstream of OPQ page RAM. PCIe APP,
+RDMA, host RQ/CQ/data buffers, OPQ egress, and the OPQ upstream FIFO chain must
+use ready/valid backpressure or explicit credit so that an accepted packet is
+eventually observed at the next checkpoint. The only permitted intentional drop
+point is OPQ page RAM under upstream pressure; drops anywhere else are RTL or
+harness bugs and must remain visible in simulation.
+
+When OPQ egress asserts ready, every upstream storage and credit boundary must
+be able to absorb one maximum Mu3e frame with margin:
+
+```
+MAX_FRAME_LENGTH_WORDS = (255 hits per subheader + subheader) * N_SHD
+                       + header + trailer
+MIN_UPSTREAM_CREDIT_WORDS = 4 * MAX_FRAME_LENGTH_WORDS
+```
+
+The empirical `4x` margin is the current design rule for all OPQ-upstream
+FIFOs and credit pools. Later PROF/performance tests may study bubble
+propagation and rate loss, but they must not make simulation pass by dropping
+packets upstream of OPQ page RAM.
+
+Plan for the SWB PCIe/RDMA packet-loss closure:
+- Keep the current dual UVM/tb_int stimulus realistic: host software posts RQEs,
+  polls CQEs, and owns the host-memory RQ/CQ/data rings instead of forcing
+  internal DUT queues.
+- Add checkpoint records with true simulation timestamp and transaction id at
+  host RQ post, PCIe HIP RX accept, RDMA RQE ingress, OPQ accept/drop/emit,
+  PCIe HIP TX accept, host data write, and host CQE observation.
+- Audit OPQ egress, OPQ upstream FIFOs, RDMA queue FIFOs, PCIe APP TX/RX
+  queues, and host model buffers against `MIN_UPSTREAM_CREDIT_WORDS`.
+- Treat any accepted packet missing from the next lossless checkpoint as a
+  failure, even when a later workaround could keep the testbench moving.
 
 ### 2.3 DEBUG_LEVEL regulation per IP
 

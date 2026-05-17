@@ -7,8 +7,21 @@ set_project_property HIDE_FROM_IP_CATALOG {false}
 
 add_instance clk_bridge altera_clock_bridge 18.1
 add_instance reset_bridge altera_reset_bridge 18.1
-add_instance opq_0 ordered_priority_queue_native_sv_fixed4 26.5.0.0430
+add_instance opq_0 ordered_priority_queue_native_sv_fixed4 26.5.0.430
 add_instance csr_jtag_master altera_jtag_avalon_master 18.1
+
+set opq_debug_level 0
+if {[info exists ::OPQ_DEBUG_LEVEL]} {
+    set opq_debug_level $::OPQ_DEBUG_LEVEL
+} elseif {[info exists env(DEBUG_LEVEL)]} {
+    set opq_debug_level $env(DEBUG_LEVEL)
+} elseif {[info exists env(OPQ_DEBUG_LEVEL)]} {
+    set opq_debug_level $env(OPQ_DEBUG_LEVEL)
+}
+if {[lsearch -exact {0 1 2} $opq_debug_level] < 0} {
+    error "DEBUG_LEVEL/OPQ_DEBUG_LEVEL must be one of 0, 1, or 2; got '${opq_debug_level}'"
+}
+set_instance_parameter_value opq_0 {DEBUG_LV} $opq_debug_level
 
 set_instance_parameter_value csr_jtag_master {FAST_VER} {1}
 set_instance_parameter_value csr_jtag_master {FIFO_DEPTHS} {2}

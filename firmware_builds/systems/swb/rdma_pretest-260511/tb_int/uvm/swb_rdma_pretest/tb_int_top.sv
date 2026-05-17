@@ -358,10 +358,10 @@ module tb_int_top;
                                                         pcie_dma_egress);
 
         host_cfg = host_memory_default_config();
-        host_cfg.RQ_DEPTH = 256;
-        host_cfg.CQ_DEPTH = 256;
+        host_cfg.RQ_DEPTH = 16384;
+        host_cfg.CQ_DEPTH = 65536;
         host_cfg.N_SEGMENTS = 64;
-        host_cfg.SEG_BYTES = 4096;
+        host_cfg.SEG_BYTES = 2097152;
         host_cfg.poll_cadence = 100ns;
         host_cfg.record_write_latency = 0ns;
         uvm_config_db#(host_memory_config_t)::set(null,

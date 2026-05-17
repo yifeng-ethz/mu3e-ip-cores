@@ -123,6 +123,12 @@ architecture RTL of pcie_application is
 
     signal rx_st_ready_rmem         : std_logic;
     signal rx_st_ready_wmem         : std_logic;
+    signal rx_st_ready_all          : std_logic;
+    signal rx_st_accept             : std_logic;
+    signal rreg_request_ready       : std_logic;
+    signal wreg_request_ready       : std_logic;
+    signal rmem_request_ready       : std_logic;
+    signal wmem_request_ready       : std_logic;
 
     -- registers
     signal writeregs_s              : reg32array_pcie;
@@ -206,9 +212,11 @@ begin
     readregs_s(63 downto 56) <= readregs_int(63 downto 56);
     readregs_s(55 downto 0) <= readregs(55 downto 0);
 
-    rx_st_ready0 <=
+    rx_st_ready_all <=
         '1' when rx_st_ready_wreg = '1' and rx_st_ready_rreg = '1' and rx_st_ready_wmem = '1' and rx_st_ready_rmem = '1' -- should we add the DMA here somehow?
         else '0';
+    rx_st_ready0 <= rx_st_ready_all;
+    rx_st_accept <= rx_st_ready_all and i_rx_st.valid;
 
     -- needs to changed once meory is added
     --rx_st_ready_rmem <= '1';
@@ -222,6 +230,7 @@ begin
 
         -- from IF
         i_rx_st         => i_rx_st,
+        i_rx_st_accept  => rx_st_accept,
         o_rx_st_ready0  => rx_st_ready_wreg,
         i_rx_bar        => rx_bar0(0),
 
@@ -230,6 +239,7 @@ begin
         regwritten      => regwritten_s,
 
         -- to response engine
+        i_request_ready => wreg_request_ready,
         readaddr        => wreg_readaddr,
         readlength      => wreg_readlength,
         header2         => wreg_header2,
@@ -245,10 +255,12 @@ begin
     port map (
         -- from IF
         i_rx_st         => i_rx_st,
+        i_rx_st_accept  => rx_st_accept,
         o_rx_st_ready0  => rx_st_ready_rreg,
         i_rx_bar        => rx_bar0(1),
 
         -- to response engine
+        i_request_ready => rreg_request_ready,
         readaddr        => rreg_readaddr,
         readlength      => rreg_readlength,
         header2         => rreg_header2,
@@ -264,6 +276,7 @@ begin
     port map (
         -- from IF
         i_rx_st         => i_rx_st,
+        i_rx_st_accept  => rx_st_accept,
         o_rx_st_ready0  => rx_st_ready_wmem,
         i_rx_bar        => rx_bar0(2),
 
@@ -273,6 +286,7 @@ begin
         tomemwren       => writememwren,
 
         -- to response engine
+        i_request_ready => wmem_request_ready,
         readaddr        => wmem_readaddr,
         readlength      => wmem_readlength,
         header2         => wmem_header2,
@@ -286,10 +300,12 @@ begin
     port map (
         -- from IF
         i_rx_st         => i_rx_st,
+        i_rx_st_accept  => rx_st_accept,
         o_rx_st_ready0  => rx_st_ready_rmem,
         i_rx_bar        => rx_bar0(3),
 
         -- to response engine
+        i_request_ready => rmem_request_ready,
         readaddr        => rmem_readaddr,
         readlength      => rmem_readlength,
         header2         => rmem_header2,
@@ -317,24 +333,28 @@ begin
         rreg_readlength     => rreg_readlength,
         rreg_header2        => rreg_header2,
         rreg_readen         => rreg_readen,
+        rreg_request_ready  => rreg_request_ready,
 
         -- from register write part
         wreg_readaddr       => wreg_readaddr,
         wreg_readlength     => wreg_readlength,
         wreg_header2        => wreg_header2,
         wreg_readen         => wreg_readen,
+        wreg_request_ready  => wreg_request_ready,
 
         -- from memory read part
         rmem_readaddr       => rmem_readaddr,
         rmem_readlength     => rmem_readlength,
         rmem_header2        => rmem_header2,
         rmem_readen         => rmem_readen,
+        rmem_request_ready  => rmem_request_ready,
 
         -- from memory write part
         wmem_readaddr       => wmem_readaddr,
         wmem_readlength     => wmem_readlength,
         wmem_header2        => wmem_header2,
         wmem_readen         => wmem_readen,
+        wmem_request_ready  => wmem_request_ready,
 
         -- to and from writeable memory
         writemem_addr       => writememaddr_r,

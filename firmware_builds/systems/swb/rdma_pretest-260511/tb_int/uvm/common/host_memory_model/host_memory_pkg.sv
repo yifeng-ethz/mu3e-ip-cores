@@ -7,8 +7,8 @@ package tb_int_host_memory_pkg;
     `include "uvm_macros.svh"
 
     localparam longint unsigned HOST_RQ_BASE   = 64'h0000_0000_1000_0000;
-    localparam longint unsigned HOST_CQ_BASE   = 64'h0000_0000_1001_0000;
-    localparam longint unsigned HOST_DATA_BASE = 64'h0000_0000_1002_0000;
+    localparam longint unsigned HOST_CQ_BASE   = 64'h0000_0000_1010_0000;
+    localparam longint unsigned HOST_DATA_BASE = 64'h0000_0000_1020_0000;
 
     typedef struct packed {
         logic [63:0]  addr;
@@ -38,10 +38,10 @@ package tb_int_host_memory_pkg;
     } host_memory_config_t;
 
     function automatic host_memory_config_t host_memory_default_config();
-        host_memory_default_config.RQ_DEPTH = 256;
-        host_memory_default_config.CQ_DEPTH = 256;
+        host_memory_default_config.RQ_DEPTH = 16384;
+        host_memory_default_config.CQ_DEPTH = 65536;
         host_memory_default_config.N_SEGMENTS = 64;
-        host_memory_default_config.SEG_BYTES = 4096;
+        host_memory_default_config.SEG_BYTES = 2097152;
         host_memory_default_config.HOST_RQ_BASE_ADDR = HOST_RQ_BASE;
         host_memory_default_config.HOST_CQ_BASE_ADDR = HOST_CQ_BASE;
         host_memory_default_config.HOST_DATA_BASE_ADDR = HOST_DATA_BASE;
