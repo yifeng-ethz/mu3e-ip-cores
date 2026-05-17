@@ -27,8 +27,61 @@ Severity legend:
 | [BUG-010-H](#bug-010-h-febswb-corun-smoke-did-not-model-the-declared-128-subheader-frame) | H | non-datapath-refactor | `directed-only (FEB/SWB corun smoke and monitor harness)` | fixed | FEB/SWB corun UVM smoke, 2026-05-14 | this checkpoint | The corun smoke declared 128 subheaders but drove only the active subheader, and the monitors reconstructed true timestamps without rejecting a declared-versus-seen subheader mismatch. |
 | [BUG-011-I](#bug-011-i-make-side-qsys-generation-did-not-produce-the-debug2-synthesis-dut-tree-for-tb_int) | I | non-datapath-refactor | `common (realistic tb_int setup and Qsys regeneration)` | fixed | FEB v3 debug Qsys generation, 2026-05-17 | this working tree | The Make-side Qsys generate hook produced only the normal `synthesis/` tree, leaving no parallel DEBUG_LEVEL=2 synthesis HDL tree for realistic `tb_int`; the arb supercore build Tcl also referenced stale `arb_hit_type0` version `26.5.0.0511`. |
 | [BUG-012-H](#bug-012-h-feb-generated-histogram-smoke-did-not-require-declared-hit-counts-for-all-type0type1-modes) | H | non-datapath-refactor | `common (generated-FEB histogram direct simulation)` | fixed | FEB generated histogram simulation, 2026-05-17 | this working tree | The direct histogram smoke could pass without proving the declared 10 ms, 100 kHz one-random-channel-per-ASIC hit count for Type0 rate plus Type1 rate and latency modes on both MTS banks; it also compiled raw repo RTL instead of the regenerated FEB `simulation/submodules` tree. |
+| [BUG-013-H](#bug-013-h-direct-histogram-harness-modeled-16-active-asics-instead-of-the-febs-8-asic-topology) | H | non-datapath-refactor | `common (generated-FEB histogram direct simulation and Type0 plot evidence)` | fixed | FEB generated histogram simulation review, 2026-05-17 | this commit | The direct histogram harness modeled 16 active ASIC sources, but this FEB has 8 ASICs total: 4 upper bank and 4 lower bank. |
+| [BUG-014-I](#bug-014-i-feb-ip-packaging-could-drift-back-to-256-subheaders) | I | non-datapath-refactor | `common (Qsys/IP regeneration if an N_SHD override is missed or changed)` | fixed | FEB/SWB N_SHD audit, 2026-05-17 | this commit | `feb_frame_assembly` still defaulted to 256 subheaders and FEB rbCAM packaging still allowed non-128 `N_SHD`, so a missed override could regenerate a FEB source shape that SWB reports as 256 subheaders. |
 
 ## 2026-05-17
+
+### BUG-014-I: FEB IP packaging could drift back to 256 subheaders
+
+- First seen:
+  - FEB/SWB frame-shape audit on 2026-05-17 after the board report that SWB saw 256 subheaders.
+- Symptom:
+  - Active regenerated FEB v3 systems had `N_SHD=128`, but the raw `feb_frame_assembly` HDL generic and `_hw.tcl` package default still said 256.
+  - The FEB rbCAM package defaulted to 128 but still allowed Qsys `N_SHD` selections up to 256.
+- Root cause:
+  - The system Tcl recipes were carrying the SciFi/FEB convention as an integration override instead of making the FEB IP packages reject a non-128 frame contract.
+  - A stale cache, missed override, or manual Qsys edit could therefore reintroduce a 256-subheader FEB source even when the active build scripts intended 128.
+- Fix:
+  - `feb_frame_assembly_hw.tcl` now defaults `N_SHD` to 128, restricts the GUI range to `{128}`, and emits a Platform Designer validation/elaboration error for any other value.
+  - `feb_frame_assembly.vhd` now also defaults the generic to 128 so direct HDL instantiation does not silently inherit the old 256-subheader profile.
+  - `ring_buffer_cam_hw.tcl` now hard-locks FEB rbCAM generation to `N_SHD=128` in validation/elaboration and exposes only `{128}` in the Qsys GUI range.
+  - `script/generate_qsys_debug_pair.sh` now has a make-facing Qsys source guard that aborts generation if any active FEB Qsys source contains an `N_SHD` parameter other than 128.
+- Evidence:
+  - Guarded Qsys regeneration stamp `20260517_nshd128_guard_asic8` passed: DEBUG0 validate/generate and DEBUG2 validate/generate all reported `exit_code=0`, `error_count=0`.
+  - The guard log `scifi_datapath_system_v3_nshd128_guard_20260517_nshd128_guard_asic8.log` is empty, meaning no active FEB Qsys source contained a non-128 `N_SHD`.
+  - The regenerated `scifi_datapath_system_v3.sopcinfo` contains ten `N_SHD` parameters and all ten read back `value=128`.
+  - The regenerated `synthesis/submodules/feb_frame_assembly.vhd` and `simulation/submodules/feb_frame_assembly.vhd` both default `N_SHD` to 128.
+- Residuals:
+  - A plain in-memory `qsys-script validate_system` experiment did not return nonzero for a scripted `N_SHD=256` parameter set, so the generation wrapper guard remains part of the required hard gate in addition to the component `_hw.tcl` validation.
+
+### BUG-013-H: direct histogram harness modeled 16 active ASICs instead of the FEB's 8-ASIC topology
+
+- First seen:
+  - FEB generated histogram simulation review on 2026-05-17 after checking the physical source model against the FEB topology.
+- Symptom:
+  - The direct histogram harness declared `N_ASICS=16`, so the 10 ms, 100 kHz smoke expected 16,000 hits for Type0 and for each Type1 bank.
+  - The Type0 max-rate DISLIN plot also normalized the 1 ms ping-pong readback by 16 ASICs and expected 16,000 hits per 1 ms read.
+- Root cause:
+  - The harness conflated the 8 Type0 lane/ASIC sources and the two MTS bank modes into one 16-source logical model.
+  - The physical FEB topology has 8 ASICs total: ASICs 0..3 in the upper bank and ASICs 4..7 in the lower bank. Type1-up and Type1-down each exercise only 4 active ASICs.
+- Fix:
+  - `tb_hist_direct_v3.sv` now models `N_TYPE0_ASICS=8` for Type0 and `N_TYPE1_BANK_ASICS=4` for each Type1 bank.
+  - Type1-down stimuli now use global ASIC IDs 4..7, while Type1-up uses 0..3.
+  - The summary CSV now records `active_asics`, and the DISLIN renderer derives its per-ASIC normalization and expected hits/read from that field instead of a hardcoded 16.
+- Evidence:
+  - Corrected generated-RTL smoke on 2026-05-17, stamp `hist_direct_v3_smoke_20260517_130642`, passed with `pass_count=5`, `fail_count=0`, `Errors=0`, `Warnings=2`.
+  - Smoke transcript counts:
+    - `CASE_PASS type0_rate_100k_onech expected=8000 offered=8000 total=8000`
+    - `CASE_PASS type1_up_rate_100k_onech expected=4000 offered=4000 total=4000`
+    - `CASE_PASS type1_up_latency_100k_onech expected=4000 offered=4000 total=4000`
+    - `CASE_PASS type1_down_rate_100k_onech expected=4000 offered=4000 total=4000`
+    - `CASE_PASS type1_down_latency_100k_onech expected=4000 offered=4000 total=4000`
+  - Corrected Type0 max-rate run, stamp `hist_direct_v3_type0_rate_max_20260517_130705`, passed with `CASE_PASS type0_rate_1000k_allch expected=80000 offered=80000 total=80000 per_asic_rate_hz=1000000.000`.
+  - The interval CSV has ten in-RUNNING 1 ms ping-pong reads, each with `last_total=8000`, `bin_sum=8000`, and `last_dropped=0`.
+  - DISLIN rendered PNG/PDF with `Warnings: 0`; the figure title now reports `active ASICs=8`, and the caption reports `8000 hits/read expected, total=80000, bin_sum=80000, dropped=0, PASS`.
+- Residuals:
+  - This is a harness/evidence bug, not an RTL datapath bug. The corrected generated-RTL simulation still shows no hit loss in Type0 rate, Type1 rate, or Type1 latency modes at the declared stimulus rates.
 
 ### BUG-012-H: FEB generated histogram smoke did not require declared hit counts for all Type0/Type1 modes
 
@@ -59,6 +112,7 @@ Severity legend:
   - Questa summary: `pass_count=5`, `fail_count=0`, `Errors=0`, `Warnings=2`.
 - Residuals:
   - No raw RTL defect was exposed by the stricter generated-FEB simulation; the fix is the harness/evidence contract and generated-RTL compile path.
+  - The physical active-source count in this original evidence was later corrected under BUG-013-H; the 16-source counts above are retained here as the historical transcript from the first strict-hitcount checkpoint.
 
 ### BUG-011-I: Make-side Qsys generation did not produce the DEBUG2 synthesis DUT tree for tb_int
 

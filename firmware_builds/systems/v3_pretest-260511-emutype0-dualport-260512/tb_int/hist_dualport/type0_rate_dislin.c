@@ -11,7 +11,6 @@
 #define PAGE_WIDTH 2970
 #define PAGE_HEIGHT 2100
 #define CLK_HZ 125000000.0f
-#define N_ASICS 16.0f
 
 typedef struct {
   char case_name[160];
@@ -23,6 +22,7 @@ typedef struct {
   long long total;
   long long dropped;
   long long bin_sum;
+  int active_asics;
   char result[32];
 } summary_t;
 
@@ -114,7 +114,20 @@ static int read_summary(const char *path, const char *case_name, summary_t *summ
     summary->total = atoll(tokens[12]);
     summary->dropped = atoll(tokens[13]);
     summary->bin_sum = atoll(tokens[14]);
-    snprintf(summary->result, sizeof(summary->result), "%s", tokens[19]);
+    if (ntok >= 21) {
+      summary->active_asics = atoi(tokens[18]);
+      snprintf(summary->result, sizeof(summary->result), "%s", tokens[20]);
+    } else {
+      int period = summary->rate_hz > 0 ? (int)(CLK_HZ / (float)summary->rate_hz) : 0;
+      int hits_per_source = period > 0 ? summary->run_cycles / period : 0;
+      summary->active_asics = hits_per_source > 0 ? (int)(summary->expected / hits_per_source) : 0;
+      snprintf(summary->result, sizeof(summary->result), "%s", tokens[19]);
+    }
+    if (summary->active_asics <= 0) {
+      fprintf(stderr, "invalid active ASIC count derived from summary for case %s\n", case_name);
+      fclose(fp);
+      return 0;
+    }
     fclose(fp);
     return 1;
   }
@@ -131,7 +144,8 @@ static int read_intervals(const char *path, const summary_t *summary, series_t *
   const float interval_s = (float)summary->interval_cycles / CLK_HZ;
   const float interval_ms = interval_s * 1000.0f;
   const float target_rate_khz = (float)summary->rate_hz / 1000.0f;
-  const float target_hits = ((float)summary->rate_hz * interval_s) * N_ASICS;
+  const float active_asics = (float)summary->active_asics;
+  const float target_hits = ((float)summary->rate_hz * interval_s) * active_asics;
 
   if (fp == NULL) {
     fprintf(stderr, "could not open interval CSV: %s\n", path);
@@ -169,8 +183,8 @@ static int read_intervals(const char *path, const summary_t *summary, series_t *
     series->total_hits[row] = total_hits;
     series->bin_hits[row] = bin_hits;
     series->dropped_hits[row] = (float)atof(tokens[6]);
-    series->total_rate_khz[row] = total_hits / interval_s / N_ASICS / 1000.0f;
-    series->bin_rate_khz[row] = bin_hits / interval_s / N_ASICS / 1000.0f;
+    series->total_rate_khz[row] = total_hits / interval_s / active_asics / 1000.0f;
+    series->bin_rate_khz[row] = bin_hits / interval_s / active_asics / 1000.0f;
     series->target_rate_khz[row] = target_rate_khz;
     series->target_hits[row] = target_hits;
     series->bank_status[row] = (unsigned int)strtoul(tokens[14], NULL, 0);
@@ -372,9 +386,10 @@ static void render_plot(const summary_t *summary, const series_t *series, const 
            "FEB generated RTL Type0 max-rate ping-pong readback");
   snprintf(subtitle,
            sizeof(subtitle),
-           "10 ms RUNNING, 1 ms ping-pong bank reads, %d kHz/ASIC, %s, N_ASICS=16",
+           "10 ms RUNNING, 1 ms ping-pong bank reads, %d kHz/ASIC, %s, active ASICs=%d",
            summary->rate_hz / 1000,
-           summary->pattern);
+           summary->pattern,
+           summary->active_asics);
   page_message_centered(title, 82, 46);
   page_message_centered(subtitle, 138, 30);
   page_message_centered("No post-END_RUN readback or rescaling: plotted points are the in-run 1 ms latch and bin reads.", 178, 24);

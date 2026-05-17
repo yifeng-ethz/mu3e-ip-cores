@@ -35,6 +35,36 @@ GENERATED_DIR="${QSYS_DIR}/${QSYS_BASE}"
 SYNTHESIS_DIR="${GENERATED_DIR}/synthesis"
 SIMULATION_DIR="${GENERATED_DIR}/simulation"
 
+assert_feb_nshd_128() {
+    local guard_log="${QSYS_DIR}/${QSYS_BASE}_nshd128_guard_${STAMP}.log"
+    local files=()
+    local candidate
+
+    for candidate in \
+        "${QSYS}" \
+        "${SYSTEM_DIR}/quartus_systems"/hit_stack_system*.qsys \
+        "${ROOT}/quartus_systems"/hit_stack_system*.qsys; do
+        [ -f "${candidate}" ] || continue
+        files+=("$(realpath -- "${candidate}")")
+    done
+
+    : > "${guard_log}"
+    [ "${#files[@]}" -gt 0 ] || return 0
+    if ! awk '
+        /<parameter name="N_SHD"/ {
+            if ($0 !~ /value="128"/) {
+                printf "%s:%d:%s\n", FILENAME, FNR, $0
+                bad = 1
+            }
+        }
+        END { exit bad ? 1 : 0 }
+    ' "${files[@]}" > "${guard_log}"; then
+        echo "ERROR: FEB Qsys N_SHD guard failed; all FEB frame/rbCAM N_SHD parameters must be 128." >&2
+        cat "${guard_log}" >&2
+        exit 1
+    fi
+}
+
 run_top_patch_if_needed() {
     if [ "${QSYS_BASE}" = "feb_system_v3" ] && [ -f "${TOP_PATCH_SCRIPT}" ]; then
         "${QSYS_SCRIPT_BIN}" \
@@ -355,12 +385,14 @@ run_top_patch_if_needed
 
 set_arb_source_debug_level 0
 set_qsys_debug_level 0
+assert_feb_nshd_128
 validate_qsys 0
 launch_qsys_gui_background
 run_qsys_generate synthesis 0
 
 set_arb_source_debug_level 2
 set_qsys_debug_level 2
+assert_feb_nshd_128
 validate_qsys 2
 run_qsys_generate simulation 2
 

@@ -108,6 +108,7 @@ firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.log
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.md
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.pdf
 firmware_builds/systems/*/tb_int/REPORT/hist_direct_v3_*.png
+firmware_builds/systems/*/tb_int/REPORT/nshd_guard_*.log
 
 # --- More build cache artifacts ---
 **/*.map.guard

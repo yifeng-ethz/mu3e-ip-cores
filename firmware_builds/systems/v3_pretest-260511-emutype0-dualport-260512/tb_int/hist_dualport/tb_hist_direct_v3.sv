@@ -12,7 +12,8 @@ module tb_hist_direct_v3;
   localparam int unsigned CLK_PERIOD_NS       = 8;
   localparam int unsigned N_BINS              = 256;
   localparam int unsigned N_TYPE0_LANES       = 8;
-  localparam int unsigned N_ASICS             = 16;
+  localparam int unsigned N_TYPE0_ASICS       = 8;
+  localparam int unsigned N_TYPE1_BANK_ASICS  = 4;
   localparam int unsigned CHANNELS_PER_ASIC   = 32;
   localparam int unsigned TYPE0_DATA_WIDTH    = 45;
   localparam int unsigned TYPE1_DATA_WIDTH    = 39;
@@ -509,19 +510,19 @@ module tb_hist_direct_v3;
     input bit          all_channels
   );
     int unsigned period;
-    int unsigned next_due[N_ASICS];
-    int unsigned fixed_ch[N_ASICS];
-    int unsigned hit_index[N_ASICS];
+    int unsigned next_due[N_TYPE0_ASICS];
+    int unsigned fixed_ch[N_TYPE0_ASICS];
+    int unsigned hit_index[N_TYPE0_ASICS];
     bit          lane_has_hit[N_TYPE0_LANES];
     int unsigned lane_asic[N_TYPE0_LANES];
     int unsigned lane_ch[N_TYPE0_LANES];
     int unsigned lane_tcc[N_TYPE0_LANES];
 
     period = CLK_HZ / rate_hz;
-    for (int asic = 0; asic < N_ASICS; asic++) begin
+    for (int asic = 0; asic < N_TYPE0_ASICS; asic++) begin
       fixed_ch[asic]  = (prng_next() >> 8) % CHANNELS_PER_ASIC;
       hit_index[asic] = 0;
-      next_due[asic]  = ((asic % 8) * (period / 8 + 1) + ((asic / 8) * (period / 2 + 3))) % period;
+      next_due[asic]  = (asic * (period / N_TYPE0_ASICS + 1)) % period;
     end
 
     for (int cyc = 0; cyc < run_cycles; cyc++) begin
@@ -532,10 +533,10 @@ module tb_hist_direct_v3;
         type0_data[lane]  <= '0;
         type0_chan[lane]  <= '0;
       end
-      for (int asic = 0; asic < N_ASICS; asic++) begin
+      for (int asic = 0; asic < N_TYPE0_ASICS; asic++) begin
         if (cyc == next_due[asic]) begin
           int lane;
-          lane = asic & 7;
+          lane = asic % N_TYPE0_LANES;
           if (lane_has_hit[lane]) begin
             next_due[asic] = cyc + 1;
           end else begin
@@ -575,9 +576,10 @@ module tb_hist_direct_v3;
 	    input bit          delay_mode
   );
     int unsigned period;
-    int unsigned next_due[N_ASICS];
-    int unsigned fixed_ch[N_ASICS];
-    int unsigned hit_index[N_ASICS];
+    int unsigned next_due[N_TYPE1_BANK_ASICS];
+    int unsigned fixed_ch[N_TYPE1_BANK_ASICS];
+    int unsigned hit_index[N_TYPE1_BANK_ASICS];
+    int unsigned bank_base_asic;
     bit          has_hit;
     int unsigned hit_asic;
     int unsigned hit_ch;
@@ -588,10 +590,11 @@ module tb_hist_direct_v3;
 
     period = CLK_HZ / rate_hz;
     delay_target_v = DELAY_TARGET_CYCLES;
-    for (int asic = 0; asic < N_ASICS; asic++) begin
+    bank_base_asic = (source_select == SOURCE_TYPE1_DOWN) ? N_TYPE1_BANK_ASICS : 0;
+    for (int asic = 0; asic < N_TYPE1_BANK_ASICS; asic++) begin
       fixed_ch[asic]  = (prng_next() >> 8) % CHANNELS_PER_ASIC;
       hit_index[asic] = 0;
-      next_due[asic]  = (asic * (period / N_ASICS + 1)) % period;
+      next_due[asic]  = (asic * (period / N_TYPE1_BANK_ASICS + 1)) % period;
     end
 
     for (int cyc = 0; cyc < run_cycles; cyc++) begin
@@ -606,15 +609,15 @@ module tb_hist_direct_v3;
       type1_down_ts    <= '0;
       type1_down_chan  <= '0;
 
-      for (int asic = 0; asic < N_ASICS; asic++) begin
+      for (int asic = 0; asic < N_TYPE1_BANK_ASICS; asic++) begin
         if (cyc == next_due[asic]) begin
           if (has_hit) begin
             next_due[asic] = cyc + 1;
           end else begin
             has_hit = 1'b1;
-            hit_asic = asic;
+            hit_asic = bank_base_asic + asic;
             hit_ch = all_channels ? ((prng_next() >> 12) % CHANNELS_PER_ASIC) : fixed_ch[asic];
-            hit_tcc = (cyc + asic * 17 + hit_index[asic]) & 13'h1fff;
+            hit_tcc = (cyc + hit_asic * 17 + hit_index[asic]) & 13'h1fff;
             next_due[asic] = cyc + period;
             hit_index[asic]++;
           end
@@ -718,6 +721,15 @@ module tb_hist_direct_v3;
     case_interval_seen    = 0;
   endtask
 
+  function automatic int unsigned active_asic_count_for_source(
+    input bit [1:0] source_select
+  );
+    if (source_select == SOURCE_TYPE0) begin
+      return N_TYPE0_ASICS;
+    end
+    return N_TYPE1_BANK_ASICS;
+  endfunction
+
   function automatic longint unsigned expected_hits_for_case(
     input bit [1:0]    source_select,
     input int unsigned rate_hz
@@ -732,7 +744,7 @@ module tb_hist_direct_v3;
       $fatal(1, "rate_hz=%0d does not declare an exact integer-cycle stimulus for run_cycles=%0d",
              rate_hz, run_cycles);
     end
-    return longint'(N_ASICS) * longint'(run_cycles / period);
+    return longint'(active_asic_count_for_source(source_select)) * longint'(run_cycles / period);
   endfunction
 
 	  task automatic run_hist_case(
@@ -749,6 +761,7 @@ module tb_hist_direct_v3;
     real per_asic_rate_v;
     int unsigned expected_intervals;
     int unsigned expected_delay_bin;
+    int unsigned active_asics;
     longint unsigned expected_hits;
 
     pattern = all_channels ? "all_ch_all_asic" : "one_random_ch_per_asic";
@@ -760,6 +773,7 @@ module tb_hist_direct_v3;
                           all_channels ? "allch" : "onech");
     expected_intervals = run_cycles / interval_cycles;
     expected_delay_bin = DELAY_TARGET_CYCLES / DELAY_BIN_WIDTH;
+    active_asics = active_asic_count_for_source(source_select);
     expected_hits = expected_hits_for_case(source_select, rate_hz);
 
     $display("CASE_START %s source=%0d delay=%0d rate_hz=%0d pattern=%s expected_hits=%0d",
@@ -841,16 +855,16 @@ module tb_hist_direct_v3;
     end
 
     seconds_v = real'(run_cycles) / real'(CLK_HZ);
-    per_asic_rate_v = (real'(case_interval_total) / seconds_v) / real'(N_ASICS);
+    per_asic_rate_v = (real'(case_interval_total) / seconds_v) / real'(active_asics);
     $fwrite(summary_fd,
-            "%s,%s,%s,%0d,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0.3f,%s\n",
+            "%s,%s,%s,%0d,%s,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0d,%0.3f,%s\n",
             case_name, source_name, mode_name,
             rate_hz, pattern, run_cycles, interval_cycles,
             expected_hits, case_offered, case_accepted, case_ready_miss,
             case_interval_seen, case_interval_total,
             case_interval_dropped, case_interval_bin_sum,
             case_coal_overflow_max, case_delay_min_bin, case_delay_max_bin,
-            per_asic_rate_v, case_pass ? "PASS" : "FAIL");
+            active_asics, per_asic_rate_v, case_pass ? "PASS" : "FAIL");
 
     if (case_pass) begin
       pass_count++;
@@ -925,7 +939,7 @@ module tb_hist_direct_v3;
       $fatal(1, "failed to open report files for prefix %s", report_prefix);
     end
     $fwrite(summary_fd,
-            "case,source,mode,rate_hz,pattern,run_cycles,interval_cycles,expected,offered,accepted,ready_miss,intervals,total,dropped,bin_sum,coal_overflow_max,delay_min_bin,delay_max_bin,per_asic_rate_hz,result\n");
+            "case,source,mode,rate_hz,pattern,run_cycles,interval_cycles,expected,offered,accepted,ready_miss,intervals,total,dropped,bin_sum,coal_overflow_max,delay_min_bin,delay_max_bin,active_asics,per_asic_rate_hz,result\n");
     $fwrite(interval_fd,
             "case,interval_idx,rate_hz,pattern,delay_mode,last_total,last_dropped,bin_sum,min_bin,max_bin,total_accum,dropped_accum,bin_sum_accum,coal_status,bank_status\n");
 
