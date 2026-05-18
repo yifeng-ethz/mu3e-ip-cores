@@ -3,7 +3,7 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="1.0"
+   version="4.0.0.0518"
    description="Bump mutrig_frame_deassembly_0 instance to 26.2.0.0511 (rc-readyless: ctrl sink declares USE_READY=0, run-control fan-out from feb_system_v3 run_control_splitter no longer needs auto-inserted timing_adapter on this path)."
    tags=""
    categories="System" />

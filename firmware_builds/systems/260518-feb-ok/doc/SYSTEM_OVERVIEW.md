@@ -13,7 +13,7 @@ and [`BUG_HISTORY.md`](BUG_HISTORY.md).
 | `control_path_subsystem` | `debug_sc_system_v4` | `4.0.0.0518` | `quartus_systems/debug_sc_system_v4.qsys` | sc_hub + slow-control fabric, hosts Region A slaves |
 | `data_path_subsystem` | `scifi_datapath_system_v4` | `4.0.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/scifi_datapath_system_v4.qsys` (local patched) + `quartus_systems/scifi_datapath_system_v4.qsys` (mirror) | MuTRiG receive + arbitration + hist, hosts Region B slaves |
 | `upload_subsystem` | `upload_system_v4` | `4.0.0.0518` | `quartus_systems/upload_system_v4.qsys` | run-control mgmt host + upload mux, hosts Region C |
-| `bringup_subsystem` | `feb_bringup_system` | `1.0` (TODO bump to `26.x.y.0518`) | `quartus_systems/feb_bringup_system.qsys` | Nios II + JTAG UART for bring-up |
+| `bringup_subsystem` | `feb_bringup_system` | `26.0.0.0518` | `quartus_systems/feb_bringup_system.qsys` | Nios II + JTAG UART for bring-up (bumped from 1.0) |
 
 All v3 predecessors (`feb_system_v3*`, `debug_sc_system_v3*`, `scifi_datapath_system_v3*`, `upload_system_v3*`, `mutrig_datapath_system_v3` snapshot copies of the variants) are parked under `quartus_systems/deprecated/`.
 
@@ -26,7 +26,7 @@ See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
 | `scratch_pad_ram` | `altera_avalon_onchip_memory2` | `18.1` | vendor |
 | `onewire_master_controller_0` | `onewire_master_controller` | `26.2.1.0428` | OK |
 | `onewire_master_0` (link layer, private bus only) | `onewire_master` | `26.2.1.0428` | OK |
-| `max10_prog_avmm_0` | `max10_prog_avmm` | `0.2.0` (TODO bump to `26.x.y.0518`) | bad version format |
+| `max10_prog_avmm_0` | `max10_prog_avmm` | `26.0.0.0518` | bumped from 0.2.0 |
 | `firefly_xcvr_ctrl_0` | `firefly_xcvr_ctrl` | `26.2.0423` | OK |
 | `on_die_temp_sense_ctrl` | `altera_temp_sense_ctrl` | `1.1` | vendor |
 | `mutrig_cfg_ctrl_0` | `mutrig_cfg_ctrl` | `24.1.0423` | OK (also owns dangling `avmm_cnt` master, to be wired into the new `ctrl2data_mm_bridge`) |
@@ -44,7 +44,7 @@ See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
 |---|---|---|---|
 | `lvds_rx_28nm_0` | `altera_lvds_rx_28nm` | `24.0.1110` | vendor |
 | `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` | `25.1.0631` | OK |
-| `mutrig_datapath_subsystem_{0..7}` | `mutrig_datapath_system_v3` | `1.0` (TODO bump) | sub-subsystem, version pending |
+| `mutrig_datapath_subsystem_{0..7}` | `mutrig_datapath_system_v4` | `4.0.0.0518` | sub-subsystem, renamed v3→v4 + bumped |
 | `mutrig_datapath_subsystem_{0..7}.mutrig_frame_deassembly_0` | `mutrig_frame_deassembly` | `26.2.0.0511` | OK |
 | `mutrig_datapath_subsystem_{0..7}.backpressure_fifo` | `altera_avalon_sc_fifo` | `18.1` | vendor |
 | `mts_preprocessor_0` | `mts_preprocessor` | `26.3.5.0518` | OK |
@@ -54,14 +54,14 @@ See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
 | `hist_post_splitter_0` / `hist_post_cdc_0` | vendor splitter / DC-FIFO | `18.1` | vendor |
 | `emulator_mutrig_qsys_inst` | `emulator_mutrig` | `26.3.3.0517` | OK |
 | `emulator_hit_type0_fanout` | `hit_type0_fanout8` | `26.0.1.0517` | OK |
-| `emulator_inject_fanout` | `pulse_fanout8` | `1.2` (TODO bump) | bad version |
+| `emulator_inject_fanout` | `pulse_fanout8` | `26.0.0.0518` | bumped from 1.2; tiny 1→8 fanout buffer for the calibration injection pulse |
 | `mutrig_injector_0` | `mutrig_injector_multiheader` | `26.1.2.0517` | OK |
-| `mutrig_reset_controller_0` | `mutrig_reset_controller` | `1.1.0` (TODO bump) | bad version |
+| `mutrig_reset_controller_0` | `mutrig_reset_controller` | `26.0.0.0518` | bumped from 1.1.0 |
 | `mux_mutrig2processor` / `mux_mutrig2processor_0` | `hit_type0_readyless_mux4` | `26.1.0.0516` | OK |
-| `arb_hit_type0_supercore_0` (wrapper) | `arb_hit_type0_supercore` | `1.0` (TODO bump) | bad version on wrapper; lanes OK below |
+| `arb_hit_type0_supercore_0` (wrapper) | `arb_hit_type0_supercore` | `1.0` (kept) | **kept at 1.0** to avoid collision with the IP-Builder `arb_hit_type0_supercore_hw.tcl` variant (also kind=`arb_hit_type0_supercore`) that carries `26.6.5.0518` — bumping the qsys subsystem to a matching version makes Qsys's kind resolver pick the wrong (IP-Builder) variant and break port resolution |
 | `arb_hit_type0_supercore_0.lane_{0..7}` | `arb_hit_type0` | `26.6.5.0518` | OK |
 | `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.5.0522` | OK; **hist_bin 256-word burst aperture target** |
-| `hit_stack_subsystem_{0,1}` | `hit_stack_system` | `1.0` (TODO bump) | sub-subsystem, version pending |
+| `hit_stack_subsystem_{0,1}` | `hit_stack_system` | `26.0.0.0518` | sub-subsystem, bumped from 1.0 |
 | `hit_stack_subsystem_{0,1}.feb_frame_assembly_0` | `feb_frame_assembly` | `26.0.0328` | OK |
 | `hit_stack_subsystem_{0,1}.ring_buffer_cam_{0..3}` | `ring_buffer_cam` | `26.2.13.0516` | OK |
 | `dbg_mm2runctrl_0` | `dbg_mm2runctrl` | `1.0.0` | **to drop** — replaced by `runctl_mgmt_host_0.runctl` AvST source |
@@ -93,19 +93,28 @@ The two conventions coexist: subsystem version reads like the v-suffix
 namespace generation (v4 family), and leaf IPs read like packaged IP
 revisions.
 
-## Pending version bumps
+## Completed version bumps (2026-05-18)
 
-Visible badge `1.0` / `1.2` / `0.2.0` / `1.1.0` IPs scheduled for an identity-header pass:
-- `max10_prog_avmm` (`0.2.0`)
-- `mutrig_reset_controller` (`1.1.0`)
-- `pulse_fanout8` (`1.2`)
-- `dbg_mm2runctrl` (`1.0.0`) — moot, will be removed
-- `feb_bringup_system` (`1.0`) — wrapper subsystem
-- `arb_hit_type0_supercore` wrapper (`1.0`) — wrapper subsystem, lanes already at 26.6.5.0518
-- `mutrig_datapath_system_v3` (`1.0`) — wrapper subsystem
-- `hit_stack_system` (`1.0`) — wrapper subsystem
+- `max10_prog_avmm` 0.2.0 → 26.0.0.0518 (leaf IP)
+- `mutrig_reset_controller` 1.1.0 → 26.0.0.0518 (leaf IP)
+- `pulse_fanout8` 1.2 → 26.0.0.0518 (leaf IP)
+- `feb_bringup_system` 1.0 → 26.0.0.0518 (subsystem without v-suffix)
+- `hit_stack_system` 1.0 → 26.0.0.0518 (subsystem without v-suffix)
+- `mutrig_datapath_system_v3` 1.0 → `mutrig_datapath_system_v4` 4.0.0.0518 (renamed + bumped)
+- `arb_hit_type0_supercore_hw.tcl` VERSION_DATE 20260516 → 20260518 (matching lanes)
+- v4 subsystems (`feb_system_v4`, `debug_sc_system_v4`, `scifi_datapath_system_v4`, `upload_system_v4`, `mutrig_datapath_system_v4`) → 4.0.0.0518
 
-The four kept-at-`v18.1` items (`altera_*`, `altera_avalon_*`, `multiplexer`) are vendor IPs and stay on the Quartus 18.1 stamp.
+Kept at `1.0`:
+- `arb_hit_type0_supercore.qsys` (subsystem wrapper) — collision with the
+  `arb_hit_type0_supercore_hw.tcl` IP-Builder variant (also kind=`arb_hit_type0_supercore`,
+  version `26.6.5.0518`); any version bump on the subsystem makes Qsys's kind resolver
+  flip to the IP-Builder variant and the subsystem's per-lane ports disappear at
+  qsys-generate. Documented in this row of Region B above.
+
+Pending (separate IP-packaging follow-up):
+- `dbg_mm2runctrl` (`1.0.0`) — moot, scheduled for removal in the rewire.
+
+Vendor IPs (`altera_*`, `altera_avalon_*`, `multiplexer`) stay on the Quartus 18.1 stamp.
 
 ## Files moved to `quartus_systems/deprecated/` (2026-05-18 v3→v4 cut)
 
