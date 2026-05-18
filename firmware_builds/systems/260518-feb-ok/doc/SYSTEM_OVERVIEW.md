@@ -33,17 +33,19 @@ See [`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) for the SC-hub byte map.
 | `sc_hub` | `sc_hub_v2` | `26.6.10.0423` | OK |
 | `pll_156t40` | `altera_pll` | `18.1` | vendor |
 | `pll_reset_inactive` | `inactive_reset_source` | `26.0.0.0425` | OK |
-| `legacy_firefly_bridge` | `altera_avalon_mm_bridge` | `18.1` | **to drop** — orphan, m0 reaches no slave |
-| `mm_bridge` (sc_hub → data_path) | `altera_avalon_mm_bridge` | `18.1` | **rename `ctrl2data_mm_bridge` + widen to 128 KB max-burst 256** |
-| `upload_mm_bridge` (sc_hub → upload) | `altera_avalon_mm_bridge` | `18.1` | **rename `ctrl2upload_mm_bridge` + widen to 64 KB** |
+| `mm_bridge` (sc_hub → data_path) | `altera_avalon_mm_bridge` | `18.1` | DROPPED span widen pending; ADDRESS_WIDTH=15 (128 KiB) MAX_BURST_SIZE=256 in v4 rewire |
+| `upload_mm_bridge` (sc_hub → upload) | `altera_avalon_mm_bridge` | `18.1` | ADDRESS_WIDTH=14 (64 KiB) in v4 rewire |
 | `jtag_master` | `altera_jtag_avalon_master` | `18.1` | vendor; local Region A reach |
+
+**Dropped in v4 rewire** (commit `c788ee7f`):
+- `legacy_firefly_bridge` — orphan, no slaves; removed from `debug_sc_system_v4.qsys`
 
 ## Region B — data-path slaves (instances inside `data_path_subsystem`)
 
 | Instance | Kind | Version | Status |
 |---|---|---|---|
-| `lvds_rx_28nm_0` | `altera_lvds_rx_28nm` | `24.0.1110` | vendor |
-| `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` | `25.1.0631` | OK |
+| `lvds_rx_28nm_0` | `altera_lvds_rx_28nm` | `24.0.1110` | vendor (separate Qsys block, NOT yet folded into the controller IP) |
+| `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` | `25.1.0631` | **WRONG IP** — should be `mu3e_lvds_controller` (kind `mu3e_lvds_controller`, v`26.2.1.0506`, `mu3e_lvds_controller/rtl/mu3e_lvds_controller.sv`) which has META header (UID=`0x4C564453`/"LVDS") + the `mu3e_lvds_controller_phy_adapter` PHY HIP folded in. Confirmed by drift audit row +0x000 (SVD UID `0x4C564453` vs live `0x00FA0009`) |
 | `mutrig_datapath_subsystem_{0..7}` | `mutrig_datapath_system_v4` | `26.4.0.0518` | sub-subsystem, renamed v3→v4 + bumped |
 | `mutrig_datapath_subsystem_{0..7}.mutrig_frame_deassembly_0` | `mutrig_frame_deassembly` | `26.2.0.0511` | OK |
 | `mutrig_datapath_subsystem_{0..7}.backpressure_fifo` | `altera_avalon_sc_fifo` | `18.1` | vendor |
@@ -52,20 +54,22 @@ See [`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) for the SC-hub byte map.
 | `hist_type0_lane{0..7}_tap` | `hit_type0_tap2` | `26.0.0.0517` | OK |
 | `hist_type1_up_tap` / `hist_type1_down_tap` | `avst_snoop_splitter` | `26.0.0.0502` | OK |
 | `hist_post_splitter_0` / `hist_post_cdc_0` | vendor splitter / DC-FIFO | `18.1` | vendor |
-| `emulator_mutrig_qsys_inst` | `emulator_mutrig` | `26.3.3.0517` | OK |
+| `emulator_mutrig_qsys_inst` | `emulator_mutrig` | `26.3.3.0517` | kind OK, IP **likely held in reset on board** — META header in `frontend_csr.sv` should return IP_UID=`0x454D5554`/"EMUT" at offset 0 but live reads `0x00000000` plus reset values for all 6 documented regs. Same class of bug as `mutrig_injector_0` above |
 | `emulator_hit_type0_fanout` | `hit_type0_fanout8` | `26.0.1.0517` | OK |
 | `emulator_inject_fanout` | `pulse_fanout8` | `26.0.0.0518` | bumped from 1.2; tiny 1→8 fanout buffer for the calibration injection pulse |
-| `mutrig_injector_0` | `mutrig_injector_multiheader` | `26.1.2.0517` | OK |
+| `mutrig_injector_0` | `mutrig_injector_multiheader` | `26.1.2.0517` | kind OK, IP **held in reset on board** — write to RW reg HEADER_DELAY did NOT stick (sc_tool 2 write 0x0A803 0xCAFE / readback 0x00000000). RTL is correct (META header at offset 0 returns IP_UID=`0x4D494E4A`/"MINJ"). Reset wiring debug needed (see `doc/reports/feb_v4_csr_drift_audit.md` section 2) |
 | `mutrig_reset_controller_0` | `mutrig_reset_controller` | `26.0.0.0518` | bumped from 1.1.0 |
 | `mux_mutrig2processor` / `mux_mutrig2processor_0` | `hit_type0_readyless_mux4` | `26.1.0.0516` | OK |
 | `arb_hit_type0_supercore_0` (wrapper) | `arb_hit_type0_supercore` | `1.0` (kept) | **kept at 1.0** to avoid collision with the IP-Builder `arb_hit_type0_supercore_hw.tcl` variant (also kind=`arb_hit_type0_supercore`) that carries `26.6.5.0518` — bumping the qsys subsystem to a matching version makes Qsys's kind resolver pick the wrong (IP-Builder) variant and break port resolution |
 | `arb_hit_type0_supercore_0.lane_{0..7}` | `arb_hit_type0` | `26.6.5.0518` | OK |
-| `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.5.0522` | OK; **hist_bin 256-word burst aperture target** |
+| `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.5.0522` | **WRONG IP** — should be `histogram_statistics` (v3 contract per `histogram_statistics/RTL_V3_NOTE.md`, hw.tcl `histogram_statistics/histogram_statistics_hw.tcl`) which exposes the explicit Type0 lane{0..7}_in + Type1 up/down_in interfaces with 48-bit ts sideband instead of the generic `hist_fill_in`. The v2 IP cannot wire Type0 lane fanout or Type1 latency mode cleanly |
 | `hit_stack_subsystem_{0,1}` | `hit_stack_system_v4` | `26.4.0.0518` | sub-subsystem, bumped from 1.0 |
 | `hit_stack_subsystem_{0,1}.feb_frame_assembly_0` | `feb_frame_assembly` | `26.0.0328` | OK |
 | `hit_stack_subsystem_{0,1}.ring_buffer_cam_{0..3}` | `ring_buffer_cam` | `26.2.13.0516` | OK |
-| `dbg_mm2runctrl_0` | `dbg_mm2runctrl` | `1.0.0` | **to drop** — replaced by `runctl_mgmt_host_0.runctl` AvST source |
 | `master_datapath` | `altera_jtag_avalon_master` | `18.1` | vendor; local Region B JTAG reach |
+
+**Dropped in v4 rewire** (commit `c788ee7f`):
+- `dbg_mm2runctrl_0` — replaced by `runctl_mgmt_host_0.runctl` AvST source; removed from `scifi_datapath_system_v4.qsys`
 
 ## Region C — upload-subsystem slaves (inside `upload_subsystem`)
 
@@ -109,10 +113,25 @@ Kept at `1.0`:
   flip to the IP-Builder variant and the subsystem's per-lane ports disappear at
   qsys-generate. Documented in this row of Region B above.
 
-Pending (separate IP-packaging follow-up):
-- `dbg_mm2runctrl` (`1.0.0`) — moot, scheduled for removal in the rewire.
-
 Vendor IPs (`altera_*`, `altera_avalon_*`, `multiplexer`) stay on the Quartus 18.1 stamp.
+
+## Wrong-IP findings (2026-05-18 drift audit)
+
+See [`reports/feb_v4_csr_drift_audit.md`](reports/feb_v4_csr_drift_audit.md)
+for the full SVD-vs-RTL audit. Three "wrong IP in v4 qsys" findings that
+need a swap + re-elaborate + full FEB compile cycle:
+
+| current instance | current kind | should be | reason |
+|---|---|---|---|
+| `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` (v`25.1.0631`) | `mu3e_lvds_controller` (v`26.2.1.0506`) | new IP has META header (UID=`0x4C564453`/"LVDS") plus the `mu3e_lvds_controller_phy_adapter` PHY HIP folded in |
+| `histogram_statistics_0` | `histogram_statistics_v2` (v`26.3.5.0522`) | `histogram_statistics` (v3 contract per `RTL_V3_NOTE.md`) | new IP exposes explicit `type0_lane0..7_in` + `type1_up_in` / `type1_down_in` with 48-bit ts sideband; v2 cannot wire Type0 fanout or Type1 latency mode cleanly |
+
+Two "IP held in reset" findings (RTL is correct, qsys reset wiring needs debug):
+
+| instance | kind | symptom | RTL evidence |
+|---|---|---|---|
+| `mutrig_injector_0` | `mutrig_injector_multiheader` (v`26.1.2.0517`) | RW writes don't stick (sc_tool 2 write 0x0A803 0xCAFE -> read returns 0) | `charge_injection/rtl/vhdl/mutrig_injector_multiheader.vhd:517` returns IP_UID at offset 0 when not in reset |
+| `emulator_mutrig_qsys_inst` | `emulator_mutrig` (v`26.3.3.0517`) | UID offset 0 reads `0x00000000` instead of `0x454D5554`/"EMUT" | `emulator_mutrig/rtl/frontend/frontend_csr.sv:130` has `ADDR_UID_CONST` returning IP_UID |
 
 ## Files moved to `quartus_systems/deprecated/` (2026-05-18 v3→v4 cut)
 
@@ -127,4 +146,5 @@ touch — the kind reference remains `mutrig_datapath_system_v3`.
 
 ## Live readback evidence
 
-- On-board probe of the v3 build (pre-rewire): [`tb_int/reports/feb_inventory_20260518_150948.md`](../tb_int/reports/feb_inventory_20260518_150948.md) — 11 of 14 endpoints reachable via sc_hub, 3 OUT-OF-BRIDGE (hist_csr, hist_bin, mutrig_injector). The v4 rewire is targeted to make those 3 reachable.
+- **Pre-rewire (v3 build)**: [`tb_int/reports/feb_inventory_20260518_150948.md`](../tb_int/reports/feb_inventory_20260518_150948.md) — 11 of 14 endpoints reachable via sc_hub, 3 OUT-OF-BRIDGE (hist_csr, hist_bin, mutrig_injector).
+- **Post-rewire (v4 build, on-board 2026-05-18)**: 22 of 22 endpoints reachable (hist_csr/hist_bin/mutrig_injector now inside the widened ctrl2data bridge window). Per-IP readback files under [`reports/20260518/`](reports/20260518/SYSTEM_OVERVIEW.md). Cross-IP rollup + drift hot-spots: [`reports/feb_v4_csr_report_summary.md`](reports/feb_v4_csr_report_summary.md). Full SVD-vs-RTL drift audit (which IPs have REAL drift): [`reports/feb_v4_csr_drift_audit.md`](reports/feb_v4_csr_drift_audit.md).

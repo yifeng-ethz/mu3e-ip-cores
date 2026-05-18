@@ -371,11 +371,29 @@ def probe_one(p: Probe, sc_tool: Path, swb_lock: Path, link: int,
     return ProbeResult(probe=p, words=[], error=f"unknown mode: {mode}")
 
 
-def load_svd_for_kind(kind: str) -> SvdPeripheral | None:
+# Slave-port names that carry the IP's CSR aperture (and therefore get the
+# SVD overlay). All other ports — RAM (.s0, .s1, .hist_bin), bridge .s0,
+# FIFO .csr, etc. — are NOT covered by the IP's CSR SVD and must NOT be
+# scored against it.
+CSR_PORT_NAMES = {
+    "csr", "csr_avmm", "avmm_csr", "firefly",
+    "internal_csr", "ctrl", "reconfig_mgmt",
+}
+
+
+def load_svd_for_kind(kind: str, port: str = "") -> SvdPeripheral | None:
     """Locate the SVD file for an IP kind via KIND_TO_SVD and parse its
     first <peripheral>'s register table. Returns None when no SVD is
-    mapped (passthroughs, unknown IPs) and an SvdPeripheral with
-    .error set when the file exists but cannot be parsed."""
+    mapped (passthroughs, unknown IPs), when the port is not a CSR port
+    (memory apertures, bridge passthroughs), or with .error set when the
+    file exists but cannot be parsed.
+
+    Port-name discrimination is needed because some IPs expose BOTH a
+    CSR aperture AND a memory aperture (e.g. histogram_statistics_v2
+    has .csr and .hist_bin); the SVD documents only the CSR aperture
+    and must not be overlaid on the memory aperture."""
+    if port and port not in CSR_PORT_NAMES:
+        return None
     rel = KIND_TO_SVD.get(kind)
     if rel is None:
         return None
@@ -431,7 +449,7 @@ def probe_report(p: Probe, sc_tool: Path, swb_lock: Path, link: int,
             error=(f"out-of-bridge: data-path internal 0x{p.local_offset:05x}"
                    f" >= ctrl mm_bridge span 0x{CTRL_BRIDGE_TO_DATA_SPAN:05x}"),
         )
-    svd = load_svd_for_kind(p.kind)
+    svd = load_svd_for_kind(p.kind, p.port)
     # cap span at 256 words per the user spec for --mode report
     total = min(p.span_word, 256)
     if total == 0:
@@ -555,13 +573,15 @@ def _word_to_register(svd: SvdPeripheral | None, byte_off: int) -> SvdRegister |
     return None
 
 
-def render_report_section(r: ProbeResult) -> list[str]:
+def render_report_section(r: ProbeResult,
+                           uvm_lookup: dict[tuple[str,int], int] | None = None
+                           ) -> list[str]:
     """One per-IP section for --mode report.
 
     Each word in the IP's aperture (capped at min(span_words, 256)) is
-    one row: offset | SVD register | expected (resetValue) | single
-    read | burst read | diff status (match if single==burst==expected,
-    else flagged)."""
+    one row with 5 columns: offset | register | SVD (resetValue + brief
+    description) | UVM (expected from UVM evidence if provided) | board
+    (live single + burst readback) | diff."""
     p = r.probe
     lines: list[str] = []
     title = f"### `{p.instance}.{p.port}`  (kind=`{p.kind}`)"
@@ -590,7 +610,7 @@ def render_report_section(r: ProbeResult) -> list[str]:
         lines.append("> No readback data — probe failed before any word was read.")
         lines.append("")
         return lines
-    lines.append("| offset | SVD register | expected (reset) | read single | read burst | diff |")
+    lines.append("| offset | register | SVD (reset + description) | UVM (expected) | board (single / burst) | diff |")
     lines.append("|---|---|---|---|---|---|")
     nw = min(len(r.words),
              len(r.burst_words) if r.burst_words is not None else len(r.words))
@@ -600,28 +620,38 @@ def render_report_section(r: ProbeResult) -> list[str]:
         reg = _word_to_register(r.svd, byte_off)
         reg_name = reg.name if reg else "—"
         if reg and reg.reset_value is not None:
-            exp_s = f"`0x{reg.reset_value:08X}`"
-            expected = reg.reset_value
+            desc = f" — {reg.description}" if reg.description else ""
+            svd_cell = f"`0x{reg.reset_value:08X}`{desc}"
+            expected_svd: int | None = reg.reset_value
+        elif reg:
+            # named register but no resetValue declared
+            desc = f" — {reg.description}" if reg.description else ""
+            svd_cell = f"_(no reset declared)_{desc}"
+            expected_svd = None
         else:
-            exp_s = "—"
-            expected = None
+            svd_cell = "—"
+            expected_svd = None
+        # UVM expected (from external evidence dict)
+        uvm_val = (uvm_lookup or {}).get((p.kind, byte_off))
+        uvm_cell = f"`0x{uvm_val:08X}`" if uvm_val is not None else "—"
         single = r.words[i]
         burst = r.burst_words[i] if r.burst_words is not None else single
+        board_cell = f"`0x{single:08X}` / `0x{burst:08X}`"
         # Decide diff status
         if single != burst:
             diff = "BURST≠SINGLE"
-        elif expected is None:
+        elif expected_svd is None:
             diff = "no-svd-reset"
             n_no_svd += 1
-        elif single == expected:
+        elif single == expected_svd:
             diff = "match"
             n_match += 1
         else:
             diff = "drift"
             n_drift += 1
         lines.append(
-            f"| `+0x{byte_off:03X}` | `{reg_name}` | {exp_s} "
-            f"| `0x{single:08X}` | `0x{burst:08X}` | {diff} |"
+            f"| `+0x{byte_off:03X}` | `{reg_name}` | {svd_cell} "
+            f"| {uvm_cell} | {board_cell} | {diff} |"
         )
     lines.append("")
     lines.append(
@@ -710,6 +740,15 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--output", type=Path,
                     default=Path(str(DEFAULT_OUTPUT).format(
                         stamp=dt.datetime.now().strftime("%Y%m%d_%H%M%S"))))
+    ap.add_argument("--reports-dir", type=Path, default=SYSTEM_DIR / "doc" / "reports",
+                    help="Root for per-IP reports (default: doc/reports). "
+                         "In --mode report this is the parent of the dated "
+                         "subdir <YYYYMMDD>/ that holds one file per IP plus "
+                         "SYSTEM_OVERVIEW.md.")
+    ap.add_argument("--uvm-evidence", type=Path, default=None,
+                    help="JSON file with UVM-expected values per IP. Format: "
+                         "{\"<kind>\": {\"0\": \"0xDEADBEEF\", ...}, ...}. "
+                         "Populates the UVM column of --mode report.")
     args = ap.parse_args(argv)
 
     if not args.sopcinfo.is_file():
@@ -770,6 +809,97 @@ def main(argv: list[str]) -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(md, encoding="utf-8")
     print(f"\nWrote {args.output}")
+
+    # In --mode report: also emit per-IP files and a SYSTEM_OVERVIEW.md
+    # index under reports-dir/<YYYYMMDD>/.
+    if args.mode == "report":
+        # Load optional UVM-evidence dict
+        import json
+        uvm_lookup: dict[tuple[str,int], int] = {}
+        if args.uvm_evidence and args.uvm_evidence.is_file():
+            try:
+                raw = json.loads(args.uvm_evidence.read_text())
+                for kind, regmap in raw.items():
+                    for off_s, val_s in regmap.items():
+                        try:
+                            off = int(off_s, 0)
+                            val = int(val_s, 0)
+                            uvm_lookup[(kind, off)] = val
+                        except (ValueError, TypeError):
+                            continue
+                print(f"[uvm] loaded {len(uvm_lookup)} expected values "
+                      f"from {args.uvm_evidence}")
+            except Exception as e:
+                print(f"[uvm] failed to parse {args.uvm_evidence}: {e}")
+        stamp_date = dt.datetime.now().strftime("%Y%m%d")
+        dated_dir = args.reports_dir / stamp_date
+        dated_dir.mkdir(parents=True, exist_ok=True)
+        index_rows: list[tuple[str, str, str, int, int, int, int]] = []
+        for r in results:
+            if r.probe.is_passthrough:
+                continue
+            ip_file = f"{r.probe.instance}_{r.probe.port}_readback.md".replace(".", "_").replace(
+                "_readback_md", "_readback.md")
+            ip_path = dated_dir / ip_file
+            body: list[str] = []
+            body.append(f"# {r.probe.instance}.{r.probe.port} CSR readback")
+            body.append("")
+            body.append(f"- **Timestamp**: {header['Timestamp']}")
+            body.append(f"- **Kind**: `{r.probe.kind}`")
+            body.append(f"- **sc-byte base**: `0x{r.probe.base_byte:06X}`")
+            body.append(f"- **addressSpan**: `0x{r.probe.span_byte:04X}` bytes")
+            body.append(f"- **probe mode**: {args.mode} (burst {args.burst})")
+            if r.svd is not None and not r.svd.error:
+                body.append(f"- **SVD**: `{r.svd.source_path.name}` v{r.svd.version}")
+            body.append("")
+            body.extend(render_report_section(r, uvm_lookup))
+            ip_path.write_text("\n".join(body) + "\n", encoding="utf-8")
+            # Per-IP summary for the index
+            nw = min(len(r.words),
+                     len(r.burst_words) if r.burst_words is not None else len(r.words))
+            n_match = n_drift = n_no_svd = 0
+            for i in range(nw):
+                byte_off = i * 4
+                reg = _word_to_register(r.svd, byte_off)
+                exp = reg.reset_value if (reg and reg.reset_value is not None) else None
+                s = r.words[i]
+                b = r.burst_words[i] if r.burst_words is not None else s
+                if s != b:
+                    pass  # counted as BURST!=SINGLE; not in this rollup
+                elif exp is None:
+                    n_no_svd += 1
+                elif s == exp:
+                    n_match += 1
+                else:
+                    n_drift += 1
+            index_rows.append((r.probe.instance, r.probe.port,
+                               r.probe.kind, nw, n_match, n_drift, n_no_svd))
+        # SYSTEM_OVERVIEW.md
+        overview_lines: list[str] = []
+        overview_lines.append(f"# FEB v4 CSR readback — {stamp_date} system overview")
+        overview_lines.append("")
+        overview_lines.append("Generated by `script/probe_feb_ip_inventory.py --mode report`.")
+        overview_lines.append("One linked file per Avalon-MM slave under "
+                              f"`{dated_dir.relative_to(SYSTEM_DIR)}/`. Each file "
+                              "tabulates every word in the slave's CSR aperture "
+                              "with three value columns: **SVD** (declared "
+                              "resetValue + description), **UVM** (expected from "
+                              "UVM evidence dict when provided), **board** (live "
+                              "single read / burst read).")
+        overview_lines.append("")
+        overview_lines.append("| IP | kind | words | match | drift | no-svd-reset | report |")
+        overview_lines.append("|---|---|---|---|---|---|---|")
+        for inst, port, kind, nw, nm, nd, nn in index_rows:
+            ip_file = f"{inst}_{port}_readback.md".replace(".", "_").replace(
+                "_readback_md", "_readback.md")
+            overview_lines.append(
+                f"| `{inst}.{port}` | {kind} | {nw} | {nm} | {nd} | {nn} | "
+                f"[readback]({ip_file}) |"
+            )
+        ovr_path = dated_dir / "SYSTEM_OVERVIEW.md"
+        ovr_path.write_text("\n".join(overview_lines) + "\n", encoding="utf-8")
+        print(f"\n[report] wrote {len(index_rows)} per-IP files under {dated_dir}/")
+        print(f"[report] index: {ovr_path}")
 
     hard_fail = sum(1 for r in results
                     if r.error and not r.error.startswith("out-of-bridge")
