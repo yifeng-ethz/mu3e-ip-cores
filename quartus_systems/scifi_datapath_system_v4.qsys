@@ -3,7 +3,7 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="4.0.0.0518"
+   version="26.4.0.0518"
    description="Direct V3 histogram topology: histogram_statistics_0.N_PORTS=8, type0_lane0..7 connect from hist_type0_lane*_tap.hist while tap.primary preserves the MTS mux path; type1_up/down connect from hist_type1_*_tap.out1 while tap.out0 preserves the hit-stack path; type1_up/down_ts connect directly from the matching MTS timestamp sideband. No histogram_ingress_bridge instance is part of the data path."
    tags=""
    categories="System" />
@@ -1251,7 +1251,7 @@
  <module
    name="emulator_inject_fanout"
    kind="pulse_fanout8"
-   version="1.2"
+   version="26.0.0.0518"
    enabled="1" />
  <module
    name="emulator_mutrig_qsys_inst"
@@ -1456,7 +1456,7 @@
  <module
    name="hit_stack_subsystem_0"
    kind="hit_stack_system"
-   version="1.0"
+   version="26.0.0.0518"
    enabled="1">
   <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="125000000" />
@@ -1473,7 +1473,7 @@
  <module
    name="hit_stack_subsystem_1"
    kind="hit_stack_system"
-   version="1.0"
+   version="26.0.0.0518"
    enabled="1">
   <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_DATAPATH_CLOCK_CLOCK_RATE" value="125000000" />
@@ -1830,7 +1830,7 @@
  <module
    name="mutrig_datapath_subsystem_0"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1844,7 +1844,7 @@
  <module
    name="mutrig_datapath_subsystem_1"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1858,7 +1858,7 @@
  <module
    name="mutrig_datapath_subsystem_2"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1872,7 +1872,7 @@
  <module
    name="mutrig_datapath_subsystem_3"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1886,7 +1886,7 @@
  <module
    name="mutrig_datapath_subsystem_4"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1900,7 +1900,7 @@
  <module
    name="mutrig_datapath_subsystem_5"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1914,7 +1914,7 @@
  <module
    name="mutrig_datapath_subsystem_6"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1928,7 +1928,7 @@
  <module
    name="mutrig_datapath_subsystem_7"
    kind="mutrig_datapath_system_v4"
-   version="1.0"
+   version="26.4.0.0518"
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="11" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
@@ -1957,7 +1957,7 @@
  <module
    name="mutrig_reset_controller_0"
    kind="mutrig_reset_controller"
-   version="1.1.0"
+   version="26.0.0.0518"
    enabled="1">
   <parameter name="DEBUG" value="1" />
   <parameter name="RESET_LANE" value="2" />

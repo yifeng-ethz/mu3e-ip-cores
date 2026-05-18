@@ -23,14 +23,14 @@ The table below is **regenerated** from
 
 | instance | kind | version | span | inside view | notes |
 |---|---|---|---|---|---|
-| `control_path_subsystem` | `debug_sc_system_v4` | `4.0.0.518` | -- | [→ control_path_subsystem](ip_csr/control_path_subsystem.md) | ctrl-path: sc_hub, slow control, board hardware |
-| `data_path_subsystem` | `scifi_datapath_system_v4` | `4.0.0.518` | -- | [→ data_path_subsystem](ip_csr/data_path_subsystem.md) | data-path: MuTRiG receive, arbitration, histogram |
-| `upload_subsystem` | `upload_system_v4` | `4.0.0.518` | -- | [→ upload_subsystem](ip_csr/upload_subsystem.md) | upload: run-control mgmt + upload mux |
+| `control_path_subsystem` | `debug_sc_system_v4` | `26.4.0.518` | -- | [→ control_path_subsystem](ip_csr/control_path_subsystem.md) | ctrl-path: sc_hub, slow control, board hardware |
+| `data_path_subsystem` | `scifi_datapath_system_v4` | `26.4.0.518` | -- | [→ data_path_subsystem](ip_csr/data_path_subsystem.md) | data-path: MuTRiG receive, arbitration, histogram |
+| `upload_subsystem` | `upload_system_v4` | `26.4.0.518` | -- | [→ upload_subsystem](ip_csr/upload_subsystem.md) | upload: run-control mgmt + upload mux |
 
 ## Provenance
 
 - sopcinfo: `../generated/qsys/feb_system_v4.sopcinfo`
 - generator: `../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:37:57
+- regenerated: 2026-05-18T16:45:03
 
 <!-- END auto-generated -->

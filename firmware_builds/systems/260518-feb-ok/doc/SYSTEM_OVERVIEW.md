@@ -2,24 +2,24 @@
 
 Snapshot of the Qsys hierarchy and IP versions for `feb_system_v4`, the rewired
 top of the 260518-feb-ok build. Companion to
-[`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) (per-slave SC-hub address map)
+[`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) (per-slave SC-hub address map)
 and [`BUG_HISTORY.md`](BUG_HISTORY.md).
 
 ## Top + subsystems
 
 | Instance | Kind | Version | Source | Role |
 |---|---|---|---|---|
-| `feb_system_v4` (top) | `feb_system_v4` | `4.0.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/feb_system_v4.qsys` (local seed) | board top; instantiates the 3 subsystems + clocks |
-| `control_path_subsystem` | `debug_sc_system_v4` | `4.0.0.0518` | `quartus_systems/debug_sc_system_v4.qsys` | sc_hub + slow-control fabric, hosts Region A slaves |
-| `data_path_subsystem` | `scifi_datapath_system_v4` | `4.0.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/scifi_datapath_system_v4.qsys` (local patched) + `quartus_systems/scifi_datapath_system_v4.qsys` (mirror) | MuTRiG receive + arbitration + hist, hosts Region B slaves |
-| `upload_subsystem` | `upload_system_v4` | `4.0.0.0518` | `quartus_systems/upload_system_v4.qsys` | run-control mgmt host + upload mux, hosts Region C |
+| `feb_system_v4` (top) | `feb_system_v4` | `26.4.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/feb_system_v4.qsys` (local seed) | board top; instantiates the 3 subsystems + clocks |
+| `control_path_subsystem` | `debug_sc_system_v4` | `26.4.0.0518` | `quartus_systems/debug_sc_system_v4.qsys` | sc_hub + slow-control fabric, hosts Region A slaves |
+| `data_path_subsystem` | `scifi_datapath_system_v4` | `26.4.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/scifi_datapath_system_v4.qsys` (local patched) + `quartus_systems/scifi_datapath_system_v4.qsys` (mirror) | MuTRiG receive + arbitration + hist, hosts Region B slaves |
+| `upload_subsystem` | `upload_system_v4` | `26.4.0.0518` | `quartus_systems/upload_system_v4.qsys` | run-control mgmt host + upload mux, hosts Region C |
 | `bringup_subsystem` | `feb_bringup_system` | `26.0.0.0518` | `quartus_systems/feb_bringup_system.qsys` | Nios II + JTAG UART for bring-up (bumped from 1.0) |
 
 All v3 predecessors (`feb_system_v3*`, `debug_sc_system_v3*`, `scifi_datapath_system_v3*`, `upload_system_v3*`, `mutrig_datapath_system_v3` snapshot copies of the variants) are parked under `quartus_systems/deprecated/`.
 
 ## Region A — ctrl-path slaves (instances inside `control_path_subsystem`)
 
-See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
+See [`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) for the SC-hub byte map.
 
 | Instance | Kind | Version | Status |
 |---|---|---|---|
@@ -44,7 +44,7 @@ See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
 |---|---|---|---|
 | `lvds_rx_28nm_0` | `altera_lvds_rx_28nm` | `24.0.1110` | vendor |
 | `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` | `25.1.0631` | OK |
-| `mutrig_datapath_subsystem_{0..7}` | `mutrig_datapath_system_v4` | `4.0.0.0518` | sub-subsystem, renamed v3→v4 + bumped |
+| `mutrig_datapath_subsystem_{0..7}` | `mutrig_datapath_system_v4` | `26.4.0.0518` | sub-subsystem, renamed v3→v4 + bumped |
 | `mutrig_datapath_subsystem_{0..7}.mutrig_frame_deassembly_0` | `mutrig_frame_deassembly` | `26.2.0.0511` | OK |
 | `mutrig_datapath_subsystem_{0..7}.backpressure_fifo` | `altera_avalon_sc_fifo` | `18.1` | vendor |
 | `mts_preprocessor_0` | `mts_preprocessor` | `26.3.5.0518` | OK |
@@ -79,19 +79,17 @@ See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
 
 ## Versioning convention
 
-Two version conventions are in play on this build:
+Every Qsys element in this build uses the `ip-packaging` skill format
+`YY.MINOR.PATCH.MMDD`:
 
 - **Subsystem qsys with a `_v<N>` suffix in the name** (`feb_system_v4`,
   `debug_sc_system_v4`, `scifi_datapath_system_v4`, `upload_system_v4`,
-  `mutrig_datapath_system_v4` when bumped) — `MAJOR` matches `N`, e.g.
-  the v4 cut uses `4.0.0.0518` (MAJOR=4, MINOR=0, PATCH=0, BUILD=`MMDD`).
-- **Leaf IPs (no v-suffix in the kind)** — `YY.MINOR.PATCH.MMDD` with
-  `YY` = last two digits of the year (`26` for 2026), per the
-  `ip-packaging` skill rule.
-
-The two conventions coexist: subsystem version reads like the v-suffix
-namespace generation (v4 family), and leaf IPs read like packaged IP
-revisions.
+  `mutrig_datapath_system_v4`) — `MINOR` matches the v-suffix `N`. The
+  v4 cut therefore uses `26.4.*.MMDD` (YY=26, MINOR=4, PATCH increments
+  on a fix, BUILD=`MMDD`). First-cut value is `26.4.0.0518`.
+- **Leaf IPs (no v-suffix in the kind)** — `26.MINOR.PATCH.MMDD` where
+  MINOR/PATCH track the IP's own feature/fix history. First-cut value
+  for a previously-unversioned IP is `26.0.0.MMDD`.
 
 ## Completed version bumps (2026-05-18)
 
@@ -100,9 +98,9 @@ revisions.
 - `pulse_fanout8` 1.2 → 26.0.0.0518 (leaf IP)
 - `feb_bringup_system` 1.0 → 26.0.0.0518 (subsystem without v-suffix)
 - `hit_stack_system` 1.0 → 26.0.0.0518 (subsystem without v-suffix)
-- `mutrig_datapath_system_v3` 1.0 → `mutrig_datapath_system_v4` 4.0.0.0518 (renamed + bumped)
+- `mutrig_datapath_system_v3` 1.0 → `mutrig_datapath_system_v4` 26.4.0.0518 (renamed + bumped)
 - `arb_hit_type0_supercore_hw.tcl` VERSION_DATE 20260516 → 20260518 (matching lanes)
-- v4 subsystems (`feb_system_v4`, `debug_sc_system_v4`, `scifi_datapath_system_v4`, `upload_system_v4`, `mutrig_datapath_system_v4`) → 4.0.0.0518
+- v4 subsystems (`feb_system_v4`, `debug_sc_system_v4`, `scifi_datapath_system_v4`, `upload_system_v4`, `mutrig_datapath_system_v4`) → 26.4.0.0518
 
 Kept at `1.0`:
 - `arb_hit_type0_supercore.qsys` (subsystem wrapper) — collision with the
