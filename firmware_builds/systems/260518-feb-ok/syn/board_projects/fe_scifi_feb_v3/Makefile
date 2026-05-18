@@ -43,7 +43,7 @@ GEN_SYN_DIR     := $(GENERATED_DIR)/synthesis
 GEN_SIM_DIR     := $(GENERATED_DIR)/simulation
 SOFTWARE_DIR    := $(PROJ_DIR)/software
 TRASH_DIR       := $(SYSTEM_DIR)/trash_bin
-SEED_QSYS       := $(GEN_QSYS_DIR)/feb_system_v3.qsys
+SEED_QSYS       := $(GEN_QSYS_DIR)/feb_system_v4.qsys
 
 # --- Quartus tools -----------------------------------------------------------
 QUARTUS_ROOTDIR ?= /data1/intelFPGA/18.1/quartus
@@ -53,7 +53,7 @@ QUARTUS_SH      := $(QUARTUS_ROOTDIR)/bin/quartus_sh
 NIOS2_BSP       := $(QUARTUS_ROOTDIR)/nios2eds/sdk2/bin/nios2-bsp
 
 # --- Qsys systems we build/generate ------------------------------------------
-QSYS_NAMES      := arb_hit_type0_supercore scifi_datapath_system_v3 scifi_datapath_system_v3_pipe feb_system_v3
+QSYS_NAMES      := arb_hit_type0_supercore scifi_datapath_system_v4 feb_system_v4
 
 # --- Family / part for FEB SciFi v3 board (Arria V SX SoC, not Arria 10) -----
 # build_arb_hit_type0_supercore_qsys.tcl explicitly sets DEVICE_FAMILY {Arria V}

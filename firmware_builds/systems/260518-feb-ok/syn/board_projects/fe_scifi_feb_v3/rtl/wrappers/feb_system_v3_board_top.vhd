@@ -1,5 +1,5 @@
 library ieee;
-library feb_system_v3;
+library feb_system_v4;
 
 use ieee.std_logic_1164.all;
 
@@ -96,7 +96,7 @@ architecture rtl of feb_system is
 begin
     control_path_clk125 <= i_monitor_clk_125;
 
-    u_qsys : entity feb_system_v3.feb_system_v3
+    u_qsys : entity feb_system_v4.feb_system_v4
         port map (
             cclk156_clk                           => i_xcvr_clk,
             download_sc_data                      => download_sc_data_125,

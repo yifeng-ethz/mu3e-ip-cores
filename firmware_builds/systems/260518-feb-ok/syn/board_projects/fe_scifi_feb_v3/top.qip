@@ -34,10 +34,10 @@ set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "rtl/wrappe
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "rtl/wrappers/feb_system_v3_board_top.sdc"]
 
 # ----- Qsys-generated subsystem (LOCAL, produced by make qsys-syn) -------
-# feb_system_v3 HDL tree under <system>/generated/synthesis/feb_system_v3/
+# feb_system_v4 HDL tree under <system>/generated/synthesis/feb_system_v4/
 # is produced by qsys-from-tcl + qsys-syn in this system. Self-contained
 # (no cross-system v3_pretest dependency).
-set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/260518-feb-ok/generated/synthesis/feb_system_v3/synthesis/feb_system_v3.qip"]
+set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/260518-feb-ok/generated/synthesis/feb_system_v4/synthesis/feb_system_v4.qip"]
 
 # ----- Quartus-IP-Builder outputs (regenerated at build time) ------------
 # These dirs are created by qsys-generate / Quartus IP regen the first time

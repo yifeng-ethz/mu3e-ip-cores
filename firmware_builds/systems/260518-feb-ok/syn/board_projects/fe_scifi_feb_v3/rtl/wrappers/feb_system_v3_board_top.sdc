@@ -1,7 +1,7 @@
 # =============================================================================
-# Per-wrapper SDC for feb_system_v3_board_top.vhd
+# Per-wrapper SDC for feb_system_v4_board_top.vhd
 #
-# Owns: the u_qsys (feb_system_v3) instance — covers reset arcs that
+# Owns: the u_qsys (feb_system_v4) instance — covers reset arcs that
 #       originate from a Qsys-internal altera_reset_controller and land
 #       in clock domains that are external to the system's reset domain.
 #
@@ -26,7 +26,7 @@ set ctrl_rst_src     [get_keepers -nowarn \
     {*control_path_subsystem*rst_controller*altera_reset_controller*r_sync_rst}]
 if {[get_collection_size $ctrl_rst_src] > 0 && [get_collection_size $pll_156t40_dst] > 0} {
     set_false_path -from $ctrl_rst_src -to $pll_156t40_dst
-    post_message -type info "feb_system_v3_board_top.sdc: false_path control_path rst_controller -> pll_156t40 divclk"
+    post_message -type info "feb_system_v4_board_top.sdc: false_path control_path rst_controller -> pll_156t40 divclk"
 }
 
 # Second Qsys reset arc: data_path_subsystem|rst_controller_001 ->
@@ -39,5 +39,5 @@ set dp_rst_src     [get_keepers -nowarn \
     {*data_path_subsystem*altera_reset_controller:rst_controller_001*altera_reset_synchronizer_int_chain*}]
 if {[get_collection_size $dp_rst_src] > 0 && [get_collection_size $xcvr_pll_dst] > 0} {
     set_false_path -from $dp_rst_src -to $xcvr_pll_dst
-    post_message -type info "feb_system_v3_board_top.sdc: false_path data_path rst_controller_001 -> transceiver_pll_clock\[0\]"
+    post_message -type info "feb_system_v4_board_top.sdc: false_path data_path rst_controller_001 -> transceiver_pll_clock\[0\]"
 }

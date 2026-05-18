@@ -5,7 +5,7 @@ Reads UID and META-mux VERSION from each user-IP CSR on the FEB via
 sc_tool (over the SWB secondary ring) and emits a markdown report.
 
 Address table is derived from the build's own sopcinfo
-(generated/qsys/feb_system_v3.sopcinfo). Default IPs covered:
+(generated/qsys/feb_system_v4.sopcinfo). Default IPs covered:
 
 - control path: scratch_pad_ram, onewire_master_controller,
   max10_prog_avmm, firefly_xcvr_ctrl, on_die_temp_sense_ctrl,
@@ -46,7 +46,7 @@ from typing import Any
 SCRIPT_DIR = Path(__file__).resolve().parent
 SYSTEM_DIR = SCRIPT_DIR.parent
 
-DEFAULT_SOPCINFO = SYSTEM_DIR / "generated" / "qsys" / "feb_system_v3.sopcinfo"
+DEFAULT_SOPCINFO = SYSTEM_DIR / "generated" / "qsys" / "feb_system_v4.sopcinfo"
 DEFAULT_SOF = SYSTEM_DIR / "syn" / "board_projects" / "fe_scifi_feb_v3" / "output_files" / "top.sof"
 DEFAULT_OUTPUT = SYSTEM_DIR / "tb_int" / "reports" / "feb_inventory_{stamp}.md"
 DEFAULT_SC_TOOL = Path("/home/yifeng/packages/online_dpv2/online/install/bin/sc_tool")
