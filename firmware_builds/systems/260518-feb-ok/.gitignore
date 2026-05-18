@@ -41,6 +41,8 @@ syn/board_projects/*/*.qws
 syn/board_projects/*/generated/
 syn/board_projects/*/bts/
 syn/board_projects/*/ip/
+syn/board_projects/*/reconfig_mif/
+syn/board_projects/*/qmsg/
 
 # Simulator and analyzer work products (allow tb_int sources, drop runs)
 tb_int/feb_swb_corun/build/

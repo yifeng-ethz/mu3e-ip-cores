@@ -29,17 +29,36 @@ set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/wrapp
 # ----- timing constraints ------------------------------------------------
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "settings/top.sdc"]
 set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "settings/top_FEB_v2.sdc"]
+# Per-wrapper SDC files (reset-recovery false_paths tracked with their wrapper)
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "rtl/wrappers/firefly_xcvr_subsystem.sdc"]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "rtl/wrappers/feb_system_v3_board_top.sdc"]
 
-# ----- Qsys-generated subsystem (cross-system reference) -----------------
-# feb_system_v3 Qsys output lives in the canonical v3 build's syn tree.
-set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/syn/feb_system_v3/synthesis/feb_system_v3.qip"]
+# ----- Qsys-generated subsystem (LOCAL, produced by make qsys-syn) -------
+# feb_system_v3 HDL tree under <system>/generated/synthesis/feb_system_v3/
+# is produced by qsys-from-tcl + qsys-syn in this system. Self-contained
+# (no cross-system v3_pretest dependency).
+set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/260518-feb-ok/generated/synthesis/feb_system_v3/synthesis/feb_system_v3.qip"]
 
 # ----- Quartus-IP-Builder outputs (regenerated at build time) ------------
 # These dirs are created by qsys-generate / Quartus IP regen the first time
 # top.qpf is opened. If they do not yet exist, run the regen step first.
-set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "generated/include.qip"]
-set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.qip"]
-set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.qip"]
-set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/alt_clkctrl/unnamed/synthesis/unnamed.qip"]
-set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/ram_sub_det/ram_sub_det.qip"]
-set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/altera_io_bidir/alt_iobuf_onewire.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/ip/alt_clkctrl/unnamed/synthesis/unnamed.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/ip/ram_sub_det/ram_sub_det.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/ip/altera_io_bidir/alt_iobuf_onewire.qip"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "misc/ip/altera_io_bidir_max10/ip_altiobuf_bidir.vhd"]
+
+# ----- shared utility packages and entities (work.util, work.util_slv,
+# ----- reset_sync, rx_align, ip_dcfifo_v2, components_pkg, ...) ----------
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/util/include.qip"]
+
+# ----- register-mapping packages (work.feb_sc_registers, work.mudaq, ...)
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/registers/include.qip"]
+
+# ----- firefly transceiver helpers (work.firefly_reg_mapping, ...) -------
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/firefly/include.qip"]
+
+# ----- legacy_fe a5 xcvr IPs (ip_altera_xcvr_native_av, reset_control,
+# ----- alt_xcvr_reconfig, fastlink_small, native_reset_tx, clk_ctrl_single)
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "misc/legacy_fe/include.qip"]

@@ -17,3 +17,8 @@ set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_RETIMING ON
 set_global_assignment -name PHYSICAL_SYNTHESIS_EFFORT NORMAL
 
 set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
+
+# Project-wide VHDL-2008 input: needed for util_pkg (integer_vector) and
+# for the hist v2 IP family. Per-file magic comments
+# (-- altera vhdl_input_version vhdl_2008) are honored separately.
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008

@@ -161,6 +161,10 @@ qsys-patch:
 	@echo "[qsys-patch] (no-op for now; the seeded .qsys files are used as-is)"
 
 # --- Step 2a: qsys-syn (synthesis HDL, DEBUG_LEVEL=0) ------------------------
+# VHDL-2008 is enabled at project scope via VHDL_INPUT_VERSION in
+# revisions/top.qsf. VHDL files that need the parser switched per file (e.g.
+# the hist v2 source family) also carry `-- altera vhdl_input_version
+# vhdl_2008` at line 1 for clarity when the file is read standalone.
 qsys-syn:
 	@mkdir -p $(GEN_SYN_DIR)
 	@chmod u+w $(GEN_SYN_DIR)
@@ -239,7 +243,11 @@ app:
 flow_map:
 	$(QUARTUS_SH) --flow analysis_and_synthesis top -c top
 
-flow: qsys
+# Quartus compile depends only on the SYNTHESIS HDL trees (qsys-from-tcl +
+# qsys-syn). qsys-gen produces simulation HDL which is irrelevant to bitstream
+# build and is allowed to fail on vendor IPs without SIM_VERILOG filesets
+# (e.g. altera_lvds_rx_28nm); skipping it lets make flow proceed to fitter.
+flow: qsys-from-tcl qsys-syn
 	$(QUARTUS_SH) --flow compile top -c top
 
 # --- Simulation scenarios (sim-<case>) ---------------------------------------
