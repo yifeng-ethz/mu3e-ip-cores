@@ -20,6 +20,15 @@
 #   make flow          Quartus full compile (map + fit + sta + asm) -> output_files/top.sof
 #   make clean-trash   mv build artifacts to <system>/trash_bin/build_<stamp>/ (no rm)
 #
+#   make sim-<case>    run a named simulation case (PLACEHOLDER until each case
+#                      is wired; see firmware_builds/systems/README.md
+#                      "Make-targets contract")
+#   make test-<case>   run a named on-board test driver under script/board/
+#                      (PLACEHOLDER until each case is wired; the driver must
+#                      load sopcinfo at runtime, use IP .svd as field guide,
+#                      and read on-board IP VERSION on startup; see
+#                      firmware_builds/systems/README.md "Make-targets contract")
+#
 # Per CLAUDE.md hard rules, no `rm` is invoked. clean-trash uses mv only.
 
 # --- Paths -------------------------------------------------------------------
@@ -68,7 +77,7 @@ define SEARCH_PATH_BOOTSTRAP
 endef
 
 # --- Phony list --------------------------------------------------------------
-.PHONY: all help qsys qsys-from-tcl qsys-patch qsys-syn qsys-gen app flow flow_map clean-trash
+.PHONY: all help qsys qsys-from-tcl qsys-patch qsys-syn qsys-gen app flow flow_map clean-trash sim-% test-%
 all: flow
 
 help:
@@ -83,6 +92,13 @@ help:
 	@echo '  make flow_map         Quartus analysis_and_synthesis only'
 	@echo '  make flow             Quartus full compile (map + fit + sta + asm)'
 	@echo '  make clean-trash      move build outputs to trash_bin/build_<stamp>/  (NO rm)'
+	@echo
+	@echo 'Simulation / on-board test targets (one per scenario):'
+	@echo '  make sim-<case>       run tb_int scenario <case>  (e.g. sim-upload_backpressure)'
+	@echo '  make test-<case>      run on-board driver <case>  (e.g. test-low_rate_hist)'
+	@echo
+	@echo 'Wired sim cases:  $(SIM_CASES)'
+	@echo 'Wired test cases: $(TEST_CASES)'
 	@echo
 	@echo 'Paths:'
 	@echo '  PROJ_DIR      = $(PROJ_DIR)'
@@ -220,6 +236,56 @@ flow_map:
 
 flow: qsys
 	$(QUARTUS_SH) --flow compile top -c top
+
+# --- Simulation scenarios (sim-<case>) ---------------------------------------
+# Pattern target: `make sim-upload_backpressure` etc.  Each named case under
+# $(SYSTEM_DIR)/tb_int/<case>/ becomes a `sim-<case>` target.  Until a case is
+# wired with its real Make-recipe, the placeholder reminds the user to wire
+# it per firmware_builds/systems/README.md.
+TB_INT_DIR  := $(SYSTEM_DIR)/tb_int
+SIM_CASES   := $(notdir $(patsubst %/,%,$(filter-out %/trash_bin/, $(sort $(dir $(wildcard $(TB_INT_DIR)/*/Makefile))))))
+
+sim-%:
+	@case_dir=$(TB_INT_DIR)/$*; \
+	if [ -f $$case_dir/Makefile ]; then \
+	    echo "[sim-$*] -> $$case_dir"; \
+	    $(MAKE) -C $$case_dir QUESTA_HOME=$${QUESTA_HOME:-/data1/questaone_sim-2026.1_1/questasim}; \
+	else \
+	    echo "[sim-$*] PLACEHOLDER -- wire $$case_dir/Makefile per firmware_builds/systems/README.md \"Make-targets contract\"" >&2; \
+	    exit 1; \
+	fi
+
+# --- On-board test drivers (test-<case>) -------------------------------------
+# Pattern target: `make test-low_rate_hist` etc.  Looks for the driver script
+# under script/board/test_<case>.py (or .tcl).  HARD RULES for the driver
+# itself live in firmware_builds/systems/README.md "Make-targets contract":
+#   - load $(GEN_QSYS_DIR)/<system>.sopcinfo at runtime (no hardcoded base)
+#   - resolve CSR fields from the IP .svd files, not host headers
+#   - read on-board IP VERSION_MAJOR/MINOR/PATCH/BUILD/DATE on startup and
+#     warn if the readback does not match the sopcinfo
+#   - serialize SWB ring access via ~/.local/bin/swb_ring_lock
+#   - wait 20 s after quartus_pgm before any SC access
+BOARD_SCRIPT_DIR := $(PROJ_DIR)/script/board
+TEST_CASES       := $(patsubst test_%.py,%,$(notdir $(wildcard $(BOARD_SCRIPT_DIR)/test_*.py))) \
+                    $(patsubst test_%.tcl,%,$(notdir $(wildcard $(BOARD_SCRIPT_DIR)/test_*.tcl)))
+
+test-%:
+	@py=$(BOARD_SCRIPT_DIR)/test_$*.py; \
+	tcl=$(BOARD_SCRIPT_DIR)/test_$*.tcl; \
+	sopc=$$(ls $(GEN_QSYS_DIR)/*.sopcinfo 2>/dev/null | head -1); \
+	if [ -z "$$sopc" ]; then \
+	    echo "[test-$*] WARN: no .sopcinfo found under $(GEN_QSYS_DIR); driver will not be able to discover the address map. Run \`make qsys-from-tcl qsys-syn\` first." >&2; \
+	fi; \
+	if [ -f $$py ]; then \
+	    echo "[test-$*] python3 $$py --sopcinfo $$sopc"; \
+	    python3 $$py --sopcinfo $$sopc; \
+	elif [ -f $$tcl ]; then \
+	    echo "[test-$*] tclsh $$tcl $$sopc"; \
+	    tclsh $$tcl $$sopc; \
+	else \
+	    echo "[test-$*] PLACEHOLDER -- wire $(BOARD_SCRIPT_DIR)/test_$*.{py,tcl} per firmware_builds/systems/README.md \"Make-targets contract\"" >&2; \
+	    exit 1; \
+	fi
 
 # --- Clean to trash (no rm per CLAUDE.md) ------------------------------------
 clean-trash:
