@@ -9,10 +9,10 @@ and [`BUG_HISTORY.md`](BUG_HISTORY.md).
 
 | Instance | Kind | Version | Source | Role |
 |---|---|---|---|---|
-| `feb_system_v4` (top) | `feb_system_v4` | `26.4.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/feb_system_v4.qsys` (local seed) | board top; instantiates the 3 subsystems + clocks |
-| `control_path_subsystem` | `debug_sc_system_v4` | `26.4.0.0518` | `quartus_systems/debug_sc_system_v4.qsys` | sc_hub + slow-control fabric, hosts Region A slaves |
-| `data_path_subsystem` | `scifi_datapath_system_v4` | `26.4.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/scifi_datapath_system_v4.qsys` (local patched) + `quartus_systems/scifi_datapath_system_v4.qsys` (mirror) | MuTRiG receive + arbitration + hist, hosts Region B slaves |
-| `upload_subsystem` | `upload_system_v4` | `26.4.0.0518` | `quartus_systems/upload_system_v4.qsys` | run-control mgmt host + upload mux, hosts Region C |
+| `feb_system_v4` (top) | `feb_system_v4` | `4.0.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/feb_system_v4.qsys` (local seed) | board top; instantiates the 3 subsystems + clocks |
+| `control_path_subsystem` | `debug_sc_system_v4` | `4.0.0.0518` | `quartus_systems/debug_sc_system_v4.qsys` | sc_hub + slow-control fabric, hosts Region A slaves |
+| `data_path_subsystem` | `scifi_datapath_system_v4` | `4.0.0.0518` | `firmware_builds/systems/260518-feb-ok/generated/qsys/scifi_datapath_system_v4.qsys` (local patched) + `quartus_systems/scifi_datapath_system_v4.qsys` (mirror) | MuTRiG receive + arbitration + hist, hosts Region B slaves |
+| `upload_subsystem` | `upload_system_v4` | `4.0.0.0518` | `quartus_systems/upload_system_v4.qsys` | run-control mgmt host + upload mux, hosts Region C |
 | `bringup_subsystem` | `feb_bringup_system` | `1.0` (TODO bump to `26.x.y.0518`) | `quartus_systems/feb_bringup_system.qsys` | Nios II + JTAG UART for bring-up |
 
 All v3 predecessors (`feb_system_v3*`, `debug_sc_system_v3*`, `scifi_datapath_system_v3*`, `upload_system_v3*`, `mutrig_datapath_system_v3` snapshot copies of the variants) are parked under `quartus_systems/deprecated/`.
@@ -77,7 +77,23 @@ See [`ADDR_MAP_PROPOSAL.md`](ADDR_MAP_PROPOSAL.md) for the SC-hub byte map.
 | `csr_bridge` | `altera_avalon_mm_bridge` | `18.1` | vendor |
 | `upload_system_jtag_master` | `altera_jtag_avalon_master` | `18.1` | vendor; local Region C JTAG reach |
 
-## Pending version bumps (ip-packaging skill format `YY.MINOR.PATCH.MMDD`)
+## Versioning convention
+
+Two version conventions are in play on this build:
+
+- **Subsystem qsys with a `_v<N>` suffix in the name** (`feb_system_v4`,
+  `debug_sc_system_v4`, `scifi_datapath_system_v4`, `upload_system_v4`,
+  `mutrig_datapath_system_v4` when bumped) — `MAJOR` matches `N`, e.g.
+  the v4 cut uses `4.0.0.0518` (MAJOR=4, MINOR=0, PATCH=0, BUILD=`MMDD`).
+- **Leaf IPs (no v-suffix in the kind)** — `YY.MINOR.PATCH.MMDD` with
+  `YY` = last two digits of the year (`26` for 2026), per the
+  `ip-packaging` skill rule.
+
+The two conventions coexist: subsystem version reads like the v-suffix
+namespace generation (v4 family), and leaf IPs read like packaged IP
+revisions.
+
+## Pending version bumps
 
 Visible badge `1.0` / `1.2` / `0.2.0` / `1.1.0` IPs scheduled for an identity-header pass:
 - `max10_prog_avmm` (`0.2.0`)

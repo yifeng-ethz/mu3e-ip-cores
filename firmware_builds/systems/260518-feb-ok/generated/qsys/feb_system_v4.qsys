@@ -3,7 +3,7 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="26.4.0.0518"
+   version="4.0.0.0518"
    description="Direct V4 histogram topology: scifi_datapath_system_v4 and scifi_datapath_system_v3_pipe feed histogram_statistics_v2 from all eight Type0 selected lanes plus Type1 up/down MTS banks with 48-bit timestamp sidebands through transparent tap/fanout points that preserve the primary MTS and hit-stack paths. The histogram ingress bridge is removed. Carries the emulator-type0 BYTE_STREAM_ENABLE=false fanout, readyless run-control/emulator-control broadcast splitters, and SC-WEDGE reset fix from 3.0.4.0512."
    tags="INTERNAL_COMPONENT=false"
    categories="" />

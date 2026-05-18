@@ -3,7 +3,7 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="26.4.0.0518"
+   version="4.0.0.0518"
    description="Drops dead legacy charge_injection_pulser_0 and pulse_out_conduit export; SC slot 4 is free."
    tags="INTERNAL_COMPONENT=false"
    categories="" />

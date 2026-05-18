@@ -78,15 +78,41 @@ Region B footprint = 44 KB out of 128 KB. `dbg_mm2runctrl_0` is **dropped** (rep
 
 | sub-offset | slave | UID (hex) | UID (ASCII) | span |
 |---|---|---|---|---|
-| `+0x000` | `feb_frame_assembly_0.csr` | TBD (no UID in current build) | `—` | 64 B |
-| `+0x100` | `ring_buffer_cam_0.csr` | `0x5242434D` | `RBCM` | 128 B |
+| `+0x000` | `feb_frame_assembly_0.csr` | — (no identity header) | `—` | 64 B (16 words, all read-only) |
+| `+0x100` | `ring_buffer_cam_0.csr` | `0x5242434D` | `RBCM` | 128 B (10 words used, padded to 128 B) |
 | `+0x200` | `ring_buffer_cam_1.csr` | `0x5242434D` | `RBCM` | 128 B |
 | `+0x300` | `ring_buffer_cam_2.csr` | `0x5242434D` | `RBCM` | 128 B |
 | `+0x400` | `ring_buffer_cam_3.csr` | `0x5242434D` | `RBCM` | 128 B |
 
-The 8 hit_stack slaves (4 RBCAM + 1 FFA per subsystem × 2 subsystems = 10 endpoints) are reachable via sc_hub through the widened `ctrl2data_mm_bridge`, and via `data_path_subsystem.master_datapath` JTAG at the same internal offsets.
+The 8 hit_stack slaves per subsystem (4 RBCAM + 1 FFA, × 2 subsystems = 10 endpoints) are reachable via sc_hub through the widened `ctrl2data_mm_bridge`, and via `data_path_subsystem.master_datapath` JTAG at the same internal offsets. The hit_stack DC FIFOs (`run_ctrl_cdc_d2x` per subsystem) have **no avmm aperture** — they are pure data-path crossings.
 
-The hit_stack DC FIFOs (`run_ctrl_cdc_d2x` per subsystem) have **no avmm aperture** — they are pure data-path crossings. No additional slots needed.
+#### Inside view: `ring_buffer_cam.csr` (UID `RBCM`, 10 words / 40 B used, 128 B aperture)
+
+Source: `ring-buffer_cam/script/ring_buffer_cam.svd`.
+
+| word | offset | name | access | description |
+|---|---|---|---|---|
+| `0x00` | `0x00` | `UID` | RO | Software-visible IP identifier. Default ASCII `RBCM` (`0x5242434D`). |
+| `0x01` | `0x04` | `META` | RW | Read-multiplexed metadata word. Write `page_sel` (0=VERSION, 1=DATE, 2=GIT, 3=INSTANCE_ID). |
+| `0x02` | `0x08` | `CTRL` | RW | `go`, `soft_reset`, `filter_inerr` control bits. |
+| `0x03` | `0x0C` | `EXPECTED_LATENCY` | RW | Read-pointer delay target in cycles. |
+| `0x04` | `0x10` | `FILL_LEVEL` | RO | Live fill-level estimate from push / pop / overwrite. |
+| `0x05` | `0x14` | `INERR_COUNT` | RO | Count of filtered ingress timestamp-error hits. |
+| `0x06` | `0x18` | `PUSH_COUNT` | RO | Total accepted push operations. |
+| `0x07` | `0x1C` | `POP_COUNT` | RO | Total drained hits. |
+| `0x08` | `0x20` | `OVERWRITE_COUNT` | RO | Total overwrite events. |
+| `0x09` | `0x24` | `CACHE_MISS_COUNT` | RO | Total cache-miss / empty-search events. |
+| `0x0A..0x1F` | `0x28..0x7C` | (reserved) | — | Reserved padding in 128 B aperture. |
+
+#### Inside view: `feb_frame_assembly.csr` (no identity header, 16 words / 64 B opaque RO)
+
+Source: `feb_frame_assembly/feb_frame_assembly.svd`.
+
+| word | offset | name | access | description |
+|---|---|---|---|---|
+| `0x00..0x0F` | `0x00..0x3C` | `WORD000..WORD015` | RO | Opaque FEB frame-assembly status snapshot, 16 read-only words. |
+
+Note: `feb_frame_assembly` does not currently carry the standard Mu3e identity header (UID at offset 0x00 returns one of the WORDxxx values, not an ASCII tag). Adopting the identity header is a follow-up IP-packaging task tracked in `SYSTEM_OVERVIEW.md`.
 
 ## Region C — upload subsystem (64 KB)
 
