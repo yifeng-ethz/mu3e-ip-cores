@@ -3,7 +3,7 @@
 **Companion docs:** [DV_PLAN.md](DV_PLAN.md), [DV_HARNESS.md](DV_HARNESS.md), [DV_COV.md](DV_COV.md), [BUG_HISTORY.md](BUG_HISTORY.md)
 **Parent:** [DV_PLAN.md](DV_PLAN.md)
 **ID Range:** B001-B999
-**Total:** 4 cases (2 implemented / 0 waived)
+**Total:** 6 cases (2 implemented / 0 waived)
 
 This bucket covers bring-up + protocol correctness on the FEB v3
 integration boundary. Cases here drive the authentic generated firmware
@@ -22,8 +22,8 @@ via the UVM env in `tb_int/uvm/` per dv-workflow rule 19.
 |---|---|---|---|---|
 | Upload mux backpressure (UB) | 1 | B001-B001 | hit_type3_upper ready loop is closed; SC packets and run-control idles reach upload egress under downstream backpressure | implemented |
 | Histogram bank ping-pong (HB) | 1 | B002-B002 | scifi_datapath_system_v3 histogram_statistics_v2 bank toggle delivers monotonic ARB counts to host via SC | implemented |
-| SC-hub direct slave probe (SP) | 1 | B003-B003 | UID and META[0]=VERSION readback over sc_hub reaches every slave inside the new ctrl2data / ctrl2upload bridge windows | pending |
-| Per-subsystem JTAG reach (JR) | 1 | B004-B004 | Each of the 3 local JTAG masters reads every slave in its own subsystem; skips the cross-subsystem bridges and skips onewire_master_controller per the agreed contract | pending |
+| SC-hub direct slave probe (SP) | 3 | B003-B005 | UID, VERSION, and full CSR-aperture burst readback over sc_hub reaches every reachable slave inside the v4 ctrl2data / ctrl2upload bridge windows | pending |
+| Per-subsystem JTAG reach (JR) | 1 | B006-B006 | Each of the 3 local JTAG masters reads every readable slave and writes-then-reads-back every RW register in its own subsystem; runs against the FULL unmodified generated DUT (no workaround) with the JTAG access modeled by a dedicated SV driver | pending |
 
 ---
 
@@ -43,16 +43,23 @@ via the UVM env in `tb_int/uvm/` per dv-workflow rule 19.
 
 ---
 
-## 4. SC-hub direct slave probe (SP) -- 1 case
+## 4. SC-hub direct slave probe (SP) -- 3 cases
+
+The on-board companion driver is `script/probe_feb_ip_inventory.py`
+with `--mode {uid,version,full} [--burst N]`. The UVM cases below
+exercise the SAME modes against the unmodified generated DUT
+(`generated/simulation/feb_system_v4/`) before each on-board run.
 
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---|---|---|---|
-| B003 | D | sc_hub walks every slave in the rearranged map | 1 | For each slave in the proposed addr map (Region A direct + Region B data-path + Region C upload) issue a 1-word SC read of UID at offset 0 and a META-mux dance (write 0 then read offset 4) for VERSION; reuse `script/probe_feb_ip_inventory.py` shape | every reachable slave returns non-zero UID; sc_tool reports rsp=OK ack=1 for every probe; the slaves at the new Region B addresses no longer alias back to ctrl-path; the on-board run of probe_feb_ip_inventory.py mirrors the sim readout | TBD |
+| B003 | D | sc_hub UID readback walks every slave in the v4 map | 1 | For each Avalon-MM slave enumerated from `generated/qsys/feb_system_v4.sopcinfo` issue ONE 1-word read at offset 0 through `control_path_subsystem.sc_hub_cmd_pipe.m0`; sc_hub_internal_csr at sc-word 0xFE80 is included; passthrough bridges and altera_avalon_sc_fifo CSR ports are reported as INFO only | every reachable slave returns rsp=OK ack=1; UID matches the IP's RTL CSR_WORD_0_CONST stamp when defined; on-board parity: `probe_feb_ip_inventory.py --mode uid` enumerates the same 22 endpoints with the same UIDs; UVM_ERROR == 0. | TBD |
+| B004 | D | sc_hub UID + META[0] VERSION dance | 1 | For each slave, run B003's UID read followed by `write meta_sel=0 at offset 4` then `read offset 4` to capture the META[0]=VERSION word; one full pass over the v4 sopcinfo | every reachable slave returns rsp=OK ack=1 for both the UID and VERSION reads; VERSION matches the IP's packaging-skill `YY.MINOR.PATCH.MMDD` stamp; on-board parity: `probe_feb_ip_inventory.py --mode version` returns identical UID+VERSION; UVM_ERROR == 0. | TBD |
+| B005 | D | sc_hub full-CSR burst readback | 4 | For each slave, issue one burst read of the full `addressSpan` words through `sc_hub_cmd_pipe.m0`. Iterate burst length over {1, 16, 64, 256} (256 is the mm_bridge MAX_BURST_SIZE); skip iterations where burst > slave span. Pre-load `scratch_pad_ram` and `hist_bin` with a known monotonic sequence to detect word-drop / out-of-order delivery | 256 reachable-slave bursts complete with rsp=OK ack=1; the post-burst single-word read at the same base returns the same word as the burst's first word; no waitrequest pause longer than one mm_bridge pipeline stage in the elaboration report; on-board parity: `probe_feb_ip_inventory.py --mode full --burst 256` produces a word-dump that matches the sim trace within the per-IP allowable readback-dynamics window (counters tolerated to drift between sim and live); UVM_ERROR == 0. | TBD |
 
 ---
 
-## 5. Per-subsystem JTAG reach (JR) -- 1 case
+## 5. Per-subsystem JTAG reach (JR) -- 1 case (B006)
 
 | ID | Method | Scenario | Iter | Stimulus | Pass Criteria | Function Reference |
 |---|---|---|---|---|---|---|
-| B004 | D | each of the 3 local JTAG masters walks all slaves in its own subsystem | 1 | Drive control_path_subsystem.jtag_master, data_path_subsystem.master_datapath, and upload_subsystem.upload_system_jtag_master in turn; each master reads UID at every slave local to its subsystem; sc_hub master is held idle so the readbacks come solely from the JTAG side | every per-subsystem slave answered by JTAG matches the sc_hub readout from B003; no JTAG master is wired to either cross-subsystem bridge or to onewire_master_controller; sc_hub remains the only path that can reach onewire | pending |
+| B006 | D | each of the 3 local JTAG masters walks all slaves in its own subsystem | 1 | Run against the UNMODIFIED generated DUT (`generated/simulation/feb_system_v4/` with DEBUG_LEVEL=2). Model the JTAG master external access via a dedicated SV Avalon-MM driver bound to `<subsystem>.jtag_master.master` (NO workaround, NO simplified passthrough). For each of the 3 masters (`control_path_subsystem.jtag_master`, `data_path_subsystem.jtag_master_datapath`, `upload_subsystem.upload_system_jtag_master`): (i) walk every reachable slave in its OWN subsystem and read UID + first 4 words; (ii) for every register marked RW in the IP's SVD, write a deterministic 32-bit pattern (alternating 0xA5..A5 / 0x5A..5A / value+1), read it back, and restore the original value. Skip exactly the two contract exceptions: cross-subsystem mm_bridge slaves and `control_path_subsystem.onewire_master_0` (the link-layer master; the `onewire_master_controller_0` CSR IS exercised) | every read returns rsp=OK ack=1; every RW write+readback round-trip matches the pattern (with a coverage hole tolerated for self-clearing or hardware-side-effect registers explicitly tagged `<modifiedWriteValues>` in the SVD); no slave is reached through a path that requires sc_hub to be live; UVM_ERROR == 0. | TBD |
