@@ -47,12 +47,12 @@ run_qsys_update \
 
 qsys-script \
     --cmd="set ::env(SYSTEM_DIR) {${SYSTEM_DIR}}" \
-    --script="${VERSION_SCRIPT}" > "${SYSTEM_DIR}/syn/feb_system_v3_dualport_version_qsys_script.log" 2>&1
+    --script="${VERSION_SCRIPT}" > "${SYSTEM_DIR}/trash_bin/quartus_logs/feb_system_v3_dualport_version_qsys_script.log" 2>&1
 
-if [ -f "${SYSTEM_DIR}/syn/feb_system_v3.sopcinfo" ]; then
-    chmod a-w "${SYSTEM_DIR}/syn/feb_system_v3.sopcinfo"
+if [ -f "${SYSTEM_DIR}/generated/qsys/feb_system_v3.sopcinfo" ]; then
+    chmod a-w "${SYSTEM_DIR}/generated/qsys/feb_system_v3.sopcinfo"
 fi
 
-if [ -d "${SYSTEM_DIR}/syn/feb_system_v3/synthesis" ]; then
-    chmod -R a-w "${SYSTEM_DIR}/syn/feb_system_v3/synthesis"
+if [ -d "${SYSTEM_DIR}/generated/synthesis/feb_system_v3/synthesis" ]; then
+    chmod -R a-w "${SYSTEM_DIR}/generated/synthesis/feb_system_v3/synthesis"
 fi

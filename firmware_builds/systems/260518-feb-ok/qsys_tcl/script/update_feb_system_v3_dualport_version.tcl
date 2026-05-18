@@ -163,12 +163,12 @@ proc update_top_datapath_binding {path datapath_version address_map} {
 }
 
 update_component_metadata \
-    [file join $env(SYSTEM_DIR) syn feb_system_v3.qsys] \
+    [file join $env(SYSTEM_DIR) generated qsys feb_system_v3.qsys] \
     $datapath_version \
     $top_description
 
 update_top_datapath_binding \
-    [file join $env(SYSTEM_DIR) syn feb_system_v3.qsys] \
+    [file join $env(SYSTEM_DIR) generated qsys feb_system_v3.qsys] \
     $datapath_version \
     $datapath_address_map
 

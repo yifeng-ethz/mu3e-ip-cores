@@ -43,7 +43,7 @@ GEN_SYN_DIR     := $(GENERATED_DIR)/synthesis
 GEN_SIM_DIR     := $(GENERATED_DIR)/simulation
 SOFTWARE_DIR    := $(PROJ_DIR)/software
 TRASH_DIR       := $(SYSTEM_DIR)/trash_bin
-SEED_QSYS       := $(SYSTEM_DIR)/syn/feb_system_v3.qsys
+SEED_QSYS       := $(GEN_QSYS_DIR)/feb_system_v3.qsys
 
 # --- Quartus tools -----------------------------------------------------------
 QUARTUS_ROOTDIR ?= /data1/intelFPGA/18.1/quartus
@@ -55,9 +55,12 @@ NIOS2_BSP       := $(QUARTUS_ROOTDIR)/nios2eds/sdk2/bin/nios2-bsp
 # --- Qsys systems we build/generate ------------------------------------------
 QSYS_NAMES      := arb_hit_type0_supercore scifi_datapath_system_v3 scifi_datapath_system_v3_pipe feb_system_v3
 
-# --- Family / part for FEB v3 (Arria 10 SoC on the FEB SciFi board) ----------
-FPGA_FAMILY     := Arria 10
-FPGA_PART       := 10AS066N3F40E2SG
+# --- Family / part for FEB SciFi v3 board (Arria V SX SoC, not Arria 10) -----
+# build_arb_hit_type0_supercore_qsys.tcl explicitly sets DEVICE_FAMILY {Arria V}
+# DEVICE {5AGXBA7D4F31C5}, and the live feb_system_v3.qsys carries pll_156t40 +
+# scratch_pad_ram M10K which only resolve on the Arria V part.
+FPGA_FAMILY     := Arria V
+FPGA_PART       := 5AGXBA7D4F31C5
 
 # --- Environment exported to all recipes -------------------------------------
 export MU3E_IP_CORES_ROOT := $(REPO_ROOT)

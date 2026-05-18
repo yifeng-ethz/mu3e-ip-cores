@@ -8,6 +8,21 @@ generated/
 trash_bin/
 tb_int/trash_bin/
 
+# Exception: feb_system_v3.qsys is the hand-edited Platform Designer SEED for
+# the FEB v3 board top. It lives at generated/qsys/ because the patcher Tcl
+# files in qsys_tcl/script/ modify it in place. It must be tracked so a fresh
+# worktree can bootstrap qsys-from-tcl; otherwise qsys-script has nothing to
+# load_system. Other generated/ contents (arb_hit_type0_supercore, the HDL
+# trees under synthesis/ and simulation/) remain gitignored.
+!generated/
+!generated/qsys/
+!generated/qsys/feb_system_v3.qsys
+# Re-ignore the rest of generated/
+generated/qsys/*
+!generated/qsys/feb_system_v3.qsys
+generated/synthesis/
+generated/simulation/
+
 # Quartus build outputs inside the board project (also regenerated)
 syn/board_projects/*/db/
 syn/board_projects/*/qdb/
