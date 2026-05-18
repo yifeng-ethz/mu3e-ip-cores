@@ -19,31 +19,30 @@ qsys_is_forbidden_path() {
     resolved_candidate="$(realpath -m -- "${candidate}")"
     resolved_system="${SYSTEM_DIR:+$(realpath -m -- "${SYSTEM_DIR}")}"
 
+    # Tightened policy (per feedback_qsys_apr27_pollution memory + 2026-05-18
+    # IP-version audit): EVERY firmware_builds/systems/ subtree is forbidden as
+    # an IP _hw.tcl search path. Per-system ip/<X>/ copies are stale duplicates
+    # of the canonical IP that lives in misc/<X>/ or in the submodule root.
+    # Only the active system's qsys_tcl/ is allowed (and even that is for
+    # parameter/composite Tcl, not standalone IP definitions).
     case "${resolved_candidate}" in
         "${resolved_root}/firmware_builds/systems/"*)
-            if [ -n "${resolved_system}" ]; then
-                case "${resolved_candidate}" in
-                    "${resolved_system}"|"${resolved_system}/"*)
-                        ;;
-                    *)
-                        return 0
-                        ;;
-                esac
+            if [ -n "${resolved_system}" ] && [ "${resolved_candidate}" = "${resolved_system}/qsys_tcl" -o -n "${resolved_candidate##${resolved_system}/qsys_tcl/*}" -a "${resolved_candidate#${resolved_system}/qsys_tcl/}" != "${resolved_candidate}" ]; then
+                # allow active-system qsys_tcl/ only (the patcher Tcl, not IPs)
+                :
+            else
+                return 0
             fi
             ;;
     esac
 
     case "${resolved_candidate}" in
-        "${resolved_root}/firmware_builds/systems/"*/syn|\
-        "${resolved_root}/firmware_builds/systems/"*/syn/*|\
-        "${resolved_root}/firmware_builds/systems/"*/ip/hit_type0_tap2|\
-        "${resolved_root}/firmware_builds/systems/"*/ip/hit_type0_tap2/*|\
-        "${resolved_root}/firmware_builds/systems/system_20260427_testplanphase5"|\
-        "${resolved_root}/firmware_builds/systems/system_20260427_testplanphase5/"*|\
         "${resolved_root}/.git"|\
         "${resolved_root}/.git/"*|\
         "${resolved_root}/.worktrees"|\
-        "${resolved_root}/.worktrees/"*)
+        "${resolved_root}/.worktrees/"*|\
+        */trash_bin|\
+        */trash_bin/*)
             return 0
             ;;
     esac

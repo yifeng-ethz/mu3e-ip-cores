@@ -43,9 +43,7 @@ run_qsys_update \
     "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3_dualport_hist_qsys_script.log"
 
 run_qsys_update \
-    "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3_pipe.qsys" \
     "${TOPOLOGY_SCRIPT}" \
-    "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3_pipe_dualport_hist_qsys_script.log"
 
 qsys-script \
     --cmd="set ::env(SYSTEM_DIR) {${SYSTEM_DIR}}" \

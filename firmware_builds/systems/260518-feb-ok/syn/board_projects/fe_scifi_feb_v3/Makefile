@@ -161,6 +161,7 @@ qsys-patch:
 qsys-syn:
 	@mkdir -p $(GEN_SYN_DIR)
 	@chmod u+w $(GEN_SYN_DIR)
+	@chmod u+w $(GEN_QSYS_DIR)/*.sopcinfo 2>/dev/null || true
 	@bash -c ' \
 	set -euo pipefail; \
 	$(SEARCH_PATH_BOOTSTRAP); \
@@ -186,6 +187,7 @@ qsys-syn:
 qsys-gen:
 	@mkdir -p $(GEN_SIM_DIR)
 	@chmod u+w $(GEN_SIM_DIR)
+	@chmod u+w $(GEN_QSYS_DIR)/*.sopcinfo 2>/dev/null || true
 	@bash -c ' \
 	set -euo pipefail; \
 	$(SEARCH_PATH_BOOTSTRAP); \

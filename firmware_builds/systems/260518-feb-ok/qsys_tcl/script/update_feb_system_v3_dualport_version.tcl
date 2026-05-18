@@ -4,7 +4,6 @@ if {![info exists env(SYSTEM_DIR)]} {
     error "SYSTEM_DIR is not set"
 }
 
-set top_description {Direct V3 histogram topology: scifi_datapath_system_v3 and scifi_datapath_system_v3_pipe feed histogram_statistics_v2 from all eight Type0 selected lanes plus Type1 up/down MTS banks with 48-bit timestamp sidebands through transparent tap/fanout points that preserve the primary MTS and hit-stack paths. The histogram ingress bridge is removed. Carries the emulator-type0 BYTE_STREAM_ENABLE=false fanout, readyless run-control/emulator-control broadcast splitters, and SC-WEDGE reset fix from 3.0.4.0512.}
 set datapath_description {Direct V3 histogram topology: histogram_statistics_0.N_PORTS=8, type0_lane0..7 connect from hist_type0_lane*_tap.hist while tap.primary preserves the MTS mux path; type1_up/down connect from hist_type1_*_tap.out1 while tap.out0 preserves the hit-stack path; type1_up/down_ts connect directly from the matching MTS timestamp sideband. No histogram_ingress_bridge instance is part of the data path.}
 set datapath_version {3.0.6.0517}
 set datapath_address_map [join [list \
@@ -175,7 +174,6 @@ update_top_datapath_binding \
 
 foreach path [list \
     [file join $env(SYSTEM_DIR) quartus_systems scifi_datapath_system_v3.qsys] \
-    [file join $env(SYSTEM_DIR) quartus_systems scifi_datapath_system_v3_pipe.qsys] \
 ] {
     update_component_metadata $path $datapath_version $datapath_description
 }

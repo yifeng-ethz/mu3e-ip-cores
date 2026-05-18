@@ -5,7 +5,7 @@ system_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 repo_root="$(git -C "${system_root}" rev-parse --show-toplevel)"
 board="${system_root}/syn/board_projects/swb_a10"
 hub="${repo_root}/quartus_systems/swb"
-opq_dir="${board}/a10/merger/qsys/opq_upstream_4lane_native_sv"
+opq_dir="${board}/misc/a10/merger/qsys/opq_upstream_4lane_native_sv"
 
 quartus_root="${QUARTUS_ROOTDIR:-/data1/intelFPGA/18.1/quartus}"
 qsys_script="${QSYS_SCRIPT:-${quartus_root}/sopc_builder/bin/qsys-script}"

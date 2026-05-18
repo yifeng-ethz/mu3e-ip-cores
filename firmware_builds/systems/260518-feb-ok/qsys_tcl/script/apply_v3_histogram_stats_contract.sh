@@ -69,7 +69,6 @@ fi
 
 for qsys in \
     "${ROOT}/quartus_systems/scifi_datapath_system_v3.qsys" \
-    "${ROOT}/quartus_systems/scifi_datapath_system_v3_pipe.qsys" \
     "${ROOT}/quartus_systems/scifi_datapath_system_v3_lat4.qsys"; do
     qsys-script \
         --system-file="${qsys}" \

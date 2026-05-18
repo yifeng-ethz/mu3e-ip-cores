@@ -95,5 +95,4 @@ run_qsys_generate() {
 
 run_qsys_generate "${SYSTEM_DIR}/quartus_systems/arb_hit_type0_supercore.qsys"
 run_qsys_generate "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3.qsys"
-run_qsys_generate "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3_pipe.qsys"
 run_qsys_generate "${SYSTEM_DIR}/syn/feb_system_v3.qsys"

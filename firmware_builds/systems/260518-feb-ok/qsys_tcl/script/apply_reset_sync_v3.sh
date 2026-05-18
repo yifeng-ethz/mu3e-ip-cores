@@ -37,5 +37,4 @@ run_qsys_update() {
 }
 
 run_qsys_update "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3.qsys"
-run_qsys_update "${SYSTEM_DIR}/quartus_systems/scifi_datapath_system_v3_pipe.qsys"
 run_qsys_update "${SYSTEM_DIR}/syn/feb_system_v3.qsys"

@@ -2,9 +2,9 @@ package require -exact qsys 16.1
 
 set VERSION_MAJOR_DEFAULT_CONST 26
 set VERSION_MINOR_DEFAULT_CONST 0
-set VERSION_PATCH_DEFAULT_CONST 0
-set BUILD_DEFAULT_CONST         512
-set VERSION_DATE_DEFAULT_CONST  20260512
+set VERSION_PATCH_DEFAULT_CONST 1
+set BUILD_DEFAULT_CONST         517
+set VERSION_DATE_DEFAULT_CONST  20260517
 
 set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
     $VERSION_MAJOR_DEFAULT_CONST \
@@ -15,7 +15,7 @@ set VERSION_STRING_DEFAULT_CONST [format "%d.%d.%d.%04d" \
 set_module_property NAME                         hit_type0_fanout8
 set_module_property DISPLAY_NAME                 "hit_type0 Fanout 8"
 set_module_property VERSION                      $VERSION_STRING_DEFAULT_CONST
-set_module_property DESCRIPTION                  "Build-local eight-way Avalon-ST hit_type0 fanout that preserves endofrun."
+set_module_property DESCRIPTION                  "Build-local eight-way Avalon-ST hit_type0 fanout that preserves endofrun and lane-qualifies FEB ASIC metadata/timestamps."
 set_module_property GROUP                        "Mu3e Data Plane/Utility"
 set_module_property AUTHOR                       "OpenAI Codex"
 set_module_property INTERNAL                     false
@@ -70,14 +70,14 @@ add_display_item "" "Identity" GROUP tab
 add_display_item "" "Interfaces" GROUP tab
 add_display_item "" "Register Map" GROUP tab
 add_display_item "Configuration" "Datapath" GROUP
-add_html_text "Datapath" overview_html {<html><b>Purpose</b><br/>Replicates one FEB hit_type0 Avalon-ST source to eight arbiter emulator inputs. The stream is readyless, matching both the emulator source and arbiter sinks, so Platform Designer should not insert ready/timing adapters on this path.</html>}
+add_html_text "Datapath" overview_html {<html><b>Purpose</b><br/>Replicates one FEB hit_type0 Avalon-ST source to eight arbiter emulator inputs while rewriting the output ASIC metadata, channel sideband, and T/E timestamps to lane IDs 0..7. The timestamp phase models the serialized ASIC ordering seen by MTS, so generated-Qsys header-sync delay mode sees one common latency bin. The stream is readyless, matching both the emulator source and arbiter sinks, so Platform Designer should not insert ready/timing adapters on this path.</html>}
 add_display_item "Datapath" DATA_WIDTH parameter
 add_display_item "Datapath" CHANNEL_WIDTH parameter
 add_display_item "Datapath" ERROR_WIDTH parameter
 add_display_item "Identity" "Delivered Profile" GROUP
 add_html_text "Delivered Profile" profile_html [format {<html><b>Catalog revision</b><br/>This build-local IP is packaged as <b>%s</b>. It has no CSR aperture.</html>} $VERSION_STRING_DEFAULT_CONST]
 add_display_item "Interfaces" "Streams" GROUP
-add_html_text "Streams" streams_html {<html><b>in</b><br/>45-bit FEB hit_type0 stream with valid, SOP, EOP, endofrun, channel[3:0], and error[2:0].<br/><br/><b>out0..out7</b><br/>Replicated readyless source streams with the same sideband contract.</html>}
+add_html_text "Streams" streams_html {<html><b>in</b><br/>45-bit FEB hit_type0 stream with valid, SOP, EOP, endofrun, channel[3:0], and error[2:0].<br/><br/><b>out0..out7</b><br/>Readyless source streams with payload ASIC bits [44:41] and channel sideband rewritten to the output lane index. Payload TCC[35:21] and ECC[15:1] are advanced by the lane phase in 8 ns units while preserving the encoded MuTRiG PRBS timestamp format.</html>}
 add_display_item "Register Map" "CSR Window" GROUP
 add_html_text "CSR Window" csr_html {<html>No software-visible registers.</html>}
 

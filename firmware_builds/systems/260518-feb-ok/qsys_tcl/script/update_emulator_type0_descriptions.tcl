@@ -7,7 +7,6 @@ if {![info exists env(SYSTEM_DIR)]} {
 set system_dir $env(SYSTEM_DIR)
 set files [list \
     [file join $system_dir quartus_systems scifi_datapath_system_v3.qsys] \
-    [file join $system_dir quartus_systems scifi_datapath_system_v3_pipe.qsys] \
     [file join $system_dir syn feb_system_v3.qsys] \
 ]
 
