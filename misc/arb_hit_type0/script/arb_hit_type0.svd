@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Mu3e</vendor>
+  <vendorID>MU3E</vendorID>
+  <name>MU3E_ARB_HIT_TYPE0</name>
+  <series>MU3E_FPGA_IP</series>
+  <version>26.6.5.0518</version>
+  <description>CMSIS-SVD description of one arb_hit_type0 lane's CSR aperture. The supercore instantiates 8 lanes; each lane's CSR is a 32-word (128 B) window decoded from offsets 0x00..0x74 per the RTL csr_read_data case in rtl/arb_hit_type0_csr.sv.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>ARB_HIT_TYPE0_CSR</name>
+      <description>Per-lane arbiter CSR. UID at offset 0x00, META mux at 0x04, runtime mode + status, watchdog + idle counters, protocol/drop-mid-packet error counters with syndromes, and live + latched-snapshot counters for ingress/drop/egress on real and emu paths plus frame counters.</description>
+      <groupName>MU3E_DATA_PATH</groupName>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x80</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>UID</name>
+          <description>Software-visible IP identifier. Default ASCII "AHT0" (0x41485430).</description>
+          <addressOffset>0x00</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x41485430</resetValue>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>META</name>
+          <description>Read-multiplexed metadata word. Write page selector (0=VERSION, 1=DATE, 2=GIT, 3=INSTANCE_ID) then read META.</description>
+          <addressOffset>0x04</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field><name>page_sel</name><bitOffset>0</bitOffset><bitWidth>2</bitWidth><access>read-write</access></field>
+            <field><name>reserved</name><bitOffset>2</bitOffset><bitWidth>30</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>MODE_PENDING</name>
+          <description>Pending mode-change request bit. Reads as 1 while a mode swap is queued.</description>
+          <addressOffset>0x08</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>mode_pending</name><bitOffset>0</bitOffset><bitWidth>2</bitWidth><access>read-only</access></field>
+            <field><name>reserved</name><bitOffset>2</bitOffset><bitWidth>30</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>STATUS</name>
+          <description>Live arbiter status flags: ingress/egress FIFO states, watchdog timeout, current mode (REAL / EMU / MIX_RR).</description>
+          <addressOffset>0x0C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>WATCHDOG_CYCLES</name>
+          <description>Watchdog timer reload value in cycles for mid-packet-drop detection.</description>
+          <addressOffset>0x10</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>16</bitWidth><access>read-write</access></field>
+            <field><name>reserved</name><bitOffset>16</bitOffset><bitWidth>16</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>IDLE_CYCLES</name>
+          <description>Packed idle-cycle counters: real_idle_cycles[15:0], emu_idle_cycles[31:16]. Counts cycles the real / emu ingress lane was idle.</description>
+          <addressOffset>0x14</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>real_idle_cycles</name><bitOffset>0</bitOffset><bitWidth>16</bitWidth><access>read-only</access></field>
+            <field><name>emu_idle_cycles</name><bitOffset>16</bitOffset><bitWidth>16</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>ERROR_COUNT_PROTOCOL</name>
+          <description>Sticky count of arbiter protocol errors (handshake/STARTOFPACKET/EOP).</description>
+          <addressOffset>0x18</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>ERROR_COUNT_DROP_MID_PACKET</name>
+          <description>Count of drops that occurred mid-packet (watchdog-triggered or downstream backpressure).</description>
+          <addressOffset>0x1C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>SYNDROME_PROTOCOL</name>
+          <description>Last-event syndrome word for protocol errors. Encodes the source/state at the moment the error was registered.</description>
+          <addressOffset>0x20</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>SYNDROME_DROP_MID_PACKET</name>
+          <description>Last-event syndrome word for the mid-packet drop counter.</description>
+          <addressOffset>0x24</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_REAL_HITS</name>
+          <description>Live ingress-hit count from the real (MuTRiG) source, low 32 bits.</description>
+          <addressOffset>0x28</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_REAL_HITS_H_SNAP</name>
+          <description>Frozen snapshot of INGRESS_REAL_HITS for atomic high/low read pairing.</description>
+          <addressOffset>0x2C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_EMU_HITS</name>
+          <description>Live ingress-hit count from the emulator source, low 32 bits.</description>
+          <addressOffset>0x30</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_EMU_HITS_H_SNAP</name>
+          <description>Frozen snapshot of INGRESS_EMU_HITS.</description>
+          <addressOffset>0x34</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>DROPS_REAL</name>
+          <description>Live drop count for the real source, low 32 bits.</description>
+          <addressOffset>0x38</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>DROPS_REAL_H_SNAP</name>
+          <description>Frozen snapshot of DROPS_REAL.</description>
+          <addressOffset>0x3C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>DROPS_EMU</name>
+          <description>Live drop count for the emu source, low 32 bits.</description>
+          <addressOffset>0x40</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>DROPS_EMU_H_SNAP</name>
+          <description>Frozen snapshot of DROPS_EMU.</description>
+          <addressOffset>0x44</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_REAL_HITS</name>
+          <description>Live egress-hit count (arbiter accepted, downstream consumed) for the real source.</description>
+          <addressOffset>0x48</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_REAL_HITS_H_SNAP</name>
+          <description>Frozen snapshot of EGRESS_REAL_HITS.</description>
+          <addressOffset>0x4C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_EMU_HITS</name>
+          <description>Live egress-hit count for the emu source.</description>
+          <addressOffset>0x50</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_EMU_HITS_H_SNAP</name>
+          <description>Frozen snapshot of EGRESS_EMU_HITS.</description>
+          <addressOffset>0x54</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_REAL_FRAMES</name>
+          <description>Live ingress-frame count for the real source.</description>
+          <addressOffset>0x58</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_REAL_FRAMES_H_SNAP</name>
+          <description>Frozen snapshot of INGRESS_REAL_FRAMES.</description>
+          <addressOffset>0x5C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_EMU_FRAMES</name>
+          <description>Live ingress-frame count for the emu source.</description>
+          <addressOffset>0x60</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>INGRESS_EMU_FRAMES_H_SNAP</name>
+          <description>Frozen snapshot of INGRESS_EMU_FRAMES.</description>
+          <addressOffset>0x64</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_REAL_FRAMES</name>
+          <description>Live egress-frame count for the real source.</description>
+          <addressOffset>0x68</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_REAL_FRAMES_H_SNAP</name>
+          <description>Frozen snapshot of EGRESS_REAL_FRAMES.</description>
+          <addressOffset>0x6C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_EMU_FRAMES</name>
+          <description>Live egress-frame count for the emu source.</description>
+          <addressOffset>0x70</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+        <register>
+          <name>EGRESS_EMU_FRAMES_H_SNAP</name>
+          <description>Frozen snapshot of EGRESS_EMU_FRAMES.</description>
+          <addressOffset>0x74</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field><name>value</name><bitOffset>0</bitOffset><bitWidth>32</bitWidth><access>read-only</access></field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>
