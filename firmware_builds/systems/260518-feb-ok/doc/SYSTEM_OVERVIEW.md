@@ -62,7 +62,7 @@ See [`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) for the SC-hub byte map.
 | `mux_mutrig2processor` / `mux_mutrig2processor_0` | `hit_type0_readyless_mux4` | `26.1.0.0516` | OK |
 | `arb_hit_type0_supercore_0` (wrapper) | `arb_hit_type0_supercore` | `1.0` (kept) | **kept at 1.0** to avoid collision with the IP-Builder `arb_hit_type0_supercore_hw.tcl` variant (also kind=`arb_hit_type0_supercore`) that carries `26.6.5.0518` — bumping the qsys subsystem to a matching version makes Qsys's kind resolver pick the wrong (IP-Builder) variant and break port resolution |
 | `arb_hit_type0_supercore_0.lane_{0..7}` | `arb_hit_type0` | `26.6.5.0518` | OK |
-| `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.5.0522` | **WRONG IP** — should be `histogram_statistics` (v3 contract per `histogram_statistics/RTL_V3_NOTE.md`, hw.tcl `histogram_statistics/histogram_statistics_hw.tcl`) which exposes the explicit Type0 lane{0..7}_in + Type1 up/down_in interfaces with 48-bit ts sideband instead of the generic `hist_fill_in`. The v2 IP cannot wire Type0 lane fanout or Type1 latency mode cleanly |
+| `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.5.0522` | **kind OK** — the `_v2`-named hw.tcl `histogram_statistics/histogram_statistics_v2_hw.tcl` already implements the v3 ingress contract (`type0_lane0..7` + `type1_up`/`type1_down` + 48-bit ts sideband per `histogram_statistics/RTL_V3_NOTE.md`) and stamps IP_UID `0x48495354` ("HIST") at offset 0. The kind WITHOUT the `_v2` suffix is the legacy generic-`hist_fill_in` IP and is now hard-blocked. Live readback returns all zeros — same held-in-reset symptom as the injector/emulator; CSR clock is `lvds_rx_28nm_0.outclock`. Expected to recover once the LVDS swap below lands. **NOTE: live sopcinfo still shows the forward-dated `0522` BUILD; the submodule was bumped to drop this to `0518` and the next qsys-generate will pick up `26.3.5.0518`.** |
 | `hit_stack_subsystem_{0,1}` | `hit_stack_system_v4` | `26.4.0.0518` | sub-subsystem, bumped from 1.0 |
 | `hit_stack_subsystem_{0,1}.feb_frame_assembly_0` | `feb_frame_assembly` | `26.0.0328` | OK |
 | `hit_stack_subsystem_{0,1}.ring_buffer_cam_{0..3}` | `ring_buffer_cam` | `26.2.13.0516` | OK |
@@ -123,8 +123,7 @@ need a swap + re-elaborate + full FEB compile cycle:
 
 | current instance | current kind | should be | reason |
 |---|---|---|---|
-| `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` (v`25.1.0631`) | `mu3e_lvds_controller` (v`26.2.1.0506`) | new IP has META header (UID=`0x4C564453`/"LVDS") plus the `mu3e_lvds_controller_phy_adapter` PHY HIP folded in |
-| `histogram_statistics_0` | `histogram_statistics_v2` (v`26.3.5.0522`) | `histogram_statistics` (v3 contract per `RTL_V3_NOTE.md`) | new IP exposes explicit `type0_lane0..7_in` + `type1_up_in` / `type1_down_in` with 48-bit ts sideband; v2 cannot wire Type0 fanout or Type1 latency mode cleanly |
+| `lvds_rx_controller_pro_0` | `lvds_rx_controller_pro` (v`25.1.0631`) | `mu3e_lvds_controller` (v`26.2.1.0506`) | new IP has META header (UID=`0x4C564453`/"LVDS") plus the `mu3e_lvds_controller_phy_adapter` PHY HIP folded in; the old kind is now hard-blocked at elaboration |
 
 Two "IP held in reset" findings (RTL is correct, qsys reset wiring needs debug):
 

@@ -24,7 +24,7 @@ registers that the SVD already documents.
 | **`emulator_mutrig_qsys_inst.csr`** | 6 | **IP returns zeros for all RW** | runtime / reset wiring | debug |
 | `arb_hit_type0_supercore.csr_pipe_N` | 0 in this report | passthrough bridges | — | — |
 | `mts_preprocessor_0/_1.csr` | 0 (no match either) | SVD has 8 generic `WORD000..` placeholders | SVD | rewrite SVD per RTL |
-| **`histogram_statistics_0.csr`** | 3 | **wrong IP in qsys** (v2, should be v3 per `RTL_V3_NOTE.md`) | qsys | **swap to `histogram_statistics` (v3 contract with explicit Type0/Type1 ingress)** |
+| **`histogram_statistics_0.csr`** | 3 | **CORRECTED: kind is OK; IP held in reset** (the `_v2`-named hw.tcl already implements the v3 ingress contract; previous "wrong IP" classification here was wrong) | qsys reset wiring | **same fix path as injector/emulator below** (CSR clock is `lvds_rx_28nm_0.outclock`) |
 | **`histogram_statistics_0.hist_bin`** | 0 (after probe fix) | ~~SVD overlay bug~~ → probe bug | probe | FIXED: probe now filters SVD overlay by port name (`CSR_PORT_NAMES`); hist_bin RAM aperture no longer gets the CSR overlay |
 | **`mutrig_injector_0.csr`** | 11 | **IP held in reset** (write-readback test confirms) | runtime / reset wiring | debug |
 | `sc_hub.internal_csr` | 0 (3 BURST≠SINGLE) | live counters | — | — |
@@ -132,34 +132,34 @@ There is a NEWER LVDS controller in the same source tree:
 instance** (1-line module-kind change + re-elaborate) — picks up META
 + HIP fold + the existing UVM test corpus.
 
-## 5a. Wrong IP in v4 qsys: `histogram_statistics_v2` vs `histogram_statistics` (v3 contract)
+## 5a. Histogram naming gotcha (NOT a wrong-IP finding after all)
 
-The v4 qsys instantiates `histogram_statistics_v2` (hw.tcl
-`histogram_statistics/histogram_statistics_v2_hw.tcl`), the OLD IP
-with the generic `hist_fill_in` ingress.
+Earlier draft of this audit said the v4 qsys was using the wrong
+histogram kind. That was wrong, and the corrected verdict is:
 
-There is a NEWER histogram IP in the same source tree with the v3
-contract documented in
-[`histogram_statistics/RTL_V3_NOTE.md`](../../../../histogram_statistics/RTL_V3_NOTE.md):
+- `histogram_statistics_v2_hw.tcl` (kind: `histogram_statistics_v2`)
+  is the IP that already implements the FEB v3 ingress contract per
+  [`RTL_V3_NOTE.md`](../../../../histogram_statistics/RTL_V3_NOTE.md):
+  explicit `type0_lane0..7` + `type1_up` / `type1_down` ingress with
+  the separate 48-bit timestamp sideband. The `_v2`-named hw.tcl
+  wraps `rtl/histogram_statistics_v2.vhd` which stamps `IP_UID = 0x48495354`
+  ("HIST") at offset 0 and exposes the v3 streaming contract.
+- `histogram_statistics_hw.tcl` (kind: `histogram_statistics`, no
+  `_v2` suffix) is the LEGACY generic `hist_fill_in`/`hist_fill_out`
+  IP that the v3 contract was written to replace.
 
-- kind `histogram_statistics` (hw.tcl
-  `histogram_statistics/histogram_statistics_hw.tcl`)
-- exposes 8 explicit `type0_lane{0..7}_in` interfaces (1 per MuTRiG lane)
-- exposes `type1_up_in` and `type1_down_in` interfaces with a
-  separate 48-bit timestamp sideband (for Type1 delay-mode histograms)
-- CSR source-select bit chooses Type0 / Type1-up / Type1-down for the
-  shared coalescing path
-- standalone DV is closed against the direct V3 inputs (no
-  `histogram_ingress_bridge` between MTS and histogram)
+`scifi_datapath_system_v4.qsys` instantiates kind
+`histogram_statistics_v2` (the v3-contract IP) — this is **CORRECT**.
+The deprecation hard-block now lives on `histogram_statistics_hw.tcl`
+(the legacy kind), gated by `MU3E_ALLOW_DEPRECATED_HISTOGRAM_STATISTICS=1`
+for legacy builds.
 
-The v2 IP cannot wire Type0 lane fanout or Type1 latency mode cleanly
-because the `hist_fill_in` ingress packs everything through a single
-muxed path; the integration bug class identified in
-`RTL_V3_NOTE.md` section 1 is exactly that hiding. **Fix: swap the
-qsys instance to `histogram_statistics`** + re-elaborate + rewire
-the 8 Type0 lanes from `arb_hit_type0_supercore_0.lane_{0..7}` and
-the 2 Type1 streams from `mts_preprocessor_{0,1}` (with ts sideband)
-into the new explicit ingress ports.
+The histogram drift rows in section 1 are therefore the SAME class of
+bug as the injector/emulator: the IP is held in reset because its CSR
+clock is `lvds_rx_28nm_0.outclock`, not `monitor_clock_125.clk`. See
+section 2 above for the write/readback liveness evidence and the
+`mm_pipeline_lvds_csr_hist` bridge chain that drives histogram CSR
+from the LVDS-recovered clock domain.
 
 ## 5b. mutrig_injector wiring note (header source)
 
@@ -226,11 +226,10 @@ sweep.
 3. **Swap `lvds_rx_controller_pro` → `mu3e_lvds_controller` in
    `scifi_datapath_system_v4.qsys`** — picks up META + PHY HIP fold.
    Removes 8 drift rows. Needs Qsys re-elaborate + full FEB compile.
-4. **Swap `histogram_statistics_v2` → `histogram_statistics` (v3)
-   in `scifi_datapath_system_v4.qsys`** — picks up explicit Type0
-   lane{0..7}_in + Type1 up/down_in ingress (per
-   `histogram_statistics/RTL_V3_NOTE.md`). Closes the hist drift
-   class and unblocks Type1 latency mode. Needs Qsys re-elaborate +
-   rewire of the 8 Type0 + 2 Type1 streams + full FEB compile.
+4. ~~Swap histogram_statistics_v2 to histogram_statistics~~ — CANCELLED.
+   The v4 qsys already uses kind `histogram_statistics_v2` which IS
+   the v3-contract IP (the naming is confusing; see section 5a
+   above). No swap needed. The hist drift will close as a side-
+   effect of the LVDS swap if the held-in-reset diagnosis is right.
 5. **Audit max10_prog_avmm** — single-bit byte drift in the IP ID; can
    wait until the legacy IP gets its next refresh.
