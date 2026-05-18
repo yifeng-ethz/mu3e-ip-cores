@@ -1,0 +1,398 @@
+`timescale 1ns/1ps
+
+// Behavioural topology stubs (BUG-RC-RESET-SCWEDGE Phase 3 repro). The
+// module mock_sc_plane_reset_model and the macros TB_INT_HARD_RESET_CYCLES /
+// TB_INT_SC_WEDGE_PAYLOAD are defined in tb_int_topology_models.sv. The
+// SV macro scope is per-compilation-unit, so we `include here to bring the
+// macros into tb_int_top's compilation unit. The header guard
+// TB_INT_SWB_TOPOLOGY_MODELS_SV inside the file prevents duplicate module
+// definition when the file is also compiled in via script/tb_int.f.
+`include "tb_int_topology_models.sv"
+
+module tb_int_top;
+    timeunit 1ns;
+    timeprecision 1ps;
+
+    import uvm_pkg::*;
+    import tb_int_runctl_phy_agent_pkg::*;
+    import tb_int_sc_phy_agent_pkg::*;
+    import tb_int_swb_stage_pkg::*;
+    import tb_int_rdma_rqe_ingress_monitor_pkg::*;
+    import tb_int_rdma_cqe_egress_monitor_pkg::*;
+    import tb_int_opq_lane_fill_monitor_pkg::*;
+    import tb_int_opq_frame_ts_monitor_pkg::*;
+    import tb_int_pcie_dma_egress_monitor_pkg::*;
+    import tb_int_host_memory_pkg::*;
+    import tb_int_host_axi_responder_pkg::*;
+    import tb_int_host_memory_model_pkg::*;
+    import tb_int_host_polling_core_pkg::*;
+    import tb_int_swb_case_model_pkg::*;
+    import tb_int_swb_scoreboard_pkg::*;
+    import tb_int_swb_dual_env_pkg::*;
+    import tb_int_swb_case_sequences_pkg::*;
+    import tb_int_swb_base_test_pkg::*;
+    import tb_int_swb_smoke_test_pkg::*;
+    import tb_int_swb_selected_tests_pkg::*;
+`include "uvm_macros.svh"
+
+    logic clk_50_b2j;
+    logic clkusr_100;
+    logic pcie_refclk_p;
+    logic cpu_reset_n;
+    logic pcie_perst_n;
+    logic rst;
+
+    logic [3:0] button;
+    logic [1:0] sw;
+    logic [6:0] hex0_d;
+    logic [6:0] hex1_d;
+    logic [3:0] led;
+    logic [3:0] led_bracket;
+    logic       sma_clkout;
+    logic       sma_clkin;
+    logic       rs422_de;
+    logic       rs422_din;
+    logic       rs422_dout;
+    logic       rj45_led_r;
+
+    tri fan_i2c_scl;
+    tri fan_i2c_sda;
+    tri power_monitor_i2c_scl;
+    tri power_monitor_i2c_sda;
+    tri temp_i2c_scl;
+    tri temp_i2c_sda;
+    tri pcie_smbdat;
+
+    logic [26:1] flash_a;
+    tri   [31:0] flash_d;
+    tri          flash_oe_n;
+    logic        flash_we_n;
+    logic [1:0]  flash_ce_n;
+    logic        flash_adv_n;
+    logic        flash_clk;
+    logic        flash_reset_n;
+
+    logic [3:0] qsfpa_tx_p;
+    logic [3:0] qsfpb_tx_p;
+    logic [3:0] qsfpc_tx_p;
+    logic [3:0] qsfpd_tx_p;
+    logic [3:0] qsfpa_rx_p;
+    logic [3:0] qsfpb_rx_p;
+    logic [3:0] qsfpc_rx_p;
+    logic [3:0] qsfpd_rx_p;
+    logic       qsfpa_refclk_p;
+    logic       qsfpb_refclk_p;
+    logic       qsfpc_refclk_p;
+    logic       qsfpd_refclk_p;
+    logic       qsfpa_lp_mode;
+    logic       qsfpb_lp_mode;
+    logic       qsfpc_lp_mode;
+    logic       qsfpd_lp_mode;
+    logic       qsfpa_mod_sel_n;
+    logic       qsfpb_mod_sel_n;
+    logic       qsfpc_mod_sel_n;
+    logic       qsfpd_mod_sel_n;
+    logic       qsfpa_rst_n;
+    logic       qsfpb_rst_n;
+    logic       qsfpc_rst_n;
+    logic       qsfpd_rst_n;
+
+    logic [7:0] pcie_rx_p;
+    logic [7:0] pcie_tx_p;
+    logic       pcie_smbclk;
+    logic       pcie_wake_n;
+
+    host_memory_config_t host_cfg;
+
+    assign rst = !cpu_reset_n;
+
+    runctl_phy_if       runctl_phy(clk_50_b2j, rst);
+    sc_avmm_if          sc_phy(clk_50_b2j, rst);
+    rdma_rqe_ingress_if rdma_rqe_ingress(clk_50_b2j, cpu_reset_n);
+    rdma_cqe_egress_if  rdma_cqe_egress(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane0(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane1(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane2(clk_50_b2j, cpu_reset_n);
+    opq_lane_if         opq_lane3(clk_50_b2j, cpu_reset_n);
+    pcie_dma_egress_if  pcie_dma_egress(clk_50_b2j, cpu_reset_n);
+    host_axi_if         host_axi(clk_50_b2j, cpu_reset_n);
+
+    initial begin
+        clk_50_b2j    = 1'b0;
+        clkusr_100    = 1'b0;
+        pcie_refclk_p = 1'b0;
+        sma_clkin     = 1'b0;
+        qsfpa_refclk_p = 1'b0;
+        qsfpb_refclk_p = 1'b0;
+        qsfpc_refclk_p = 1'b0;
+        qsfpd_refclk_p = 1'b0;
+        forever #10 clk_50_b2j = ~clk_50_b2j;
+    end
+
+    always #5  clkusr_100    = ~clkusr_100;
+    always #4  pcie_refclk_p = ~pcie_refclk_p;
+    always #4  sma_clkin     = ~sma_clkin;
+    always #3  qsfpa_refclk_p = ~qsfpa_refclk_p;
+    always #3  qsfpb_refclk_p = ~qsfpb_refclk_p;
+    always #3  qsfpc_refclk_p = ~qsfpc_refclk_p;
+    always #3  qsfpd_refclk_p = ~qsfpd_refclk_p;
+
+    initial begin
+        cpu_reset_n  = 1'b0;
+        pcie_perst_n = 1'b0;
+        button       = 4'hf;
+        sw           = 2'b00;
+        rs422_din    = 1'b0;
+        qsfpa_rx_p   = 4'h0;
+        qsfpb_rx_p   = 4'h0;
+        qsfpc_rx_p   = 4'h0;
+        qsfpd_rx_p   = 4'h0;
+        pcie_rx_p    = 8'h00;
+        pcie_smbclk  = 1'b0;
+        host_axi.awid = '0;
+        host_axi.awaddr = '0;
+        host_axi.awlen = '0;
+        host_axi.awsize = 3'd5;
+        host_axi.awburst = 2'b01;
+        host_axi.awvalid = 1'b0;
+        host_axi.wdata = '0;
+        host_axi.wstrb = '0;
+        host_axi.wlast = 1'b0;
+        host_axi.wvalid = 1'b0;
+        host_axi.bready = 1'b1;
+        host_axi.arid = '0;
+        host_axi.araddr = '0;
+        host_axi.arlen = '0;
+        host_axi.arsize = 3'd5;
+        host_axi.arburst = 2'b01;
+        host_axi.arvalid = 1'b0;
+        host_axi.rready = 1'b1;
+        runctl_phy.clear();
+        sc_phy.clear_master();
+        sc_phy.waitrequest = 1'b0;
+        rdma_rqe_ingress.clear();
+        rdma_cqe_egress.clear();
+        opq_lane0.clear();
+        opq_lane1.clear();
+        opq_lane2.clear();
+        opq_lane3.clear();
+        pcie_dma_egress.clear();
+        repeat (16) @(posedge clk_50_b2j);
+        cpu_reset_n  = 1'b1;
+        pcie_perst_n = 1'b1;
+    end
+
+    // BUG-RC-RESET-SCWEDGE behavioural topology model. Detects opcode 0x30
+    // on the runctl_phy 9-bit AVST and broadcasts a bounded ext_hard_reset
+    // pulse through a 2-flop pipeline to mock_sc_plane_reset. The SC AVMM
+    // responder below gates on mock_sc_plane_reset; while the SC plane is
+    // wedged it returns 0xEEEE_EEEE and suppresses readdatavalid. With the
+    // BUG_RC_RESET_SCWEDGE_FIXED guard defined the pipeline connection is
+    // broken (mirrors the Qsys fix at feb_system_v3.qsys:586..590).
+    logic mock_ext_hard_reset;
+    logic mock_sc_plane_reset;
+
+    mock_sc_plane_reset_model #(
+        .HARD_RESET_CYCLES(`TB_INT_HARD_RESET_CYCLES)
+    ) u_mock_sc_plane_reset (
+        .clk                 (clk_50_b2j),
+        .rst                 (rst),
+        .runctl_data         (runctl_phy.data),
+        .runctl_valid        (runctl_phy.valid),
+        .mock_ext_hard_reset (mock_ext_hard_reset),
+        .mock_sc_plane_reset (mock_sc_plane_reset)
+    );
+
+    always_ff @(posedge clk_50_b2j or negedge cpu_reset_n) begin
+        if (!cpu_reset_n) begin
+            sc_phy.readdatavalid <= 1'b0;
+            sc_phy.readdata <= 32'h0000_0000;
+        end else if (mock_sc_plane_reset) begin
+            // SC plane is opaque. Mirror silicon-side BUG-RC-RESET-SCWEDGE:
+            // every read returns rsp=RSP3 payload 0xEEEE_EEEE and the
+            // readdatavalid handshake is still produced (so the master
+            // doesn't time out on waitrequest, matching the on-board
+            // observation that the bus completes the cycle but the
+            // payload is junk).
+            sc_phy.readdatavalid <= sc_phy.read;
+            sc_phy.readdata <= `TB_INT_SC_WEDGE_PAYLOAD;
+        end else begin
+            sc_phy.readdatavalid <= sc_phy.read;
+            sc_phy.readdata <= 32'h4849_5354;
+        end
+    end
+
+`ifdef TB_INT_BIND_REAL_DUT
+    top dut (
+        .BUTTON(button),
+        .SW(sw),
+        .HEX0_D(hex0_d),
+        .HEX1_D(hex1_d),
+        .LED(led),
+        .LED_BRACKET(led_bracket),
+        .SMA_CLKOUT(sma_clkout),
+        .SMA_CLKIN(sma_clkin),
+        .RS422_DE(rs422_de),
+        .RS422_DIN(rs422_din),
+        .RS422_DOUT(rs422_dout),
+        .RJ45_LED_R(rj45_led_r),
+        .FAN_I2C_SCL(fan_i2c_scl),
+        .FAN_I2C_SDA(fan_i2c_sda),
+        .FLASH_A(flash_a),
+        .FLASH_D(flash_d),
+        .FLASH_OE_n(flash_oe_n),
+        .FLASH_WE_n(flash_we_n),
+        .FLASH_CE_n(flash_ce_n),
+        .FLASH_ADV_n(flash_adv_n),
+        .FLASH_CLK(flash_clk),
+        .FLASH_RESET_n(flash_reset_n),
+        .POWER_MONITOR_I2C_SCL(power_monitor_i2c_scl),
+        .POWER_MONITOR_I2C_SDA(power_monitor_i2c_sda),
+        .TEMP_I2C_SCL(temp_i2c_scl),
+        .TEMP_I2C_SDA(temp_i2c_sda),
+        .QSFPA_TX_p(qsfpa_tx_p),
+        .QSFPB_TX_p(qsfpb_tx_p),
+        .QSFPC_TX_p(qsfpc_tx_p),
+        .QSFPD_TX_p(qsfpd_tx_p),
+        .QSFPA_RX_p(qsfpa_rx_p),
+        .QSFPB_RX_p(qsfpb_rx_p),
+        .QSFPC_RX_p(qsfpc_rx_p),
+        .QSFPD_RX_p(qsfpd_rx_p),
+        .QSFPA_REFCLK_p(qsfpa_refclk_p),
+        .QSFPB_REFCLK_p(qsfpb_refclk_p),
+        .QSFPC_REFCLK_p(qsfpc_refclk_p),
+        .QSFPD_REFCLK_p(qsfpd_refclk_p),
+        .QSFPA_LP_MODE(qsfpa_lp_mode),
+        .QSFPB_LP_MODE(qsfpb_lp_mode),
+        .QSFPC_LP_MODE(qsfpc_lp_mode),
+        .QSFPD_LP_MODE(qsfpd_lp_mode),
+        .QSFPA_MOD_SEL_n(qsfpa_mod_sel_n),
+        .QSFPB_MOD_SEL_n(qsfpb_mod_sel_n),
+        .QSFPC_MOD_SEL_n(qsfpc_mod_sel_n),
+        .QSFPD_MOD_SEL_n(qsfpd_mod_sel_n),
+        .QSFPA_RST_n(qsfpa_rst_n),
+        .QSFPB_RST_n(qsfpb_rst_n),
+        .QSFPC_RST_n(qsfpc_rst_n),
+        .QSFPD_RST_n(qsfpd_rst_n),
+        .PCIE_RX_p(pcie_rx_p),
+        .PCIE_TX_p(pcie_tx_p),
+        .PCIE_PERST_n(pcie_perst_n),
+        .PCIE_REFCLK_p(pcie_refclk_p),
+        .PCIE_SMBCLK(pcie_smbclk),
+        .PCIE_SMBDAT(pcie_smbdat),
+        .PCIE_WAKE_n(pcie_wake_n),
+        .CLKUSR_100(clkusr_100),
+        .CPU_RESET_n(cpu_reset_n),
+        .CLK_50_B2J(clk_50_b2j)
+    );
+`endif
+
+    initial begin
+        uvm_config_db#(virtual runctl_phy_if)::set(null,
+                                                   "uvm_test_top.env.nominal.runctl_phy.drv",
+                                                   "vif",
+                                                   runctl_phy);
+        uvm_config_db#(virtual sc_avmm_if)::set(null,
+                                                "uvm_test_top.env.nominal.sc_phy.drv",
+                                                "vif",
+                                                sc_phy);
+        uvm_config_db#(virtual rdma_rqe_ingress_if)::set(null,
+                                                         "uvm_test_top.env.nominal.rdma_rqe_mon",
+                                                         "vif",
+                                                         rdma_rqe_ingress);
+        uvm_config_db#(virtual rdma_cqe_egress_if)::set(null,
+                                                        "uvm_test_top.env.debug.rdma_cqe_mon",
+                                                        "vif",
+                                                        rdma_cqe_egress);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon0",
+                                                 "vif",
+                                                 opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon0",
+                                                 "vif",
+                                                 opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon0",
+                                                 "vif",
+                                                 opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon1",
+                                                 "vif",
+                                                 opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon1",
+                                                 "vif",
+                                                 opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon1",
+                                                 "vif",
+                                                 opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon2",
+                                                 "vif",
+                                                 opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon2",
+                                                 "vif",
+                                                 opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon2",
+                                                 "vif",
+                                                 opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_lane_mon3",
+                                                 "vif",
+                                                 opq_lane3);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_ingress_ts_mon3",
+                                                 "vif",
+                                                 opq_lane3);
+        uvm_config_db#(virtual opq_lane_if)::set(null,
+                                                 "uvm_test_top.env.nominal.opq_egress_ts_mon3",
+                                                 "vif",
+                                                 opq_lane3);
+        uvm_config_db#(virtual pcie_dma_egress_if)::set(null,
+                                                        "uvm_test_top.env.nominal.pcie_dma_mon",
+                                                        "vif",
+                                                        pcie_dma_egress);
+
+        host_cfg = host_memory_default_config();
+        host_cfg.RQ_DEPTH = 16384;
+        host_cfg.CQ_DEPTH = 65536;
+        host_cfg.N_SEGMENTS = 64;
+        host_cfg.SEG_BYTES = 2097152;
+        host_cfg.poll_cadence = 100ns;
+        host_cfg.record_write_latency = 0ns;
+        uvm_config_db#(host_memory_config_t)::set(null,
+                                                  "uvm_test_top.env.host_mem",
+                                                  "cfg",
+                                                  host_cfg);
+        uvm_config_db#(host_memory_config_t)::set(null,
+                                                  "uvm_test_top.env.host_core",
+                                                  "cfg",
+                                                  host_cfg);
+        // The current structural shell has no exposed rdma_subsystem host AXI
+        // conduit. This local interface keeps the agent live as a standalone
+        // responder until TB_INT_BIND_REAL_DUT promotes the real connection.
+        uvm_config_db#(virtual host_axi_if)::set(null,
+                                                 "uvm_test_top.env.host_mem.axi",
+                                                 "vif",
+                                                 host_axi);
+
+        uvm_config_db#(virtual rdma_rqe_ingress_if)::set(null, "uvm_test_top", "rdma_rqe_vif", rdma_rqe_ingress);
+        uvm_config_db#(virtual rdma_cqe_egress_if)::set(null, "uvm_test_top", "rdma_cqe_vif", rdma_cqe_egress);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane0_vif", opq_lane0);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane1_vif", opq_lane1);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane2_vif", opq_lane2);
+        uvm_config_db#(virtual opq_lane_if)::set(null, "uvm_test_top", "opq_lane3_vif", opq_lane3);
+        uvm_config_db#(virtual pcie_dma_egress_if)::set(null, "uvm_test_top", "pcie_dma_vif", pcie_dma_egress);
+        // Test-level vifs for the directed run-control sweep
+        // (run_sequence_directed bypasses the runctl_phy_agent + sc_phy_agent
+        // sequencer chains and drives runctl_phy / sc_phy directly to mirror
+        // the case-sequence pattern used elsewhere in this tb).
+        uvm_config_db#(virtual runctl_phy_if)::set(null, "uvm_test_top", "runctl_phy_vif", runctl_phy);
+        uvm_config_db#(virtual sc_avmm_if)::set(null,    "uvm_test_top", "sc_phy_vif",     sc_phy);
+        run_test();
+    end
+endmodule

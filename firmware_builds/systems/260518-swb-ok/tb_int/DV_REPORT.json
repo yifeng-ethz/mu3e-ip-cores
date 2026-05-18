@@ -1,0 +1,327 @@
+{
+  "build": "rdma_pretest-260511",
+  "date": "2026-05-11",
+  "dut": "swb_a10/top",
+  "selected_cases": [
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B001",
+      "scenario": "SWB RC firefly reset-link broadcast IDLE to RUN_PREP",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b001_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B002",
+      "scenario": "SWB RC RUN_PREP to SYNC broadcast",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b002_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B003",
+      "scenario": "SWB RC SYNC to RUNNING stable-window open",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b003_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B004",
+      "scenario": "SWB RC RUNNING to TERMINATING with one in-flight packet",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b004_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B005",
+      "scenario": "SWB RC TERMINATING to IDLE after bounded drain",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b005_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B006",
+      "scenario": "SWB RC full IDLE to RUNNING to IDLE walk with 1 ms gap",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b006_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B007",
+      "scenario": "SWB RC RUN_NUMBER increment before RUN_PREP",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b007_test.sv"
+    },
+    {
+      "alias": "B-RC-CSR-001",
+      "bucket": "BASIC",
+      "case_id": "B008",
+      "scenario": "CSR-toggle RC fallback",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b008_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B033",
+      "scenario": "SWB SC read OPQ CSR UID via PCIe BAR",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b033_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B034",
+      "scenario": "SWB SC read rdma_subsystem CSR UID",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b034_test.sv"
+    },
+    {
+      "alias": "B-SC-JTG-001",
+      "bucket": "BASIC",
+      "case_id": "B040",
+      "scenario": "SWB-local JTAG slow-control fallback",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b040_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B043",
+      "scenario": "SWB SC single-word RW round-trip on scratch_pad",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b043_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B065",
+      "scenario": "SWB DT one RQE ingress through OPQ to PCIe DMA egress",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b065_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B066",
+      "scenario": "SWB DT rdma_subsystem CQE round-trip",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b066_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B067",
+      "scenario": "SWB DT sidecar lineage at FEB-side rdma RQE ingress",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b067_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B068",
+      "scenario": "SWB DT OPQ 4-lane fairness",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b068_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "BASIC",
+      "case_id": "B069",
+      "scenario": "SWB DT PCIe x8 DMA capture matches scoreboard",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_b069_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E001",
+      "scenario": "back-to-back zero-gap RC",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e001_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E002",
+      "scenario": "state CSR co-write during RUN_PREP edge",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e002_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E003",
+      "scenario": "frame boundary RUNNING open with one packet per lane",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e003_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E033",
+      "scenario": "OPQ ticket FIFO full boundary",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e033_test.sv"
+    },
+    {
+      "alias": "E-SC-CONC-001",
+      "bucket": "EDGE",
+      "case_id": "E043",
+      "scenario": "concurrent PCIe sc_tool plus local JTAG arbitration",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e043_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E065",
+      "scenario": "PCIe DMA burst-boundary",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e065_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E066",
+      "scenario": "maximum legal RQE packet at host segment boundary",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e066_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E067",
+      "scenario": "lane-3 frame-boundary cluster",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e067_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "EDGE",
+      "case_id": "E068",
+      "scenario": "all-lane cluster burst at CQ turnaround boundary",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_e068_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X001",
+      "scenario": "mid-flight RESET while OPQ has RQEs in flight",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x001_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X002",
+      "scenario": "mid-flight RESET during RUN_PREP state shadow update",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x002_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X003",
+      "scenario": "mid-flight RESET during host DMA issue",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x003_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X004",
+      "scenario": "truncated run-control state word is rejected",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x004_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X005",
+      "scenario": "truncated state word followed by legal recovery",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x005_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X033",
+      "scenario": "illegal PCIe BAR write to RO field",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x033_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X065",
+      "scenario": "rdma CQE timeout",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x065_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "ERROR",
+      "case_id": "X069",
+      "scenario": "RUN_PREP issued while OPQ is mid-drain",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_x069_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "PROF",
+      "case_id": "P001",
+      "scenario": "long RUNNING window structural load",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_p001_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "PROF",
+      "case_id": "P002",
+      "scenario": "RUN_NUMBER bumps between short host batches",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_p002_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "PROF",
+      "case_id": "P003",
+      "scenario": "watchdog overlap while OPQ drains under load",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_p003_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "PROF",
+      "case_id": "P065",
+      "scenario": "scaled 100 kHz/channel x 4 lanes PROF smoke",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_p065_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "PROF",
+      "case_id": "P066",
+      "scenario": "host CQE turnaround under balanced four-lane load",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_p066_test.sv"
+    },
+    {
+      "alias": "",
+      "bucket": "PROF",
+      "case_id": "P068",
+      "scenario": "sustained RQE ingress at line-rate structural scale",
+      "status": "PASS",
+      "test": "uvm/swb_rdma_pretest/tests/tb_int_p068_test.sv"
+    }
+  ]
+}

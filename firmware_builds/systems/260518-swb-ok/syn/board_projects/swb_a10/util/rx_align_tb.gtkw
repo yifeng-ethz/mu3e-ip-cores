@@ -1,0 +1,31 @@
+[*]
+@28
+top.rx_align_tb.clk
+top.rx_align_tb.reset_n
+@420
+top.rx_align_tb.cycle
+@200
+-DATA
+@22
+#{top.rx_align_tb.enc_data[7:0]} top.rx_align_tb.enc_data[7] top.rx_align_tb.enc_data[6] top.rx_align_tb.enc_data[5] top.rx_align_tb.enc_data[4] top.rx_align_tb.enc_data[3] top.rx_align_tb.enc_data[2] top.rx_align_tb.enc_data[1] top.rx_align_tb.enc_data[0]
+#{top.rx_align_tb.dec_data[7:0]} top.rx_align_tb.dec_data[7] top.rx_align_tb.dec_data[6] top.rx_align_tb.dec_data[5] top.rx_align_tb.dec_data[4] top.rx_align_tb.dec_data[3] top.rx_align_tb.dec_data[2] top.rx_align_tb.dec_data[1] top.rx_align_tb.dec_data[0]
+@28
+top.rx_align_tb.dec_datak[0]
+top.rx_align_tb.dec_error
+@200
+-BITSLIP
+@22
+#{top.rx_align_tb.e_rx_align.bitslip_errors[7:0]} top.rx_align_tb.e_rx_align.bitslip_errors[7] top.rx_align_tb.e_rx_align.bitslip_errors[6] top.rx_align_tb.e_rx_align.bitslip_errors[5] top.rx_align_tb.e_rx_align.bitslip_errors[4] top.rx_align_tb.e_rx_align.bitslip_errors[3] top.rx_align_tb.e_rx_align.bitslip_errors[2] top.rx_align_tb.e_rx_align.bitslip_errors[1] top.rx_align_tb.e_rx_align.bitslip_errors[0]
+#{top.rx_align_tb.e_rx_align.bitslip_timeout[7:0]} top.rx_align_tb.e_rx_align.bitslip_timeout[7] top.rx_align_tb.e_rx_align.bitslip_timeout[6] top.rx_align_tb.e_rx_align.bitslip_timeout[5] top.rx_align_tb.e_rx_align.bitslip_timeout[4] top.rx_align_tb.e_rx_align.bitslip_timeout[3] top.rx_align_tb.e_rx_align.bitslip_timeout[2] top.rx_align_tb.e_rx_align.bitslip_timeout[1] top.rx_align_tb.e_rx_align.bitslip_timeout[0]
+@28
+top.rx_align_tb.e_rx_align.o_bitslip
+@420
+top.rx_align_tb.data10_shift
+@200
+-LOCK
+@28
+top.rx_align_tb.e_rx_align.o_locked
+@420
+top.rx_align_tb.e_rx_align.quality
+@22
+#{top.rx_align_tb.e_rx_align.errors[7:0]} top.rx_align_tb.e_rx_align.errors[3] top.rx_align_tb.e_rx_align.errors[2] top.rx_align_tb.e_rx_align.errors[1] top.rx_align_tb.e_rx_align.errors[0]

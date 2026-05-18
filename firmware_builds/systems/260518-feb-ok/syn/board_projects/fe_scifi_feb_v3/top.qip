@@ -1,0 +1,45 @@
+#
+# Self-contained SciFi FEB v3 board build.
+# Layout (per rtl-file-structure skill, system folder contract):
+#   top.vhd                                       -- top entity at root
+#   rtl/adapters/                                 -- board_reset, max10_link, onewire
+#   rtl/wrappers/                                 -- feb_system_v3 Qsys top wrapper + CDC bridges + firefly xcvr
+#   settings/                                     -- SDC constraints
+#   revisions/                                    -- per-revision .qsf
+#   software/                                     -- Nios bare-minimum SW
+#   trash_bin/                                    -- legacy mu3e source kept for archaeology only
+#
+
+set repo_root [file normalize [file join $::quartus(qip_path) .. .. .. .. .. ..]]
+
+# ----- top entity --------------------------------------------------------
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "top.vhd"]
+
+# ----- adapters (top.vhd direct children) --------------------------------
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/adapters/board_reset_adapter.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/adapters/max10_link_adapter.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/adapters/onewire_adapter.vhd"]
+
+# ----- Qsys top wrapper + helpers (top.vhd -> u_feb_system) --------------
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/wrappers/feb_system_v3_board_top.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/wrappers/sc_downlink_cdc_bridge.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/wrappers/legacy_firefly_mon_cdc_bridge.vhd"]
+set_global_assignment -name VHDL_FILE [file join $::quartus(qip_path) "rtl/wrappers/firefly_xcvr_subsystem.vhd"]
+
+# ----- timing constraints ------------------------------------------------
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "settings/top.sdc"]
+set_global_assignment -name SDC_FILE [file join $::quartus(qip_path) "settings/top_FEB_v2.sdc"]
+
+# ----- Qsys-generated subsystem (cross-system reference) -----------------
+# feb_system_v3 Qsys output lives in the canonical v3 build's syn tree.
+set_global_assignment -name QIP_FILE [file join $repo_root "firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/syn/feb_system_v3/synthesis/feb_system_v3.qip"]
+
+# ----- Quartus-IP-Builder outputs (regenerated at build time) ------------
+# These dirs are created by qsys-generate / Quartus IP regen the first time
+# top.qpf is opened. If they do not yet exist, run the regen step first.
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "generated/include.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_ds/alt_issp_ds/synthesis/alt_issp_ds.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "bts/alt_issp_srst/alt_issp_srst/synthesis/alt_issp_srst.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/alt_clkctrl/unnamed/synthesis/unnamed.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/ram_sub_det/ram_sub_det.qip"]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) "ip/altera_io_bidir/alt_iobuf_onewire.qip"]

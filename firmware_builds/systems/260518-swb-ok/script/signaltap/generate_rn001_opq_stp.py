@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+"""Generate the RN.BASIC.001 SWB OPQ ingress/egress SignalTap file."""
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass
+from pathlib import Path
+
+
+SWB = "swb_block:e_swb_block|"
+A10 = "a10_block:e_a10_block|"
+ADAPT = f"{SWB}ingress_egress_adaptor:e_ingress_egress_adaptor|"
+PIPE = f"{SWB}swb_opq_dma_pipeline:e_opq_dma_pipeline|"
+DEFAULT_CLOCK = f"{SWB}i_clk"
+DEFAULT_TRIGGER = f"{SWB}opq_dma_input_valid"
+PHYSICAL_TO_LOGICAL = {
+    0: 0,
+    4: 1,
+    8: 2,
+    12: 3,
+    1: 4,
+    5: 5,
+    9: 6,
+    13: 7,
+}
+
+
+@dataclass(frozen=True)
+class Probe:
+    group: str
+    name: str
+
+
+def add(group: str, probes: list[Probe], *names: str) -> None:
+    probes.extend(Probe(group, name) for name in names)
+
+
+def add_bits(group: str, probes: list[Probe], base: str, width: int) -> None:
+    probes.extend(Probe(group, f"{base}[{idx}]") for idx in range(width))
+
+
+def add_link32(group: str, probes: list[Probe], base: str) -> None:
+    add_bits(group, probes, f"{base}.data", 32)
+    add_bits(f"{group} datak", probes, f"{base}.datak", 4)
+    add(
+        group,
+        probes,
+        f"{base}.sop",
+        f"{base}.eop",
+        f"{base}.idle",
+        f"{base}.err",
+        f"{base}.dthdr",
+        f"{base}.sbhdr",
+    )
+
+
+def add_xcvr_lane(group: str, probes: list[Probe], physical_lane: int) -> None:
+    add_bits(group, probes, f"{A10}o_xcvr0_rx_data[{physical_lane}]", 32)
+    add_bits(f"{group} datak", probes, f"{A10}o_xcvr0_rx_datak[{physical_lane}]", 4)
+
+
+def default_probes() -> list[Probe]:
+    probes: list[Probe] = []
+
+    add(
+        "00 control",
+        probes,
+        f"{SWB}use_opq_merge",
+        f"{SWB}opq_reset_n",
+        f"{SWB}dma_reset_n",
+        f"{SWB}i_dmamemhalffull",
+        f"{SWB}debug_mask_select_generic",
+        f"{SWB}debug_mask_select_scifi",
+        f"{SWB}mask_n[0]",
+        f"{SWB}mask_n[1]",
+        f"{SWB}mask_n[2]",
+        f"{SWB}mask_n[3]",
+    )
+    add_bits("00 mask generic register", probes, f"{SWB}debug_mask_generic_w", 32)
+    add_bits("00 mask scifi register", probes, f"{SWB}debug_mask_scifi_w", 32)
+    add_bits("00 selected link mask", probes, f"{SWB}debug_selected_link_mask_w", 32)
+    add_bits("00 readout state register", probes, f"{SWB}debug_readout_state_w", 32)
+
+    # Raw XCVR lane coverage is deliberately wider than the selected FEB link.
+    # Link 2 maps through physical lane 8 into logical feb_rx(2); earlier
+    # captures only tapped 0/1/4/5 and could not answer whether link 2 carried
+    # data.
+    for physical_lane in range(16):
+        logical = PHYSICAL_TO_LOGICAL.get(physical_lane)
+        suffix = f"_to_logical{logical}" if logical is not None else "_unmapped"
+        add_xcvr_lane(f"01 xcvr_raw_physical_lane{physical_lane}{suffix}", probes, physical_lane)
+
+    for logical_lane in range(8):
+        add_link32(f"02 swb_logical_feb_rx{logical_lane}", probes, f"{SWB}i_feb_rx[{logical_lane}]")
+
+    for lane in range(4):
+        add_link32(f"09 masked_opq_input_link_lane{lane}", probes, f"{SWB}rx_data_sim_opq[{lane}]")
+
+    for lane in range(4):
+        group = f"1{lane} opq_ingress_lane{lane}"
+        add(
+            group,
+            probes,
+            f"{ADAPT}ingress_valid[{lane}]",
+            f"{ADAPT}ingress_startofpacket[{lane}]",
+            f"{ADAPT}ingress_endofpacket[{lane}]",
+        )
+        add_bits(group, probes, f"{ADAPT}ingress_data[{lane}]", 36)
+
+    add(
+        "20 opq_egress_raw",
+        probes,
+        f"{ADAPT}opq_egress_valid",
+        f"{ADAPT}opq_egress_sop",
+        f"{ADAPT}opq_egress_eop",
+    )
+    add_bits("20 opq_egress_raw", probes, f"{ADAPT}opq_egress_data", 32)
+    add_bits("20 opq_egress_raw", probes, f"{ADAPT}opq_egress_datak", 4)
+
+    add(
+        "21 opq_egress_to_packer",
+        probes,
+        f"{SWB}opq_dma_input_valid",
+        f"{PIPE}i_opq_sop",
+        f"{PIPE}i_opq_eop",
+    )
+    add_bits("21 opq_egress_to_packer", probes, f"{SWB}opq_dma_input_data", 32)
+    add_bits("21 opq_egress_to_packer", probes, f"{SWB}opq_dma_input_datak", 4)
+
+    add(
+        "30 opq_dma_pipeline",
+        probes,
+        f"{PIPE}opq_accept_valid",
+        f"{PIPE}opq_is_sop",
+        f"{PIPE}opq_is_eop",
+        f"{PIPE}opq_dma_sop",
+        f"{PIPE}opq_dma_eop",
+        f"{PIPE}o_dma_wen",
+        f"{PIPE}o_end_of_event",
+        f"{SWB}o_dma_wren",
+        f"{SWB}o_endofevent",
+    )
+    add_bits("30 opq_dma_pipeline_opq_word", probes, f"{PIPE}opq_dma_data", 32)
+    add_bits("31 opq_dma_output_256b", probes, f"{PIPE}o_dma_data", 256)
+    add_bits("32 opq_dma_output_datak", probes, f"{PIPE}o_dma_datak", 32)
+
+    add(
+        "33 a10_dma0_handoff",
+        probes,
+        f"{A10}i_pcie0_dma0_we",
+        f"{A10}i_pcie0_dma0_eoe",
+    )
+    add_bits("33 a10_dma0_handoff", probes, f"{A10}i_pcie0_dma0_wdata", 256)
+
+    return probes
+
+
+def add_single(parent: ET.Element, attribute: str, value: str) -> None:
+    ET.SubElement(parent, "single", {"attribute": attribute, "value": value})
+
+
+def add_multi(parent: ET.Element, attribute: str, size: str, value: str) -> None:
+    ET.SubElement(parent, "multi", {"attribute": attribute, "size": size, "value": value})
+
+
+def build_stp(sample_depth: int, trigger_signal: str, trigger_mode: str) -> ET.ElementTree:
+    stamp = dt.datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")
+    signal_set_name = "rn001_opq_ingress_egress"
+    trigger_name = "opq_dma_input_valid_rise" if trigger_mode == "rising_edge" else "opq_dma_input_valid_high"
+    probes = default_probes()
+    signals = [probe.name for probe in probes]
+
+    root = ET.Element("session", {"sof_file": ""})
+    display_tree = ET.SubElement(root, "display_tree", {"gui_logging_enabled": "0"})
+    ET.SubElement(
+        display_tree,
+        "display_branch",
+        {"instance": "rn001_opq_ingress_egress", "signal_set": signal_set_name, "trigger": trigger_name},
+    )
+
+    global_info = ET.SubElement(root, "global_info")
+    add_single(global_info, "active instance", "0")
+    add_single(global_info, "lock mode", "0")
+    add_multi(global_info, "frame size", "2", "1680,981")
+
+    instance = ET.SubElement(
+        root,
+        "instance",
+        {
+            "enabled": "true",
+            "entity_name": "sld_signaltap",
+            "is_auto_node": "yes",
+            "name": "rn001_opq_ingress_egress",
+            "source_file": "sld_signaltap.vhd",
+        },
+    )
+    ET.SubElement(instance, "node_ip_info", {"instance_id": "0", "mfg_id": "110", "node_id": "0", "version": "6"})
+
+    signal_set = ET.SubElement(instance, "signal_set", {"name": signal_set_name})
+    signal_set.append(ET.Comment(f"Generated {stamp} UTC"))
+    signal_set.append(
+        ET.Comment(
+            "RN.BASIC.001 SWB frame path: raw XCVR output lanes, logical FEB link records, "
+            "raw/generic/scifi/selected link-mask control, masked 4-lane OPQ input, "
+            "OPQ egress, registered OPQ-to-packer egress, packed DMA output data+datak, "
+            "and the A10 PCIe DMA0 handoff checkpoint. "
+            "Physical lanes 0/4/8/12 map to logical OPQ-eligible lanes 0/1/2/3; "
+            "physical lanes 1/5/9/13 map to secondary logical lanes 4/5/6/7. "
+            "Decode K28.5/K23.7/K28.4 offline from datak+LSB; do not decode Idle SOPs as frames."
+        )
+    )
+    ET.SubElement(signal_set, "clock", {"name": DEFAULT_CLOCK, "polarity": "posedge", "tap_mode": "classic"})
+    ET.SubElement(
+        signal_set,
+        "config",
+        {
+            "pipeline_level": "0",
+            "ram_type": "AUTO",
+            "reserved_data_nodes": "0",
+            "reserved_storage_qualifier_nodes": "0",
+            "reserved_trigger_nodes": "0",
+            "sample_depth": str(sample_depth),
+            "trigger_in_enable": "no",
+            "trigger_out_enable": "no",
+        },
+    )
+    ET.SubElement(signal_set, "top_entity")
+
+    signal_vec = ET.SubElement(signal_set, "signal_vec")
+    for vec_name in ("trigger_input_vec", "data_input_vec", "storage_qualifier_input_vec"):
+        vec = ET.SubElement(signal_vec, vec_name)
+        for name in signals:
+            ET.SubElement(vec, "wire", {"name": name, "tap_mode": "classic"})
+
+    presentation = ET.SubElement(signal_set, "presentation")
+    unified = ET.SubElement(presentation, "unified_setup_data_view")
+    data_view = ET.SubElement(presentation, "data_view")
+    setup_view = ET.SubElement(presentation, "setup_view")
+    last_group = None
+    for index, probe in enumerate(probes):
+        if probe.group != last_group:
+            ET.SubElement(unified, "divider", {"name": probe.group})
+            ET.SubElement(data_view, "divider", {"name": probe.group})
+            ET.SubElement(setup_view, "divider", {"name": probe.group})
+            last_group = probe.group
+        common = {
+            "duplicate_name_allowed": "false",
+            "is_data_input": "true",
+            "is_node_valid": "true",
+            "is_storage_input": "true",
+            "is_trigger_input": "true",
+            "name": probe.name,
+            "tap_mode": "classic",
+            "type": "unknown",
+        }
+        ET.SubElement(unified, "node", common)
+        net = {**common, "data_index": str(index), "storage_index": str(index), "trigger_index": str(index)}
+        ET.SubElement(data_view, "net", net)
+        ET.SubElement(setup_view, "net", net)
+    ET.SubElement(presentation, "trigger_in_editor")
+    ET.SubElement(presentation, "trigger_out_editor")
+
+    trigger = ET.SubElement(
+        signal_set,
+        "trigger",
+        {
+            "attribute_mem_mode": "false",
+            "gap_record": "true",
+            "name": trigger_name,
+            "position": "pre",
+            "power_up_trigger_mode": "false",
+            "record_data_gap": "true",
+            "segment_size": "1",
+            "storage_mode": "off",
+            "storage_qualifier_disabled": "no",
+            "storage_qualifier_port_is_pin": "true",
+            "storage_qualifier_port_name": "auto_stp_external_storage_qualifier",
+            "storage_qualifier_port_tap_mode": "classic",
+            "trigger_type": "circular",
+        },
+    )
+    ET.SubElement(trigger, "power_up_trigger", {"position": "pre", "storage_qualifier_disabled": "no"})
+    events = ET.SubElement(trigger, "events", {"use_custom_flow_control": "no"})
+    level = ET.SubElement(events, "level", {"enabled": "yes", "name": "condition1", "type": "basic"})
+    level.text = f"'{trigger_signal}' == {'rising edge' if trigger_mode == 'rising_edge' else 'high'}"
+    ET.SubElement(level, "power_up", {"enabled": "yes"})
+    ET.SubElement(level, "op_node")
+
+    sq_events = ET.SubElement(trigger, "storage_qualifier_events")
+    transitional = ET.SubElement(sq_events, "transitional")
+    transitional.text = "1" * len(signals)
+    pwr = ET.SubElement(transitional, "pwr_up_transitional")
+    pwr.text = "1" * len(signals)
+    for _ in range(3):
+        sq_level = ET.SubElement(sq_events, "storage_qualifier_level", {"type": "basic"})
+        ET.SubElement(sq_level, "power_up")
+        ET.SubElement(sq_level, "op_node")
+
+    ET.SubElement(root, "mnemonics")
+    return ET.ElementTree(root)
+
+
+def indent(elem: ET.Element, level: int = 0) -> None:
+    pad = "\n" + "  " * level
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = pad + "  "
+        for child in elem:
+            indent(child, level + 1)
+        if not elem[-1].tail or not elem[-1].tail.strip():
+            elem[-1].tail = pad
+    if level and (not elem.tail or not elem.tail.strip()):
+        elem.tail = pad
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", required=True, help="Output .stp path")
+    parser.add_argument("--sample-depth", type=int, default=4096)
+    parser.add_argument("--trigger-signal", default=DEFAULT_TRIGGER)
+    parser.add_argument("--trigger-mode", choices=("rising_edge", "high"), default="rising_edge")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+    tree = build_stp(args.sample_depth, args.trigger_signal, args.trigger_mode)
+    indent(tree.getroot())
+    output = Path(args.output).resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    tree.write(output, encoding="utf-8", xml_declaration=False)
+    output.write_text(output.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+    print(f"wrote {output}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

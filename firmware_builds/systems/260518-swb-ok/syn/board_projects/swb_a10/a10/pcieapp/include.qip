@@ -1,0 +1,8 @@
+#
+
+# include vhd files
+foreach f [ lsort [ glob -directory $::quartus(qip_path) \
+    "*.vhd" \
+] ] {
+    set_global_assignment -name VHDL_FILE $f
+}

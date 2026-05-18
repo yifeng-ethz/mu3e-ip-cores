@@ -1,0 +1,28 @@
+#
+
+set rdma_ip_root "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores"
+
+foreach f [list \
+    "rdma_subsystem/rtl/rdma_subsystem_pkg.sv" \
+    "rdma_subsystem/rtl/rdma_subsystem_reset_chain.sv" \
+    "rdma_subsystem/rtl/rdma_subsystem_axi_xbar.sv" \
+    "rdma_subsystem/rtl/rdma_subsystem_csr_decoder.sv" \
+    "rdma_rq_fetcher/rtl/rdma_rq_ring_state.sv" \
+    "rdma_rq_fetcher/rtl/rdma_rq_axi_reader.sv" \
+    "rdma_rq_fetcher/rtl/rdma_rq_fetcher.sv" \
+    "rdma_dma_engine/rtl/rdma_dma_packer.sv" \
+    "rdma_dma_engine/rtl/rdma_dma_data_fifo.sv" \
+    "rdma_dma_engine/rtl/rdma_dma_writer.sv" \
+    "rdma_dma_engine/rtl/rdma_dma_engine.sv" \
+    "rdma_cq_pusher/rtl/rdma_cq_ring_state.sv" \
+    "rdma_cq_pusher/rtl/rdma_cq_axi_writer.sv" \
+    "rdma_cq_pusher/rtl/rdma_cq_msix.sv" \
+    "rdma_cq_pusher/rtl/rdma_cq_pusher.sv" \
+    "rdma_run_manager/rtl/rdma_run_manager_csr.sv" \
+    "rdma_run_manager/rtl/rdma_run_manager_status.sv" \
+    "rdma_run_manager/rtl/rdma_run_manager_fsm.sv" \
+    "rdma_run_manager/rtl/rdma_run_manager.sv" \
+    "rdma_subsystem/rtl/rdma_subsystem_top.sv" \
+] {
+    set_global_assignment -name SYSTEMVERILOG_FILE [file join $rdma_ip_root $f]
+}

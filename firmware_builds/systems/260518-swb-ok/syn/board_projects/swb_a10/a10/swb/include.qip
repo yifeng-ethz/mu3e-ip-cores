@@ -1,0 +1,32 @@
+#
+
+# LEGACY_DMA_DEAD:
+#   The SWB DMA path now uses raw OPQ egress -> swb_opq_dma_pipeline ->
+#   swb_opq_dma_packer -> PCIe DMA0. Keep the old sources in the tree for
+#   archaeology, but exclude them from the active synthesis file set.
+set swb_legacy_dma_vhdl [list \
+    "musip_mux_4_1.vhd" \
+    "musip_event_builder.vhd" \
+]
+
+set swb_legacy_dma_sv [list \
+    "swb_rdma_subsystem_bridge.sv" \
+]
+
+set swb_opq_dma_src_root "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/firmware_builds/systems/v3_pretest-260511-emutype0-dualport-260512/tb_int/feb_swb_corun/sv"
+set_global_assignment -name SYSTEMVERILOG_FILE [file join $swb_opq_dma_src_root "swb_opq_dma_packer.sv"]
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.vhd" \
+] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    if { [ lsearch -exact $swb_legacy_dma_vhdl [ file tail $f ] ] >= 0 } { continue }
+    set_global_assignment -name VHDL_FILE "$f"
+}
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain \
+    "*.sv" \
+] ] {
+    if { [ lsearch -exact $swb_legacy_dma_sv [ file tail $f ] ] >= 0 } { continue }
+    set_global_assignment -name SYSTEMVERILOG_FILE "$f"
+}

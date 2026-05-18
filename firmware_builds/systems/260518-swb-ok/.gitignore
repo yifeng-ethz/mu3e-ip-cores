@@ -1,0 +1,37 @@
+# --- Daily-dated SWB system, layout per rtl-file-structure skill ---
+# Source of truth:
+#   doc/  qsys_tcl/  script/  syn/<project files>  tb_int/<test sources>
+#   .gitignore  README.md  top.vhd  top.qpf  top.qip
+#
+# Regeneratable / archival (never committed):
+generated/
+trash_bin/
+tb_int/trash_bin/
+
+# Quartus / Qsys build outputs
+**/db/
+**/qdb/
+**/incremental_db/
+**/output_files/
+**/sta_debug_*/
+**/timing_debug/
+**/*.sof
+**/*.pof
+**/*.jic
+**/*.rpt
+**/*.qws
+**/*.log
+**/*.smsg
+**/*.cmp
+**/qverify_*/
+**/generated/tmp/
+
+# Simulator work products
+**/work_*/
+**/transcript
+**/vsim.wlf
+**/*.vcd
+
+# Tooling scratch
+**/__pycache__/
+*.pyc

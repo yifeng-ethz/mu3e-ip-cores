@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags="INTERNAL_COMPONENT=false"
+   categories="" />
+ <parameter name="bonusData"><![CDATA[bonusData 
+{
+   element clk_bridge
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element csr_jtag_master
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element opq_0
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element reset_bridge
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="10AS066H1F34E1SG" />
+ <parameter name="deviceFamily" value="Arria 10" />
+ <parameter name="deviceSpeedGrade" value="1" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface name="clk" internal="clk_bridge.in_clk" type="clock" dir="end" />
+ <interface
+   name="egress"
+   internal="opq_0.egress"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="ingress_0"
+   internal="opq_0.ingress_0"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="ingress_1"
+   internal="opq_0.ingress_1"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="ingress_2"
+   internal="opq_0.ingress_2"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="ingress_3"
+   internal="opq_0.ingress_3"
+   type="avalon_streaming"
+   dir="end" />
+ <interface name="reset" internal="reset_bridge.in_reset" type="reset" dir="end" />
+ <module
+   name="clk_bridge"
+   kind="altera_clock_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="DERIVED_CLOCK_RATE" value="0" />
+  <parameter name="EXPLICIT_CLOCK_RATE" value="0" />
+  <parameter name="NUM_CLOCK_OUTPUTS" value="1" />
+ </module>
+ <module
+   name="csr_jtag_master"
+   kind="altera_jtag_avalon_master"
+   version="18.1"
+   enabled="1">
+  <parameter name="AUTO_DEVICE" value="10AS066H1F34E1SG" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Arria 10" />
+  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="1" />
+  <parameter name="COMPONENT_CLOCK" value="0" />
+  <parameter name="FAST_VER" value="1" />
+  <parameter name="FIFO_DEPTHS" value="2" />
+  <parameter name="PLI_PORT" value="50000" />
+  <parameter name="USE_PLI" value="0" />
+ </module>
+ <module
+   name="opq_0"
+   kind="ordered_priority_queue_native_sv_fixed4"
+   version="26.5.0.430"
+   enabled="1">
+  <parameter name="BUILD" value="430" />
+  <parameter name="DEBUG_LV" value="0" />
+  <parameter name="INSTANCE_ID" value="0" />
+  <parameter name="IP_UID" value="1330663757" />
+  <parameter name="VERSION_DATE" value="20260430" />
+  <parameter name="VERSION_GIT" value="1332117425" />
+  <parameter name="VERSION_MAJOR" value="26" />
+  <parameter name="VERSION_MINOR" value="5" />
+  <parameter name="VERSION_PATCH" value="0" />
+ </module>
+ <module
+   name="reset_bridge"
+   kind="altera_reset_bridge"
+   version="18.1"
+   enabled="1">
+  <parameter name="ACTIVE_LOW_RESET" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="0" />
+  <parameter name="NUM_RESET_OUTPUTS" value="1" />
+  <parameter name="SYNCHRONOUS_EDGES" value="deassert" />
+  <parameter name="USE_RESET_REQUEST" value="0" />
+ </module>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="csr_jtag_master.master"
+   end="opq_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="reset_bridge.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="csr_jtag_master.clk" />
+ <connection
+   kind="clock"
+   version="18.1"
+   start="clk_bridge.out_clk"
+   end="opq_0.clk_interface" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="csr_jtag_master.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.1"
+   start="reset_bridge.out_reset"
+   end="opq_0.rst_interface" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+ <interconnectRequirement
+   for="csr_jtag_master.master"
+   name="qsys_mm.security"
+   value="NON_SECURE" />
+</system>

@@ -1,0 +1,8 @@
+build/
+.old_tb_work/
+report/
+report*/
+transcript
+vsim.wlf
+work_feb_swb_uvm/
+uvm/work_feb_swb_uvm/
