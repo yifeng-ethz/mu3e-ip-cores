@@ -18,19 +18,19 @@ Sub-subsystem kind: `arb_hit_type0_supercore`  ·  representative instance: `dat
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_5.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor |  |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor |  |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_7.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_0.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_1.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_2.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_3.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_4.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_5.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_6.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_7.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_0.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_1.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_2.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_3.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_4.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_5.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_6.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
+| `data_path_subsystem_arb_hit_type0_supercore_0_lane_7.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | [→ arb_hit_type0 regs](arb_hit_type0.md) |  |
 
 ## Provenance
 
 - sopcinfo: `../../generated/qsys/feb_system_v4.sopcinfo`
 - generator: `../../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:52:37
+- regenerated: 2026-05-18T17:25:28
 
 <!-- END auto-generated -->

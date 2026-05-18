@@ -73,7 +73,7 @@ HIDE_PASSTHROUGH_BRIDGE_KINDS = {
 
 # Kinds that we explicitly render a register-layout doc for under ip_csr/
 # (one per kind; multiple instances of the same kind share one doc)
-RENDER_REGISTERS = {"ring_buffer_cam", "feb_frame_assembly"}
+RENDER_REGISTERS = {"ring_buffer_cam", "feb_frame_assembly", "arb_hit_type0"}
 
 # Top-level subsystem display names (kept stable for SYSTEM_TOP.md)
 SUBSYSTEM_ROLES = {
@@ -474,31 +474,101 @@ def render_sub_subsystem_doc(ssub: SubSubsystemView, out_path: Path) -> str:
     return "\n".join(lines)
 
 
-def render_leaf_register_doc(kind: str, svd: Path, out_path: Path) -> str:
-    regs = parse_svd_registers(svd)
-    # find parent: any sub-subsystem that contains this kind
-    # default parent: data_path_subsystem
-    parent_doc = IP_CSR_DIR / "data_path_subsystem.md"
+def parse_svd_registers_full(svd: Path) -> tuple[dict, list[dict]]:
+    """Parse the SVD into a (device, [registers]) tuple where each register
+    carries its name, address, access, description, reset value, and a list
+    of bit fields (name, bitOffset, bitWidth, access, description)."""
+    root = ET.parse(svd).getroot()
+    dev = {
+        "name":    (root.findtext("name") or "?").strip(),
+        "vendor":  (root.findtext("vendor") or "?").strip(),
+        "version": (root.findtext("version") or "?").strip(),
+        "description": (root.findtext("description") or "").strip(),
+    }
+    regs = []
+    for reg in root.iter("register"):
+        off_raw = (reg.findtext("addressOffset") or "?").strip()
+        off_i   = parse_int(off_raw)
+        fields = []
+        for f in reg.findall("fields/field"):
+            fields.append({
+                "name":   (f.findtext("name") or "?").strip(),
+                "off":    parse_int(f.findtext("bitOffset") or "0") or 0,
+                "width":  parse_int(f.findtext("bitWidth") or "32") or 32,
+                "access": (f.findtext("access") or "").strip(),
+                "desc":   (f.findtext("description") or "").strip(),
+            })
+        fields.sort(key=lambda x: x["off"])
+        regs.append({
+            "name":   (reg.findtext("name") or "?").strip(),
+            "offset": off_raw,
+            "word":   off_i // 4 if off_i is not None else None,
+            "access": (reg.findtext("access") or "?").strip(),
+            "desc":   (reg.findtext("description") or "").strip(),
+            "reset":  (reg.findtext("resetValue") or "").strip(),
+            "fields": fields,
+        })
+    regs.sort(key=lambda r: r["word"] if r["word"] is not None else 1<<30)
+    return dev, regs
+
+
+def render_leaf_register_doc(kind: str, svd: Path, out_path: Path,
+                              parent_kind_doc: Path | None = None) -> str:
+    """Render an ARM-style per-IP register-map markdown: summary table at
+    the top, then one bullet block per register with description, reset,
+    and a bit-field table (when the SVD declares per-bit fields)."""
+    dev, regs = parse_svd_registers_full(svd)
+    parent = parent_kind_doc if parent_kind_doc is not None else (IP_CSR_DIR / "data_path_subsystem.md")
     lines = [
         f"# {kind} register layout",
         "",
-        f"Parent: [hit_stack_system]({rel_to_doc(IP_CSR_DIR / 'hit_stack_system.md', out_path)}) (or other instance containers)",
+        f"Parent: [{parent.stem}]({rel_to_doc(parent, out_path)})",
         "",
-        f"Source SVD: `{rel_to_doc(svd, out_path)}`",
+        f"- SVD: `{rel_to_doc(svd, out_path)}`",
+        f"- Device: `{dev['name']}` v`{dev['version']}` (vendor `{dev['vendor']}`)",
+        f"- Aperture: {len(regs)} registers ({4 * (max([r['word'] for r in regs if r['word'] is not None], default=-1) + 1)} bytes used)",
         "",
         AUTO_BEGIN,
         "",
-        "## Registers",
+        "## Summary",
         "",
         "| word | offset | name | access | description |",
         "|---|---|---|---|---|",
     ]
     for r in regs:
         w = f"0x{r['word']:02x}" if r["word"] is not None else "--"
-        desc = r["description"][:120].replace("|", "\\|")
-        lines.append(f"| `{w}` | `{r['offset']}` | `{r['name']}` | {r['access']} | {desc} |")
+        short_desc = " ".join(r["desc"].split())[:100].replace("|", "\\|")
+        anchor = r["name"].lower()
+        lines.append(f"| `{w}` | `{r['offset']}` | [`{r['name']}`](#{anchor}) | {r['access']} | {short_desc} |")
+    lines.append("")
+    lines.append("## Registers (ARM-style detail)")
+    lines.append("")
+    for r in regs:
+        anchor = r["name"].lower()
+        lines.append(f"### `{r['name']}` <a id=\"{anchor}\"></a>")
+        lines.append("")
+        meta = [f"offset `{r['offset']}`", f"word `0x{r['word']:02x}`" if r["word"] is not None else "word `--`",
+                f"access `{r['access']}`"]
+        if r["reset"]:
+            meta.append(f"reset `{r['reset']}`")
+        lines.append(" · ".join(meta))
+        lines.append("")
+        if r["desc"]:
+            lines.append(r["desc"])
+            lines.append("")
+        if r["fields"]:
+            lines.append("| bits | name | access | description |")
+            lines.append("|---|---|---|---|")
+            for f in r["fields"]:
+                hi = f["off"] + f["width"] - 1
+                bit_range = f"[{hi}:{f['off']}]" if f["width"] > 1 else f"[{f['off']}]"
+                fdesc = " ".join((f["desc"] or "").split()).replace("|", "\\|")
+                lines.append(f"| `{bit_range}` | `{f['name']}` | {f['access']} | {fdesc} |")
+            lines.append("")
+        else:
+            lines.append("_no bit fields declared in the SVD._")
+            lines.append("")
     lines.extend([
-        "",
         "## Provenance",
         "",
         f"- svd: `{rel_to_doc(svd, out_path)}`",
@@ -611,13 +681,20 @@ def main(argv: list[str]) -> int:
             print(f"  {'check' if args.check else 'wrote'} {path.relative_to(SYSTEM_DIR)}")
             changed = True
     # 3) leaf register-layout docs
+    # Map leaf kind -> parent sub-subsystem (for the Parent: link)
+    leaf_parent = {}
+    for ssub in ssubs:
+        for slv in ssub.inner_slaves:
+            if slv.kind in RENDER_REGISTERS:
+                leaf_parent.setdefault(slv.kind, IP_CSR_DIR / f"{ssub.kind}.md")
     for kind in sorted(RENDER_REGISTERS):
         svd = find_svd(kind)
         if svd is None:
             print(f"  WARN: no SVD found for {kind}", file=sys.stderr)
             continue
         path = IP_CSR_DIR / f"{kind}.md"
-        if write_if_changed(path, render_leaf_register_doc(kind, svd, path), args.check):
+        parent_path = leaf_parent.get(kind)
+        if write_if_changed(path, render_leaf_register_doc(kind, svd, path, parent_path), args.check):
             print(f"  {'check' if args.check else 'wrote'} {path.relative_to(SYSTEM_DIR)}")
             changed = True
     # 4) SYSTEM_TOP.md (preserve prose, replace auto block)
