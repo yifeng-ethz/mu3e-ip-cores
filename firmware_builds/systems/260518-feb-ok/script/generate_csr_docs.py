@@ -61,7 +61,7 @@ AUTO_END = "<!-- END auto-generated -->"
 
 # Kinds that are SUB-SUBSYSTEMS (themselves contain other slaves) —
 # collapse to a single row at Level 1, generate a Level 2 doc.
-SUB_SUBSYSTEMS = {"hit_stack_system", "mutrig_datapath_system_v4", "arb_hit_type0_supercore"}
+SUB_SUBSYSTEMS = {"hit_stack_system_v4", "mutrig_datapath_system_v4", "arb_hit_type0_supercore"}
 
 # Vendor pass-through bridges hidden at Level 1 (they only forward; the
 # downstream slave is what the user reads). The bridge itself stays in

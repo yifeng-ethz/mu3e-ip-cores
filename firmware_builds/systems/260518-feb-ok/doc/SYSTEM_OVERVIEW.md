@@ -61,7 +61,7 @@ See [`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) for the SC-hub byte map.
 | `arb_hit_type0_supercore_0` (wrapper) | `arb_hit_type0_supercore` | `1.0` (kept) | **kept at 1.0** to avoid collision with the IP-Builder `arb_hit_type0_supercore_hw.tcl` variant (also kind=`arb_hit_type0_supercore`) that carries `26.6.5.0518` — bumping the qsys subsystem to a matching version makes Qsys's kind resolver pick the wrong (IP-Builder) variant and break port resolution |
 | `arb_hit_type0_supercore_0.lane_{0..7}` | `arb_hit_type0` | `26.6.5.0518` | OK |
 | `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.5.0522` | OK; **hist_bin 256-word burst aperture target** |
-| `hit_stack_subsystem_{0,1}` | `hit_stack_system` | `26.0.0.0518` | sub-subsystem, bumped from 1.0 |
+| `hit_stack_subsystem_{0,1}` | `hit_stack_system_v4` | `26.4.0.0518` | sub-subsystem, bumped from 1.0 |
 | `hit_stack_subsystem_{0,1}.feb_frame_assembly_0` | `feb_frame_assembly` | `26.0.0328` | OK |
 | `hit_stack_subsystem_{0,1}.ring_buffer_cam_{0..3}` | `ring_buffer_cam` | `26.2.13.0516` | OK |
 | `dbg_mm2runctrl_0` | `dbg_mm2runctrl` | `1.0.0` | **to drop** — replaced by `runctl_mgmt_host_0.runctl` AvST source |

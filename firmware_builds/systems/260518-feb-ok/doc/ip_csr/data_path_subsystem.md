@@ -19,8 +19,8 @@ Subsystem kind: `scifi_datapath_system_v4`  ·  version: `26.4.0.518`  ·  role:
 | `data_path_subsystem_histogram_statistics_0.csr` | `histogram_statistics_v2` | `26.3.5.522` | 128 B | -- | 0x00020400 |
 | `data_path_subsystem_mutrig_injector_0.csr` | `mutrig_injector_multiheader` | `26.1.2.517` | 64 B | -- | 0x00022000 |
 | `data_path_subsystem_arb_hit_type0_supercore_0` | `arb_hit_type0_supercore` | `1.0` | -- | [→ arb_hit_type0_supercore](arb_hit_type0_supercore.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0` | `hit_stack_system` | `26.0.0.518` | -- | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1` | `hit_stack_system` | `26.0.0.518` | -- | [→ hit_stack_system](hit_stack_system.md) | -- |
+| `data_path_subsystem_hit_stack_subsystem_0` | `hit_stack_system_v4` | `26.4.0.518` | -- | [→ hit_stack_system_v4](hit_stack_system_v4.md) | -- |
+| `data_path_subsystem_hit_stack_subsystem_1` | `hit_stack_system_v4` | `26.4.0.518` | -- | [→ hit_stack_system_v4](hit_stack_system_v4.md) | -- |
 | `data_path_subsystem_mutrig_datapath_subsystem_0` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
 | `data_path_subsystem_mutrig_datapath_subsystem_1` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
 | `data_path_subsystem_mutrig_datapath_subsystem_2` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
@@ -35,6 +35,6 @@ Subsystem kind: `scifi_datapath_system_v4`  ·  version: `26.4.0.518`  ·  role:
 
 - sopcinfo: `../../generated/qsys/feb_system_v4.sopcinfo`
 - generator: `../../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:52:37
+- regenerated: 2026-05-18T17:23:26
 
 <!-- END auto-generated -->

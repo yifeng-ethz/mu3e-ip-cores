@@ -3,7 +3,7 @@
  <component
    name="$${FILENAME}"
    displayName="$${FILENAME}"
-   version="26.0.0.0518"
+   version="26.4.0.0518"
    description=""
    tags=""
    categories="System" />

@@ -20,11 +20,22 @@ Source SVD: `../../../../../ring-buffer_cam/script/ring_buffer_cam.svd`
 | `0x07` | `0x1C` | `POP_COUNT` | read-only | Total drained hits. |
 | `0x08` | `0x20` | `OVERWRITE_COUNT` | read-only | Total overwrite events. |
 | `0x09` | `0x24` | `CACHE_MISS_COUNT` | read-only | Total cache-miss or empty-search events. |
+| `0x0a` | `0x28` | `INERR_COUNT_LATCHED` | read-only | Snapshot of INERR_COUNT captured on counter_freeze. |
+| `0x0b` | `0x2C` | `PUSH_COUNT_LATCHED` | read-only | Snapshot of PUSH_COUNT captured on counter_freeze. |
+| `0x0c` | `0x30` | `POP_COUNT_LATCHED` | read-only | Snapshot of POP_COUNT captured on counter_freeze. |
+| `0x0d` | `0x34` | `OVERWRITE_COUNT_LATCHED` | read-only | Snapshot of OVERWRITE_COUNT captured on counter_freeze. |
+| `0x0e` | `0x38` | `CACHE_MISS_COUNT_LATCHED` | read-only | Snapshot of CACHE_MISS_COUNT captured on counter_freeze. |
+| `0x0f` | `0x3C` | `DEASM_FULL_DROP_COUNT` | read-only | Live count of hits dropped because the upstream deassembly FIFO was full. |
+| `0x10` | `0x40` | `DEASM_FULL_DROP_COUNT_LATCHED` | read-only | Snapshot of DEASM_FULL_DROP_COUNT captured on counter_freeze. |
+| `0x11` | `0x44` | `POP_CMD_FULL_DROP_COUNT` | read-only | Live count of pop-commands dropped because the pop-command FIFO was full. |
+| `0x12` | `0x48` | `POP_CMD_FULL_DROP_COUNT_LATCHED` | read-only | Snapshot of POP_CMD_FULL_DROP_COUNT captured on counter_freeze. |
+| `0x13` | `0x4C` | `EGRESS_NOT_READY_DROP_COUNT` | read-only | Live count of hits dropped because the egress was not ready when a pop arrived. |
+| `0x14` | `0x50` | `EGRESS_NOT_READY_DROP_COUNT_LATCHED` | read-only | Snapshot of EGRESS_NOT_READY_DROP_COUNT captured on counter_freeze. |
 
 ## Provenance
 
 - svd: `../../../../../ring-buffer_cam/script/ring_buffer_cam.svd`
 - generator: `../../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:37:57
+- regenerated: 2026-05-18T17:19:14
 
 <!-- END auto-generated -->
