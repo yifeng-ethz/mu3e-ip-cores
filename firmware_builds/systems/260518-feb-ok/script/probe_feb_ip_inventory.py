@@ -12,6 +12,12 @@ Modes:
                      the original 13-row inventory report)
     --mode full      burst-read every word of the IP's addressSpan,
                      burst length capped by --burst (default 256)
+    --mode report    per-IP markdown section with one row per word:
+                     [offset | SVD register | expected (resetValue)
+                       | read single | read burst | diff status]
+                     Spans capped at min(span_words, 256). SVD is
+                     auto-mapped from sopcinfo `kind` using the
+                     KIND_TO_SVD table below.
 
 Coverage:
 
@@ -47,6 +53,29 @@ from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SYSTEM_DIR = SCRIPT_DIR.parent
+# mu3e-ip-cores worktree root (3 levels up from script/: <root>/firmware_builds/systems/<dated>/script/)
+REPO_ROOT  = SYSTEM_DIR.resolve().parents[2]
+
+# sopcinfo `kind` -> SVD path (relative to REPO_ROOT). Used by --mode report.
+KIND_TO_SVD = {
+    "altera_avalon_onchip_memory2":  "toolkits/infra/cmsis_svd/generic/scratch_pad_ram.svd",
+    "altera_avalon_mm_bridge":       "toolkits/infra/cmsis_svd/generic/mm_bridge_passthrough.svd",
+    "max10_prog_avmm":               "feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd",
+    "altera_temp_sense_ctrl":        "alt_temp_sense_controller/altera_temp_sense_ctrl.svd",
+    "onewire_master_controller":     "onewire_temp_sense/script/onewire_master_controller.svd",
+    "firefly_xcvr_ctrl":             "firefly_xcvr_i2c_master/firefly_xcvr_ctrl.svd",
+    "mutrig_cfg_ctrl":               "mutrig_controller/mutrig_cfg_ctrl.svd",
+    "lvds_rx_controller_pro":        "mu3e_lvds_controller/lvds_rx_controller_pro.svd",
+    "emulator_mutrig":               "emulator_mutrig/emulator_mutrig.svd",
+    "mts_preprocessor":              "mutrig_timestamp_processor/mts_processor.svd",
+    "histogram_statistics_v2":       "histogram_statistics/histogram_statistics.svd",
+    "mutrig_injector_multiheader":   "charge_injection/script/mutrig_injector.svd",
+    "sc_hub_v2":                     "slow-control_hub/sc_hub.svd",
+    "arb_hit_type0":                 "misc/arb_hit_type0/script/arb_hit_type0.svd",
+    "ring_buffer_cam":               "ring-buffer_cam/script/ring_buffer_cam.svd",
+    "feb_frame_assembly":            "feb_frame_assembly/feb_frame_assembly.svd",
+    "mutrig_reset_controller":       "mutrig_reset_controller/mutrig_reset_controller.svd",
+}
 
 DEFAULT_SOPCINFO = SYSTEM_DIR / "generated" / "qsys" / "feb_system_v4.sopcinfo"
 DEFAULT_SOF = SYSTEM_DIR / "syn" / "board_projects" / "fe_scifi_feb_v3" / "output_files" / "top.sof"
@@ -102,12 +131,32 @@ class Probe:
 
 
 @dataclass
+class SvdRegister:
+    name: str
+    address_offset: int      # byte offset within peripheral
+    reset_value: int | None  # None if not declared
+    access: str              # read-only / read-write / write-only / etc.
+    description: str = ""
+
+
+@dataclass
+class SvdPeripheral:
+    name: str
+    version: str
+    registers: list["SvdRegister"]    # sorted by address_offset
+    source_path: Path | None = None
+    error: str = ""
+
+
+@dataclass
 class ProbeResult:
     probe: Probe
-    words: list[int]    # words read (length depends on mode/burst)
+    words: list[int]              # single-read words (length depends on mode)
+    burst_words: list[int] | None = None  # burst-read words (--mode report)
     uid: int | None = None
     version: int | None = None
     error: str = ""
+    svd: "SvdPeripheral | None" = None
 
 
 def _param(c: ET.Element, name: str) -> str | None:
@@ -270,6 +319,8 @@ def sc_write_word(sc_tool: Path, swb_lock: Path, link: int, addr_word: int,
 
 def probe_one(p: Probe, sc_tool: Path, swb_lock: Path, link: int,
               mode: str, burst: int) -> ProbeResult:
+    if mode == "report":
+        return probe_report(p, sc_tool, swb_lock, link, burst)
     if not p.reachable:
         return ProbeResult(
             probe=p, words=[],
@@ -318,6 +369,98 @@ def probe_one(p: Probe, sc_tool: Path, swb_lock: Path, link: int,
         ver = all_words[1] if len(all_words) >= 2 else None
         return ProbeResult(probe=p, words=all_words, uid=uid, version=ver)
     return ProbeResult(probe=p, words=[], error=f"unknown mode: {mode}")
+
+
+def load_svd_for_kind(kind: str) -> SvdPeripheral | None:
+    """Locate the SVD file for an IP kind via KIND_TO_SVD and parse its
+    first <peripheral>'s register table. Returns None when no SVD is
+    mapped (passthroughs, unknown IPs) and an SvdPeripheral with
+    .error set when the file exists but cannot be parsed."""
+    rel = KIND_TO_SVD.get(kind)
+    if rel is None:
+        return None
+    path = REPO_ROOT / rel
+    if not path.is_file():
+        return SvdPeripheral(name=kind, version="", registers=[],
+                             source_path=path,
+                             error=f"SVD path not found: {path}")
+    try:
+        root = ET.parse(path).getroot()
+    except Exception as e:
+        return SvdPeripheral(name=kind, version="", registers=[],
+                             source_path=path, error=f"XML parse error: {e}")
+    dev_name = root.findtext("name") or ""
+    dev_ver = root.findtext("version") or ""
+    regs: list[SvdRegister] = []
+    # CMSIS-SVD: device -> peripherals -> peripheral -> registers -> register.
+    # Take the first peripheral (our IPs only declare one).
+    for periph in root.findall(".//peripheral"):
+        for reg in periph.findall(".//register"):
+            name = reg.findtext("name") or ""
+            off_s = reg.findtext("addressOffset") or "0"
+            rv_s = reg.findtext("resetValue")
+            access = reg.findtext("access") or ""
+            desc = (reg.findtext("description") or "").strip().replace("\n", " ")
+            try:
+                off = int(off_s, 0)
+            except ValueError:
+                continue
+            rv: int | None
+            try:
+                rv = int(rv_s, 0) if rv_s else None
+            except ValueError:
+                rv = None
+            regs.append(SvdRegister(name=name, address_offset=off,
+                                    reset_value=rv, access=access,
+                                    description=desc[:160]))
+        if regs:
+            break
+    regs.sort(key=lambda r: r.address_offset)
+    return SvdPeripheral(name=dev_name, version=dev_ver,
+                         registers=regs, source_path=path)
+
+
+def probe_report(p: Probe, sc_tool: Path, swb_lock: Path, link: int,
+                 burst: int) -> ProbeResult:
+    """Read the IP's full CSR aperture (capped at min(span_words, 256))
+    via SINGLE reads AND via one or more BURST reads, plus look up the
+    SVD register layout. Returns both vectors for diffing."""
+    if not p.reachable:
+        return ProbeResult(
+            probe=p, words=[],
+            error=(f"out-of-bridge: data-path internal 0x{p.local_offset:05x}"
+                   f" >= ctrl mm_bridge span 0x{CTRL_BRIDGE_TO_DATA_SPAN:05x}"),
+        )
+    svd = load_svd_for_kind(p.kind)
+    # cap span at 256 words per the user spec for --mode report
+    total = min(p.span_word, 256)
+    if total == 0:
+        return ProbeResult(probe=p, words=[], svd=svd,
+                           error="zero-span aperture")
+    # Single-word loop
+    singles: list[int] = []
+    for off in range(total):
+        words, err = sc_read(sc_tool, swb_lock, link, p.base_word + off, 1)
+        if err:
+            return ProbeResult(probe=p, words=singles, svd=svd,
+                               error=f"single@+0x{off*4:03x}: {err}")
+        singles.append(words[0])
+    # Burst loop, chunked by `burst` words at most
+    chunk = max(1, min(burst, 256))
+    bursts: list[int] = []
+    off = 0
+    while off < total:
+        n = min(chunk, total - off)
+        words, err = sc_read(sc_tool, swb_lock, link, p.base_word + off, n)
+        if err:
+            return ProbeResult(probe=p, words=singles, burst_words=bursts,
+                               svd=svd, error=f"burst@+0x{off*4:03x}: {err}")
+        bursts.extend(words)
+        off += n
+    uid = singles[0] if singles else None
+    ver = singles[1] if len(singles) >= 2 else None
+    return ProbeResult(probe=p, words=singles, burst_words=bursts,
+                       svd=svd, uid=uid, version=ver)
 
 
 def program_feb(quartus_pgm: Path, cable: str, sof: Path) -> tuple[bool, str]:
@@ -399,6 +542,102 @@ def render_full_word_dump(results: list[ProbeResult]) -> list[str]:
     return lines
 
 
+def _word_to_register(svd: SvdPeripheral | None, byte_off: int) -> SvdRegister | None:
+    """Return the SvdRegister whose addressOffset covers the given
+    byte offset within an IP. Our SVDs declare registers at 4-byte
+    word boundaries, so a register at addressOffset N covers exactly
+    one word [N, N+4). Returns None if no register exact-matches."""
+    if svd is None:
+        return None
+    for r in svd.registers:
+        if r.address_offset == byte_off:
+            return r
+    return None
+
+
+def render_report_section(r: ProbeResult) -> list[str]:
+    """One per-IP section for --mode report.
+
+    Each word in the IP's aperture (capped at min(span_words, 256)) is
+    one row: offset | SVD register | expected (resetValue) | single
+    read | burst read | diff status (match if single==burst==expected,
+    else flagged)."""
+    p = r.probe
+    lines: list[str] = []
+    title = f"### `{p.instance}.{p.port}`  (kind=`{p.kind}`)"
+    lines.append(title)
+    lines.append("")
+    lines.append(f"- **sc-byte base**: `0x{p.base_byte:06X}`  "
+                 f"(sc-word `0x{p.base_word:05X}`)")
+    lines.append(f"- **addressSpan**: `0x{p.span_byte:04X}` bytes "
+                 f"(`{p.span_word}` words)")
+    span_w = min(p.span_word, 256)
+    lines.append(f"- **probed**: first `{span_w}` words "
+                 f"(min(span_words, 256))")
+    if r.svd is not None:
+        if r.svd.error:
+            lines.append(f"- **SVD**: ERROR — `{r.svd.error}`")
+        else:
+            lines.append(f"- **SVD**: `{r.svd.source_path.name}` "
+                         f"v{r.svd.version}  "
+                         f"({len(r.svd.registers)} registers declared)")
+    else:
+        lines.append("- **SVD**: (not mapped for this kind)")
+    if r.error:
+        lines.append(f"- **probe error**: `{r.error}`")
+    lines.append("")
+    if not r.words:
+        lines.append("> No readback data — probe failed before any word was read.")
+        lines.append("")
+        return lines
+    lines.append("| offset | SVD register | expected (reset) | read single | read burst | diff |")
+    lines.append("|---|---|---|---|---|---|")
+    nw = min(len(r.words),
+             len(r.burst_words) if r.burst_words is not None else len(r.words))
+    n_match = n_drift = n_no_svd = 0
+    for i in range(nw):
+        byte_off = i * 4
+        reg = _word_to_register(r.svd, byte_off)
+        reg_name = reg.name if reg else "—"
+        if reg and reg.reset_value is not None:
+            exp_s = f"`0x{reg.reset_value:08X}`"
+            expected = reg.reset_value
+        else:
+            exp_s = "—"
+            expected = None
+        single = r.words[i]
+        burst = r.burst_words[i] if r.burst_words is not None else single
+        # Decide diff status
+        if single != burst:
+            diff = "BURST≠SINGLE"
+        elif expected is None:
+            diff = "no-svd-reset"
+            n_no_svd += 1
+        elif single == expected:
+            diff = "match"
+            n_match += 1
+        else:
+            diff = "drift"
+            n_drift += 1
+        lines.append(
+            f"| `+0x{byte_off:03X}` | `{reg_name}` | {exp_s} "
+            f"| `0x{single:08X}` | `0x{burst:08X}` | {diff} |"
+        )
+    lines.append("")
+    lines.append(
+        f"**Per-IP summary**: {n_match} match / {n_drift} drift / "
+        f"{n_no_svd} no-svd-reset (of {nw} words)"
+    )
+    if r.burst_words is not None and len(r.burst_words) != len(r.words):
+        lines.append(f"")
+        lines.append(
+            f"> NOTE: burst returned {len(r.burst_words)} words vs "
+            f"single returned {len(r.words)} words (truncated)."
+        )
+    lines.append("")
+    return lines
+
+
 def render_markdown(results: list[ProbeResult], header: dict[str, str],
                     mode: str) -> str:
     lines: list[str] = []
@@ -407,14 +646,37 @@ def render_markdown(results: list[ProbeResult], header: dict[str, str],
     for k, v in header.items():
         lines.append(f"- **{k}**: {v}")
     lines.append("")
-    lines.append("## Per-IP CSR readback")
-    lines.append("")
-    lines.extend(render_summary_table(results, mode))
-    if mode == "full":
+    if mode == "report":
+        lines.append("## Per-IP CSR summary (rollup)")
         lines.append("")
-        lines.append("## Per-IP word dump (--mode full)")
+        lines.extend(render_summary_table(results, mode))
         lines.append("")
-        lines.extend(render_full_word_dump(results))
+        lines.append("## Per-IP CSR word-by-word report")
+        lines.append("")
+        lines.append(
+            "Each section is one Avalon-MM slave seen by `sc_hub_cmd_pipe.m0` "
+            "(direct on the control path or via the v4 ctrl2data bridge for "
+            "data-path slaves). Each row is one 32-bit word. `expected` is the "
+            "register's `resetValue` from its SVD; **drift** means the live "
+            "readback differs from the reset value (counters, status, anything "
+            "the FSM has written). `BURST≠SINGLE` means the single-word and "
+            "burst-aperture readbacks disagreed at the same offset — that "
+            "indicates a bridge / response-pipeline issue, NOT live drift."
+        )
+        lines.append("")
+        for r in results:
+            if r.probe.is_passthrough:
+                continue
+            lines.extend(render_report_section(r))
+    else:
+        lines.append("## Per-IP CSR readback")
+        lines.append("")
+        lines.extend(render_summary_table(results, mode))
+        if mode == "full":
+            lines.append("")
+            lines.append("## Per-IP word dump (--mode full)")
+            lines.append("")
+            lines.extend(render_full_word_dump(results))
     return "\n".join(lines) + "\n"
 
 
@@ -432,9 +694,10 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--jtag-cable", default=DEFAULT_JTAG_CABLE)
     ap.add_argument("--link", type=int, default=2,
                     help="SWB SC ring link for FEB SciFi (default 2)")
-    ap.add_argument("--mode", choices=("uid", "version", "full"),
+    ap.add_argument("--mode", choices=("uid", "version", "full", "report"),
                     default="version",
-                    help="Probe depth (default: version)")
+                    help="Probe depth (default: version). report = per-IP "
+                         "per-word SVD-vs-readback comparison.")
     ap.add_argument("--burst", type=int, default=256,
                     help="Max burst length for --mode full (1..256). "
                          "The mm_bridge MAX_BURST_SIZE is 256.")
