@@ -31,7 +31,7 @@ proc configure_arb_child {name lane} {
         set debug_level $::env(DEBUG_LEVEL)
     }
 
-    add_instance $name arb_hit_type0 26.6.0.0512
+    add_instance $name arb_hit_type0 26.6.5.0518
     set_required_param $name MODE_DEFAULT 1
     set_required_param $name WATCHDOG_DEFAULT 500
     set_required_param $name FIFO_DEPTH 16
@@ -73,7 +73,7 @@ if {[info exists ::system_dir]} {
 } else {
     error "SYSTEM_DIR must be set by the Qsys generation wrapper"
 }
-set qsys_path [file join $system_dir quartus_systems arb_hit_type0_supercore.qsys]
+set qsys_path [file join $system_dir generated qsys arb_hit_type0_supercore.qsys]
 file mkdir [file dirname $qsys_path]
 if {[file exists $qsys_path]} {
     exec chmod u+w $qsys_path
