@@ -308,10 +308,10 @@
    version="18.1"
    enabled="1">
   <parameter name="ADDRESS_UNITS" value="WORDS" />
-  <parameter name="ADDRESS_WIDTH" value="14" />
+  <parameter name="ADDRESS_WIDTH" value="15" />
   <parameter name="DATA_WIDTH" value="32" />
   <parameter name="LINEWRAPBURSTS" value="0" />
-  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_BURST_SIZE" value="256" />
   <parameter name="MAX_PENDING_RESPONSES" value="1" />
   <parameter name="PIPELINE_COMMAND" value="1" />
   <parameter name="PIPELINE_RESPONSE" value="1" />

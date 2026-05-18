@@ -11,12 +11,11 @@ Subsystem kind: `upload_system_v4`  ·  version: `26.4.0.518`  ·  role: upload:
 | instance | kind | version | span | inside view | notes |
 |---|---|---|---|---|---|
 | `upload_subsystem_runctl_mgmt_host_0.csr` | `runctl_mgmt_host` | `26.3.2.513` | 128 B | [svd](../../../../../run-control_mgmt/runctl_mgmt_host.svd) | 0x00000000 |
-| `upload_subsystem_csr_bridge.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | -- |
 
 ## Provenance
 
 - sopcinfo: `../../generated/qsys/feb_system_v4.sopcinfo`
 - generator: `../../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:45:03
+- regenerated: 2026-05-18T16:52:37
 
 <!-- END auto-generated -->

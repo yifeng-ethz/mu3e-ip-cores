@@ -11,107 +11,30 @@ Subsystem kind: `scifi_datapath_system_v4`  ·  version: `26.4.0.518`  ·  role:
 | instance | kind | version | span | inside view | notes |
 |---|---|---|---|---|---|
 | `data_path_subsystem_lvds_rx_controller_pro_0.csr` | `lvds_rx_controller_pro` | `25.1.631` | 64 B | [svd](../../../../../mu3e_lvds_controller/lvds_rx_controller_pro.svd) | 0x00000000 |
-| `data_path_subsystem_mutrig_datapath_subsystem_0_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00000860 |
-| `data_path_subsystem_mutrig_datapath_subsystem_1_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00001860 |
 | `data_path_subsystem_emulator_mutrig_qsys_inst.csr` | `emulator_mutrig` | `26.3.3.517` | 256 B | [svd](../../../../../emulator_mutrig/emulator_mutrig.svd) | 0x00002000 |
 | `data_path_subsystem_dbg_mm2runctrl_0.csr` | `dbg_mm2runctrl` | `1.0.0` | 64 B | -- | 0x00002200 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_0.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002280 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_1.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002300 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_2.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002380 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_3.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002400 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_4.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002480 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_5.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002500 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002580 |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_7.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00002600 |
-| `data_path_subsystem_mutrig_datapath_subsystem_2_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00002860 |
-| `data_path_subsystem_mutrig_datapath_subsystem_3_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00003860 |
 | `data_path_subsystem_mts_preprocessor_0.csr` | `mts_preprocessor` | `26.3.5.518` | 32 B | -- | 0x00004000 |
-| `data_path_subsystem_mutrig_datapath_subsystem_4_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00004860 |
-| `data_path_subsystem_mutrig_datapath_subsystem_5_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00005860 |
-| `data_path_subsystem_mutrig_datapath_subsystem_6_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00006860 |
-| `data_path_subsystem_mutrig_datapath_subsystem_7_backpressure_fifo.csr` | `altera_avalon_sc_fifo` | `18.1` | 16 B | vendor | 0x00007860 |
 | `data_path_subsystem_mts_preprocessor_1.csr` | `mts_preprocessor` | `26.3.5.518` | 32 B | -- | 0x00008000 |
-| `data_path_subsystem_mm_pipeline_jtagmaster2rstctrl.s0` | `altera_avalon_mm_bridge` | `18.1` | 256 B | vendor | 0x00011000 |
 | `data_path_subsystem_histogram_statistics_0.hist_bin` | `histogram_statistics_v2` | `26.3.5.522` | 1024 B (1 KB) | -- | 0x00020000 |
 | `data_path_subsystem_histogram_statistics_0.csr` | `histogram_statistics_v2` | `26.3.5.522` | 128 B | -- | 0x00020400 |
 | `data_path_subsystem_mutrig_injector_0.csr` | `mutrig_injector_multiheader` | `26.1.2.517` | 64 B | -- | 0x00022000 |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_0` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_1` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_2` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_3` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_4` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_5` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_6` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0.csr_7` | `arb_hit_type0_supercore` | `1.0` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_0.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_1.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_2.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_3.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_4.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_5.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_6.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_arb_hit_type0_supercore_0_lane_7.csr` | `arb_hit_type0` | `26.6.5.518` | 128 B | -- | -- |
-| `data_path_subsystem_hit_stack_subsystem_0.feb_frame_assembly_csr` | `hit_stack_system` | `26.0.0.518` | 64 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0.ring_buffer_cam_0_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0.ring_buffer_cam_1_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0.ring_buffer_cam_2_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0.ring_buffer_cam_3_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0_feb_frame_assembly_0.csr` | `feb_frame_assembly` | `26.0.328` | 64 B | [→ feb_frame_assembly regs](feb_frame_assembly.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_0.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_1.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_2.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_0_ring_buffer_cam_3.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1.feb_frame_assembly_csr` | `hit_stack_system` | `26.0.0.518` | 64 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1.ring_buffer_cam_0_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1.ring_buffer_cam_1_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1.ring_buffer_cam_2_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1.ring_buffer_cam_3_csr` | `hit_stack_system` | `26.0.0.518` | 128 B | [→ hit_stack_system](hit_stack_system.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1_feb_frame_assembly_0.csr` | `feb_frame_assembly` | `26.0.328` | 64 B | [→ feb_frame_assembly regs](feb_frame_assembly.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_0.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_1.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_2.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_hit_stack_subsystem_1_ring_buffer_cam_3.csr` | `ring_buffer_cam` | `26.2.13.516` | 128 B | [→ ring_buffer_cam regs](ring_buffer_cam.md) | -- |
-| `data_path_subsystem_mm_clock_crossing_bridge.s0` | `altera_avalon_mm_clock_crossing_bridge` | `18.1` | 65536 B (64 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_emu_dbg.s0` | `altera_avalon_mm_bridge` | `18.1` | 4096 B (4 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_hist.s0` | `altera_avalon_mm_bridge` | `18.1` | 2048 B (2 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_hitstack_ring.s0` | `altera_avalon_mm_bridge` | `18.1` | 1024 B (1 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_low.s0` | `altera_avalon_mm_bridge` | `18.1` | 8192 B (8 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_mts1.s0` | `altera_avalon_mm_bridge` | `18.1` | 32 B | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_mutrig3.s0` | `altera_avalon_mm_bridge` | `18.1` | 4096 B (4 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_mutrig4_mts0.s0` | `altera_avalon_mm_bridge` | `18.1` | 4096 B (4 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_mutrig5.s0` | `altera_avalon_mm_bridge` | `18.1` | 4096 B (4 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_mutrig6.s0` | `altera_avalon_mm_bridge` | `18.1` | 4096 B (4 KB) | vendor | -- |
-| `data_path_subsystem_mm_pipeline_lvds_csr_mutrig7.s0` | `altera_avalon_mm_bridge` | `18.1` | 4096 B (4 KB) | vendor | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_0.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_0.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_0_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_1.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_1.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_1_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_2.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_2.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_2_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_3.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_3.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_3_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_4.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_4.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_4_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_5.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_5.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_5_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_6.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_6.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_6_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_7.backpressure_fifo_csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_7.csr` | `mutrig_datapath_system_v4` | `26.4.0.518` | 16 B | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
-| `data_path_subsystem_mutrig_datapath_subsystem_7_mutrig_frame_deassembly_0.csr` | `mutrig_frame_deassembly` | `26.2.0.511` | 16 B | [svd](../../../../../mutrig_frame_deassembly/mutrig_frame_deassembly.svd) | -- |
+| `data_path_subsystem_arb_hit_type0_supercore_0` | `arb_hit_type0_supercore` | `1.0` | -- | [→ arb_hit_type0_supercore](arb_hit_type0_supercore.md) | -- |
+| `data_path_subsystem_hit_stack_subsystem_0` | `hit_stack_system` | `26.0.0.518` | -- | [→ hit_stack_system](hit_stack_system.md) | -- |
+| `data_path_subsystem_hit_stack_subsystem_1` | `hit_stack_system` | `26.0.0.518` | -- | [→ hit_stack_system](hit_stack_system.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_0` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_1` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_2` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_3` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_4` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_5` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_6` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
+| `data_path_subsystem_mutrig_datapath_subsystem_7` | `mutrig_datapath_system_v4` | `26.4.0.518` | -- | [→ mutrig_datapath_system_v4](mutrig_datapath_system_v4.md) | -- |
 | `data_path_subsystem_mutrig_reset_controller_0.reconfig_mgmt` | `mutrig_reset_controller` | `26.0.0.518` | 256 B | [svd](../../../../../mutrig_reset_controller/mutrig_reset_controller.svd) | -- |
 
 ## Provenance
 
 - sopcinfo: `../../generated/qsys/feb_system_v4.sopcinfo`
 - generator: `../../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:45:03
+- regenerated: 2026-05-18T16:52:37
 
 <!-- END auto-generated -->

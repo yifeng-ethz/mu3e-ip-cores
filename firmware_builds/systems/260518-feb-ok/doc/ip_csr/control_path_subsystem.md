@@ -15,19 +15,15 @@ Subsystem kind: `debug_sc_system_v4`  ·  version: `26.4.0.518`  ·  role: ctrl-
 | `control_path_subsystem_max10_prog_avmm_0.csr_avmm` | `max10_prog_avmm` | `26.0.0.518` | 4096 B (4 KB) | [svd](../../../../../feb_max10_comm/legacy/max10_prog_avmm/max10_prog_avmm.svd) | 0x00012000 |
 | `control_path_subsystem_firefly_xcvr_ctrl_0.firefly` | `firefly_xcvr_ctrl` | `26.2.423` | 128 B | [svd](../../../../../firefly_xcvr_i2c_master/firefly_xcvr_ctrl.svd) | 0x00014000 |
 | `control_path_subsystem_on_die_temp_sense_ctrl.csr` | `altera_temp_sense_ctrl` | `1.1` | 4 B | vendor | 0x00015000 |
-| `control_path_subsystem_legacy_firefly_bridge.s0` | `altera_avalon_mm_bridge` | `18.1` | 1024 B (1 KB) | vendor | 0x00016000 |
-| `control_path_subsystem_mm_bridge.s0` | `altera_avalon_mm_bridge` | `18.1` | 65536 B (64 KB) | vendor | 0x00020000 |
-| `control_path_subsystem_upload_mm_bridge.s0` | `altera_avalon_mm_bridge` | `18.1` | 128 B | vendor | 0x00030000 |
 | `control_path_subsystem_mutrig_cfg_ctrl_0.avmm_csr` | `mutrig_cfg_ctrl` | `24.1.423` | 16 B | [svd](../../../../../mutrig_controller/mutrig_cfg_ctrl.svd) | 0x0003f010 |
 | `control_path_subsystem_mutrig_cfg_ctrl_0.avmm_scanresult` | `mutrig_cfg_ctrl` | `24.1.423` | 65536 B (64 KB) | [svd](../../../../../mutrig_controller/mutrig_cfg_ctrl.svd) | -- |
 | `control_path_subsystem_onewire_master_0.ctrl` | `onewire_master` | `26.2.1.428` | 64 B | -- | -- |
 | `control_path_subsystem_sc_hub.csr` | `sc_hub_v2` | `26.6.10.423` | 128 B | -- | -- |
-| `control_path_subsystem_sc_hub_cmd_pipe.s0` | `altera_avalon_mm_bridge` | `18.1` | 262144 B (256 KB) | vendor | -- |
 
 ## Provenance
 
 - sopcinfo: `../../generated/qsys/feb_system_v4.sopcinfo`
 - generator: `../../script/generate_csr_docs.py`
-- regenerated: 2026-05-18T16:45:01
+- regenerated: 2026-05-18T16:52:36
 
 <!-- END auto-generated -->
