@@ -1,6 +1,6 @@
 # control_path_subsystem_firefly_xcvr_ctrl_0.firefly CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `firefly_xcvr_ctrl`
 - **sc-byte base**: `0x004000`
 - **addressSpan**: `0x0200` bytes
@@ -17,11 +17,11 @@
 | offset | register | SVD (reset + description) | UVM (expected) | board (single / burst) | diff |
 |---|---|---|---|---|---|
 | `+0x000` | `FF1_TEMP_STATUS` | _(no reset declared)_ — Firefly 1 status/control word. Reads return temperature in bits [7:0]. When hidden CSR mode is enabled, bits [27:24] expose present_n and int_n pins. Writing bi | — | `0x00000039` / `0x00000039` | no-svd-reset |
-| `+0x004` | `FF1_VCC_RESET` | _(no reset declared)_ — Firefly 1 VCC/control word. Reads return the low 16 bits of the VCC measurement. Writing bit 0 requests a Firefly reset pulse. | — | `0x0000754E` / `0x00000039` | BURST≠SINGLE |
-| `+0x008` | `FF1_RXPWR1_HIDDEN` | _(no reset declared)_ — Firefly 1 RX power channel 1 on read. Writing bit 0 enables or disables the hidden CSR page that augments FF1_TEMP_STATUS. | — | `0x00000F46` / `0x00000F46` | no-svd-reset |
-| `+0x00C` | `FF1_RXPWR2` | _(no reset declared)_ — Firefly 1 received optical power for channel 2 in the low 16 bits. | — | `0x00000CB2` / `0x00000F46` | BURST≠SINGLE |
-| `+0x010` | `FF1_RXPWR3` | _(no reset declared)_ — Firefly 1 received optical power for channel 3 in the low 16 bits. | — | `0x00000BE0` / `0x00000BF4` | BURST≠SINGLE |
-| `+0x014` | `FF1_RXPWR4` | _(no reset declared)_ — Firefly 1 received optical power for channel 4 in the low 16 bits. | — | `0x000018A6` / `0x00000BF4` | BURST≠SINGLE |
+| `+0x004` | `FF1_VCC_RESET` | _(no reset declared)_ — Firefly 1 VCC/control word. Reads return the low 16 bits of the VCC measurement. Writing bit 0 requests a Firefly reset pulse. | — | `0x00007580` / `0x00000039` | BURST≠SINGLE |
+| `+0x008` | `FF1_RXPWR1_HIDDEN` | _(no reset declared)_ — Firefly 1 RX power channel 1 on read. Writing bit 0 enables or disables the hidden CSR page that augments FF1_TEMP_STATUS. | — | `0x00000F3C` / `0x00000F32` | BURST≠SINGLE |
+| `+0x00C` | `FF1_RXPWR2` | _(no reset declared)_ — Firefly 1 received optical power for channel 2 in the low 16 bits. | — | `0x00000CB2` / `0x00000F32` | BURST≠SINGLE |
+| `+0x010` | `FF1_RXPWR3` | _(no reset declared)_ — Firefly 1 received optical power for channel 3 in the low 16 bits. | — | `0x00000BEA` / `0x00000BEA` | no-svd-reset |
+| `+0x014` | `FF1_RXPWR4` | _(no reset declared)_ — Firefly 1 received optical power for channel 4 in the low 16 bits. | — | `0x00001888` / `0x00000BEA` | BURST≠SINGLE |
 | `+0x018` | `FF1_ALARM` | _(no reset declared)_ — Firefly 1 latched alarm/status flags. Bits clear on read inside the module according to the Firefly alarm semantics. | — | `0x50000000` / `0x50000000` | no-svd-reset |
 | `+0x01C` | `FF2_TEMP_STATUS` | _(no reset declared)_ — Firefly 2 status word. Reads return temperature in bits [7:0]. | — | `0x000000FF` / `0x50000000` | BURST≠SINGLE |
 | `+0x020` | `FF2_VCC` | _(no reset declared)_ — Firefly 2 VCC measurement in the low 16 bits. | — | `0x0000FFFF` / `0x0000FFFF` | no-svd-reset |

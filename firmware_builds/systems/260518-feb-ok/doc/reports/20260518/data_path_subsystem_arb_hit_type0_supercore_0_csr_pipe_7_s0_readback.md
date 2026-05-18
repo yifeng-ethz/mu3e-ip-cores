@@ -1,6 +1,6 @@
 # data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_7.s0 CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `altera_avalon_mm_bridge`
 - **sc-byte base**: `0x022380`
 - **addressSpan**: `0x0200` bytes

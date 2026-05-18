@@ -1,6 +1,6 @@
 # data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_3.s0 CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `altera_avalon_mm_bridge`
 - **sc-byte base**: `0x022180`
 - **addressSpan**: `0x0200` bytes
@@ -52,7 +52,7 @@
 | `+0x088` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x08C` | `—` | — | — | `0x00000002` / `0x00000002` | no-svd-reset |
 | `+0x090` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
-| `+0x094` | `—` | — | — | `0x00000001` / `0x00000001` | no-svd-reset |
+| `+0x094` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x098` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x09C` | `—` | — | — | `0x00000001` / `0x00000001` | no-svd-reset |
 | `+0x0A0` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |

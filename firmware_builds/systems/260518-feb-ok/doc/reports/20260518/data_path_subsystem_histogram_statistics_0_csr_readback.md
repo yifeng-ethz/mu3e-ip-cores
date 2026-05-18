@@ -1,6 +1,6 @@
 # data_path_subsystem_histogram_statistics_0.csr CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `histogram_statistics_v2`
 - **sc-byte base**: `0x027000`
 - **addressSpan**: `0x0200` bytes

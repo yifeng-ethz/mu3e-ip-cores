@@ -822,15 +822,15 @@
  <interface name="inject" internal="emulator_inject_fanout.out8" type="conduit" dir="end" />
  <interface name="inject_aux" internal="emulator_inject_fanout.inject_aux_in" type="conduit" dir="end" />
  <interface name="lvds_outclock" internal="receiver_clock_125.out_clk" type="clock" dir="start" />
- <interface name="lvds_pll_inclock" internal="lvds_rx_28nm_0.inclock" type="clock" dir="end" />
+ <interface name="lvds_pll_inclock" internal="mu3e_lvds_controller_0.inclock" type="clock" dir="end" />
  <interface name="monitor_clock_125_in" internal="monitor_clock_125.clk_in" type="clock" dir="end" />
  <interface name="monitor_reset_in_reset" internal="monitor_clock_125.clk_in_reset" type="reset" dir="end" />
  <interface name="mutrig_reset" internal="mutrig_reset_controller_0.mutrig_reset" type="conduit" dir="end" />
  <interface name="osc_clock_50_in" internal="mutrig_injector_0.osc_clock_interface" type="clock" dir="end" />
- <interface name="redriver" internal="lvds_rx_controller_pro_0.redriver" type="conduit" dir="end" />
- <interface name="rstlink" internal="lvds_rx_controller_pro_0.decoded8" type="avalon_streaming" dir="start" />
+ <interface name="redriver" internal="mu3e_lvds_controller_0.redriver" type="conduit" dir="end" />
+ <interface name="rstlink" internal="mu3e_lvds_controller_0.decoded8" type="avalon_streaming" dir="start" />
  <interface name="runctl_mgmt_host" internal="run_control_mux.in0" type="avalon_streaming" dir="end" />
- <interface name="serial" internal="lvds_rx_28nm_0.serial" type="conduit" dir="end" />
+ <interface name="serial" internal="mu3e_lvds_controller_0.serial" type="conduit" dir="end" />
  <interface name="xcvr_clock" internal="xcvr156_clock.clk_in" type="clock" dir="end" />
  <interface name="xcvr_reset" internal="xcvr156_clock.clk_in_reset" type="reset" dir="end" />
  <module name="arb_hit_type0_supercore_0" kind="arb_hit_type0_supercore" version="1.0" enabled="1">
@@ -1252,15 +1252,6 @@
   <parameter name="AUTO_XCVR_CLOCK_CLOCK_RATE" value="156250000" />
   <parameter name="AUTO_XCVR_CLOCK_RESET_DOMAIN" value="9" />
  </module>
- <module name="lvds_rx_28nm_0" kind="altera_lvds_rx_28nm" version="24.0.1110" enabled="1">
-  <parameter name="N_LANE" value="9" />
- </module>
- <module name="lvds_rx_controller_pro_0" kind="lvds_rx_controller_pro" version="25.1.631" enabled="1">
-  <parameter name="AVMM_ADDR_W" value="4" />
-  <parameter name="DECODED_USE_CHANNEL" value="1" />
-  <parameter name="N_LANE" value="9" />
-  <parameter name="SYNC_PATTERN_SEL" value="0xFA" />
- </module>
  <module name="master_datapath" kind="altera_jtag_avalon_master" version="18.1" enabled="1">
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
@@ -1665,7 +1656,7 @@
  </module>
  <connection kind="avalon" version="18.1" start="mm_pipeline_lvds_csr_low.m0" end="mutrig_datapath_subsystem_0.backpressure_fifo_csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="baseAddress" value="0x00001000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="avalon" version="18.1" start="mm_pipeline_lvds_csr_low.m0" end="mutrig_datapath_subsystem_1.backpressure_fifo_csr">
@@ -1708,7 +1699,7 @@
   <parameter name="baseAddress" value="0x0400" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="avalon" version="18.1" start="mm_pipeline_lvds_csr_low.m0" end="lvds_rx_controller_pro_0.csr">
+ <connection kind="avalon" version="18.1" start="mm_pipeline_lvds_csr_low.m0" end="mu3e_lvds_controller_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
@@ -1785,7 +1776,7 @@
  </connection>
  <connection kind="avalon" version="18.1" start="mm_pipeline_lvds_csr_low.m0" end="mm_pipeline_jtagmaster2rstctrl.s0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0200" />
+  <parameter name="baseAddress" value="0x00001100" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="avalon" version="18.1" start="mm_clock_crossing_bridge.m0" end="mm_pipeline_lvds_csr_low.s0">
@@ -1875,7 +1866,7 @@
  </connection>
  <connection kind="avalon" version="18.1" start="master_datapath.master" end="mutrig_datapath_subsystem_0.backpressure_fifo_csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0860" />
+  <parameter name="baseAddress" value="0x00008860" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection kind="avalon" version="18.1" start="master_datapath.master" end="mutrig_injector_0.csr">
@@ -1888,7 +1879,7 @@
   <parameter name="baseAddress" value="0x00004000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="avalon" version="18.1" start="master_datapath.master" end="lvds_rx_controller_pro_0.csr">
+ <connection kind="avalon" version="18.1" start="master_datapath.master" end="mu3e_lvds_controller_0.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x00000000" />
   <parameter name="defaultConnection" value="false" />
@@ -1958,14 +1949,14 @@
   <parameter name="baseAddress" value="0x00011000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded0" end="decoded_lane_mux_0.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded1" end="decoded_lane_mux_1.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded2" end="decoded_lane_mux_2.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded3" end="decoded_lane_mux_3.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded4" end="decoded_lane_mux_4.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded5" end="decoded_lane_mux_5.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded6" end="decoded_lane_mux_6.in0" />
- <connection kind="avalon_streaming" version="18.1" start="lvds_rx_controller_pro_0.decoded7" end="decoded_lane_mux_7.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded0" end="decoded_lane_mux_0.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded1" end="decoded_lane_mux_1.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded2" end="decoded_lane_mux_2.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded3" end="decoded_lane_mux_3.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded4" end="decoded_lane_mux_4.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded5" end="decoded_lane_mux_5.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded6" end="decoded_lane_mux_6.in0" />
+ <connection kind="avalon_streaming" version="18.1" start="mu3e_lvds_controller_0.decoded7" end="decoded_lane_mux_7.in0" />
  <connection kind="avalon_streaming" version="18.1" start="mutrig_datapath_subsystem_0.headerinfo" end="mutrig_injector_0.headerinfo0" />
  <connection kind="avalon_streaming" version="18.1" start="mutrig_datapath_subsystem_1.headerinfo" end="mutrig_injector_0.headerinfo1" />
  <connection kind="avalon_streaming" version="18.1" start="mutrig_datapath_subsystem_2.headerinfo" end="mutrig_injector_0.headerinfo2" />
@@ -2048,82 +2039,74 @@
  <connection kind="clock" version="18.1" start="monitor_clock_125.clk" end="mm_pipeline_jtagmaster2rstctrl.clk" />
  <connection kind="clock" version="18.1" start="xcvr156_clock.clk" end="hist_post_splitter_0.clk" />
  <connection kind="clock" version="18.1" start="monitor_clock_125.clk" end="monitor_reset_sync.clk" />
- <connection kind="clock" version="18.1" start="monitor_clock_125.clk" end="lvds_rx_controller_pro_0.control_clock" />
+ <connection kind="clock" version="18.1" start="monitor_clock_125.clk" end="mu3e_lvds_controller_0.control_clock" />
  <connection kind="clock" version="18.1" start="xcvr156_clock.clk" end="hist_post_cdc_0.in_clk" />
  <connection kind="clock" version="18.1" start="monitor_clock_125.clk" end="mutrig_reset_controller_0.si_direct_clock" />
  <connection kind="clock" version="18.1" start="xcvr156_clock.clk" end="hit_stack_subsystem_1.xcvr_clock" />
  <connection kind="clock" version="18.1" start="xcvr156_clock.clk" end="hit_stack_subsystem_0.xcvr_clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_7.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_6.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_5.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_4.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="run_control_splitter.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="run_control_mux.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_3.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_2.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_1.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_datapath_subsystem_0.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="emulator_ctrl_splitter.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="emulator_inject_fanout.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_0.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_0.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_1.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_1.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_2.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_2.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_3.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_3.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_4.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_4.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_5.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_5.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_6.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_6.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_mux_7.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="decoded_lane_fifo_7.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_low.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_emu_dbg.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_mutrig3.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_mutrig4_mts0.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_mutrig5.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_mutrig6.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_mutrig7.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_mts1.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_hist.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_pipeline_lvds_csr_hitstack_ring.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="arb_hit_type0_supercore_0.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="emulator_hit_type0_fanout.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mux_mutrig2processor.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mux_mutrig2processor_0.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane0_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane1_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane2_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane3_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane4_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane5_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane6_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type0_lane7_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type1_up_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_type1_down_tap.clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="histogram_statistics_0.clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_injector_0.clock_interface" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mts_preprocessor_1.clock_interface" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mts_preprocessor_0.clock_interface" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="lvds_rx_controller_pro_0.data_clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="emulator_mutrig_qsys_inst.data_clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hit_stack_subsystem_1.datapath_clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hit_stack_subsystem_0.datapath_clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mutrig_reset_controller_0.dpa_clock" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="receiver_clock_125.in_clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="mm_clock_crossing_bridge.m0_clk" />
- <connection kind="clock" version="18.1" start="lvds_rx_28nm_0.outclock" end="hist_post_cdc_0.out_clk" />
- <connection kind="conduit" version="18.1" start="lvds_rx_controller_pro_0.ctrl" end="lvds_rx_28nm_0.ctrl">
-  <parameter name="endPort" value="" />
-  <parameter name="endPortLSB" value="0" />
-  <parameter name="startPort" value="" />
-  <parameter name="startPortLSB" value="0" />
-  <parameter name="width" value="0" />
- </connection>
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_7.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_6.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_5.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_4.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="run_control_splitter.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="run_control_mux.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_3.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_2.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_1.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_datapath_subsystem_0.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="emulator_ctrl_splitter.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="emulator_inject_fanout.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_0.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_0.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_1.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_1.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_2.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_2.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_3.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_3.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_4.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_4.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_5.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_5.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_6.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_6.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_mux_7.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="decoded_lane_fifo_7.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_low.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_emu_dbg.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_mutrig3.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_mutrig4_mts0.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_mutrig5.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_mutrig6.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_mutrig7.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_mts1.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_hist.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_pipeline_lvds_csr_hitstack_ring.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="arb_hit_type0_supercore_0.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="emulator_hit_type0_fanout.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mux_mutrig2processor.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mux_mutrig2processor_0.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane0_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane1_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane2_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane3_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane4_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane5_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane6_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type0_lane7_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type1_up_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_type1_down_tap.clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="histogram_statistics_0.clock" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_injector_0.clock_interface" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mts_preprocessor_1.clock_interface" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mts_preprocessor_0.clock_interface" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="emulator_mutrig_qsys_inst.data_clock" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hit_stack_subsystem_1.datapath_clock" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hit_stack_subsystem_0.datapath_clock" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mutrig_reset_controller_0.dpa_clock" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="receiver_clock_125.in_clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="mm_clock_crossing_bridge.m0_clk" />
+ <connection kind="clock" version="18.1" start="mu3e_lvds_controller_0.outclock" end="hist_post_cdc_0.out_clk" />
  <connection kind="conduit" version="18.1" start="mts_preprocessor_1.hit_type1_ts" end="histogram_statistics_0.type1_down_ts">
   <parameter name="endPort" value="" />
   <parameter name="endPortLSB" value="0" />
@@ -2152,13 +2135,6 @@
   <parameter name="startPortLSB" value="0" />
   <parameter name="width" value="0" />
  </connection>
- <connection kind="conduit" version="18.1" start="lvds_rx_28nm_0.parallel" end="lvds_rx_controller_pro_0.parallel">
-  <parameter name="endPort" value="" />
-  <parameter name="endPortLSB" value="0" />
-  <parameter name="startPort" value="" />
-  <parameter name="startPortLSB" value="0" />
-  <parameter name="width" value="0" />
- </connection>
  <connection kind="reset" version="18.1" start="xcvr156_clock.clk_reset" end="hist_post_cdc_0.in_clk_reset" />
  <connection kind="reset" version="18.1" start="xcvr156_clock.clk_reset" end="hist_post_splitter_0.reset" />
  <connection kind="reset" version="18.1" start="monitor_clock_125.clk_reset" end="monitor_reset_sync.reset_in0" />
@@ -2174,8 +2150,8 @@
  <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="decoded_lane_fifo_5.clk_reset" />
  <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="decoded_lane_fifo_6.clk_reset" />
  <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="decoded_lane_fifo_7.clk_reset" />
- <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="lvds_rx_controller_pro_0.control_reset" />
- <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="lvds_rx_controller_pro_0.data_reset" />
+ <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="mu3e_lvds_controller_0.control_reset" />
+ <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="mu3e_lvds_controller_0.data_reset" />
  <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="emulator_mutrig_qsys_inst.data_reset" />
  <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="hit_stack_subsystem_0.datapath_reset" />
  <connection kind="reset" version="18.1" start="monitor_reset_sync.reset_out" end="hit_stack_subsystem_1.datapath_reset" />
@@ -2235,4 +2211,4 @@
  <interconnectRequirement for="$system" name="qsys_mm.enableEccProtection" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.insertDefaultSlave" value="FALSE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
-</system>
+<module name="mu3e_lvds_controller_0" kind="mu3e_lvds_controller" version="26.2.1.506" enabled="1"><parameter name="N_LANE" value="9" /><parameter name="N_ENGINE" value="1" /><parameter name="ROUTING_TOPOLOGY" value="1" /><parameter name="SCORE_WINDOW_W" value="10" /><parameter name="SCORE_ACCEPT" value="8" /><parameter name="SCORE_REJECT" value="2" /><parameter name="STEER_QUEUE_DEPTH" value="4" /><parameter name="SYNC_PATTERN" value="0x0FA" /><parameter name="DEBUG_LEVEL" value="0" /><parameter name="IP_UID" value="0x4C564453" /><parameter name="INSTANCE_ID" value="0" /><parameter name="VERSION_MAJOR" value="26" /><parameter name="VERSION_MINOR" value="2" /><parameter name="VERSION_PATCH" value="1" /><parameter name="BUILD" value="0x506" /><parameter name="VERSION_DATE" value="0x20260506" /><parameter name="VERSION_GIT" value="0" /></module></system>

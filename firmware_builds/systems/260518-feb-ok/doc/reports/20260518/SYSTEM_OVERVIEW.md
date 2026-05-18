@@ -5,13 +5,13 @@ One linked file per Avalon-MM slave under `doc/reports/20260518/`. Each file tab
 
 | IP | kind | words | match | drift | no-svd-reset | report |
 |---|---|---|---|---|---|---|
-| `control_path_subsystem_scratch_pad_ram.s1` | altera_avalon_onchip_memory2 | 256 | 0 | 0 | 256 | [readback](control_path_subsystem_scratch_pad_ram_s1_readback.md) |
+| `control_path_subsystem_scratch_pad_ram.s1` | altera_avalon_onchip_memory2 | 0 | 0 | 0 | 0 | [readback](control_path_subsystem_scratch_pad_ram_s1_readback.md) |
 | `control_path_subsystem_max10_prog_avmm_0.csr_avmm` | max10_prog_avmm | 256 | 1 | 1 | 254 | [readback](control_path_subsystem_max10_prog_avmm_0_csr_avmm_readback.md) |
 | `control_path_subsystem_on_die_temp_sense_ctrl.csr` | altera_temp_sense_ctrl | 4 | 0 | 0 | 4 | [readback](control_path_subsystem_on_die_temp_sense_ctrl_csr_readback.md) |
 | `control_path_subsystem_onewire_master_controller_0.csr` | onewire_master_controller | 64 | 1 | 0 | 63 | [readback](control_path_subsystem_onewire_master_controller_0_csr_readback.md) |
 | `control_path_subsystem_firefly_xcvr_ctrl_0.firefly` | firefly_xcvr_ctrl | 128 | 0 | 0 | 122 | [readback](control_path_subsystem_firefly_xcvr_ctrl_0_firefly_readback.md) |
-| `control_path_subsystem_mutrig_cfg_ctrl_0.avmm_csr` | mutrig_cfg_ctrl | 14 | 0 | 0 | 14 | [readback](control_path_subsystem_mutrig_cfg_ctrl_0_avmm_csr_readback.md) |
-| `data_path_subsystem_lvds_rx_controller_pro_0.csr` | lvds_rx_controller_pro | 64 | 12 | 8 | 44 | [readback](data_path_subsystem_lvds_rx_controller_pro_0_csr_readback.md) |
+| `control_path_subsystem_mutrig_cfg_ctrl_0.avmm_csr` | mutrig_cfg_ctrl | 16 | 0 | 0 | 16 | [readback](control_path_subsystem_mutrig_cfg_ctrl_0_avmm_csr_readback.md) |
+| `data_path_subsystem_mu3e_lvds_controller_0.csr` | mu3e_lvds_controller | 256 | 0 | 0 | 256 | [readback](data_path_subsystem_mu3e_lvds_controller_0_csr_readback.md) |
 | `data_path_subsystem_emulator_mutrig_qsys_inst.csr` | emulator_mutrig | 256 | 0 | 6 | 250 | [readback](data_path_subsystem_emulator_mutrig_qsys_inst_csr_readback.md) |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_0.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_0_s0_readback.md) |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_1.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_1_s0_readback.md) |
@@ -19,7 +19,7 @@ One linked file per Avalon-MM slave under `doc/reports/20260518/`. Each file tab
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_3.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_3_s0_readback.md) |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_4.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_4_s0_readback.md) |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_5.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_5_s0_readback.md) |
-| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6.s0` | altera_avalon_mm_bridge | 111 | 0 | 0 | 111 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6_s0_readback.md) |
+| `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6_s0_readback.md) |
 | `data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_7.s0` | altera_avalon_mm_bridge | 128 | 0 | 0 | 128 | [readback](data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_7_s0_readback.md) |
 | `data_path_subsystem_mts_preprocessor_0.csr` | mts_preprocessor | 32 | 0 | 0 | 32 | [readback](data_path_subsystem_mts_preprocessor_0_csr_readback.md) |
 | `data_path_subsystem_mts_preprocessor_1.csr` | mts_preprocessor | 32 | 0 | 0 | 32 | [readback](data_path_subsystem_mts_preprocessor_1_csr_readback.md) |

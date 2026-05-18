@@ -1,6 +1,6 @@
 # control_path_subsystem_on_die_temp_sense_ctrl.csr CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `altera_temp_sense_ctrl`
 - **sc-byte base**: `0x002000`
 - **addressSpan**: `0x0010` bytes

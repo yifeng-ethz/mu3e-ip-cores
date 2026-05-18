@@ -1,25 +1,25 @@
-# data_path_subsystem_histogram_statistics_0.hist_bin CSR readback
+# data_path_subsystem_mu3e_lvds_controller_0.csr CSR readback
 
 - **Timestamp**: 2026-05-18T23:52:32
-- **Kind**: `histogram_statistics_v2`
-- **sc-byte base**: `0x028000`
-- **addressSpan**: `0x1000` bytes
+- **Kind**: `mu3e_lvds_controller`
+- **sc-byte base**: `0x020000`
+- **addressSpan**: `0x4000` bytes
 - **probe mode**: report (burst 256)
 
-### `data_path_subsystem_histogram_statistics_0.hist_bin`  (kind=`histogram_statistics_v2`)
+### `data_path_subsystem_mu3e_lvds_controller_0.csr`  (kind=`mu3e_lvds_controller`)
 
-- **sc-byte base**: `0x028000`  (sc-word `0x0A000`)
-- **addressSpan**: `0x1000` bytes (`1024` words)
+- **sc-byte base**: `0x020000`  (sc-word `0x08000`)
+- **addressSpan**: `0x4000` bytes (`4096` words)
 - **probed**: first `256` words (min(span_words, 256))
 - **SVD**: (not mapped for this kind)
 
 | offset | register | SVD (reset + description) | UVM (expected) | board (single / burst) | diff |
 |---|---|---|---|---|---|
-| `+0x000` | `—` | — | — | `0x20000010` / `0x20000010` | no-svd-reset |
-| `+0x004` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
-| `+0x008` | `—` | — | — | `0x000007D0` / `0x000007D0` | no-svd-reset |
-| `+0x00C` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
-| `+0x010` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x000` | `—` | — | — | `0x4C564453` / `0x4C564453` | no-svd-reset |
+| `+0x004` | `—` | — | — | `0x1A021506` / `0x1A021506` | no-svd-reset |
+| `+0x008` | `—` | — | — | `0x1A01090A` / `0x1A01090A` | no-svd-reset |
+| `+0x00C` | `—` | — | — | `0x000000FA` / `0x000000FA` | no-svd-reset |
+| `+0x010` | `—` | — | — | `0x000001FF` / `0x000001FF` | no-svd-reset |
 | `+0x014` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x018` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x01C` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |

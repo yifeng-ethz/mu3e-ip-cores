@@ -1,6 +1,6 @@
 # data_path_subsystem_emulator_mutrig_qsys_inst.csr CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `emulator_mutrig`
 - **sc-byte base**: `0x021000`
 - **addressSpan**: `0x0400` bytes
@@ -20,12 +20,12 @@
 | `+0x004` | `HIT_RATE` | `0x01000800` — Fixed-point hit and noise rates. | — | `0x00000000` / `0x00000000` | drift |
 | `+0x008` | `BURST_CFG` | `0x04041004` — Burst and multi-ASIC cluster configuration. | — | `0x00000000` / `0x00000000` | drift |
 | `+0x00C` | `PRNG_SEED` | `0xDEADBEEF` — Hit generator PRNG seed. | — | `0x00000000` / `0x00000000` | drift |
-| `+0x010` | `TX_MODE` | `0x00000008` — Frame output mode and ASIC channel tag. | — | `0x00000000` / `0x00000000` | drift |
+| `+0x010` | `TX_MODE` | `0x00000008` — Frame output mode and ASIC channel tag. | — | `0x000001FF` / `0x000001FF` | drift |
 | `+0x014` | `STATUS` | _(no reset declared)_ — Frame and event counters captured at frame start. | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x018` | `INJECT_MASK` | `0xFFFFFFFF` — Masked injection channel participation mask. | — | `0x00000000` / `0x00000000` | drift |
 | `+0x01C` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
-| `+0x020` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
-| `+0x024` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x020` | `—` | — | — | `0x00000008` / `0x00000008` | no-svd-reset |
+| `+0x024` | `—` | — | — | `0x00000002` / `0x00000002` | no-svd-reset |
 | `+0x028` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x02C` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x030` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |

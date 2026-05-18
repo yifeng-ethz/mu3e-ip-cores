@@ -1,6 +1,6 @@
 # data_path_subsystem_mts_preprocessor_1.csr CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `mts_preprocessor`
 - **sc-byte base**: `0x024000`
 - **addressSpan**: `0x0080` bytes

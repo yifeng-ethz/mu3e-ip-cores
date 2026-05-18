@@ -1,6 +1,6 @@
 # control_path_subsystem_onewire_master_controller_0.csr CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `onewire_master_controller`
 - **sc-byte base**: `0x003000`
 - **addressSpan**: `0x0100` bytes

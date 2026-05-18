@@ -1,6 +1,6 @@
 # control_path_subsystem_max10_prog_avmm_0.csr_avmm CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `max10_prog_avmm`
 - **sc-byte base**: `0x001000`
 - **addressSpan**: `0x4000` bytes

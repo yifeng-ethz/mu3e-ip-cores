@@ -1,6 +1,6 @@
 # data_path_subsystem_arb_hit_type0_supercore_0_csr_pipe_6.s0 CSR readback
 
-- **Timestamp**: 2026-05-18T20:38:10
+- **Timestamp**: 2026-05-18T23:52:32
 - **Kind**: `altera_avalon_mm_bridge`
 - **sc-byte base**: `0x022300`
 - **addressSpan**: `0x0200` bytes
@@ -12,10 +12,6 @@
 - **addressSpan**: `0x0200` bytes (`128` words)
 - **probed**: first `128` words (min(span_words, 256))
 - **SVD**: (not mapped for this kind)
-- **probe error**: `single@+0x1bc: rc=4: 0x5B88
-  [55] invalid RD link=4 addr=0x0E060 rsp=DECERR ack=1 declared=96 actual=0 start=0x5BD4
-warn: scan ended with an incomplete candidate packet
-err: timed out waiting for matching secondary reply`
 
 | offset | register | SVD (reset + description) | UVM (expected) | board (single / burst) | diff |
 |---|---|---|---|---|---|
@@ -130,6 +126,23 @@ err: timed out waiting for matching secondary reply`
 | `+0x1B0` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x1B4` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 | `+0x1B8` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1BC` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1C0` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1C4` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1C8` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1CC` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1D0` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1D4` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1D8` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1DC` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1E0` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1E4` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1E8` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1EC` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1F0` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1F4` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1F8` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
+| `+0x1FC` | `—` | — | — | `0x00000000` / `0x00000000` | no-svd-reset |
 
-**Per-IP summary**: 0 match / 0 drift / 111 no-svd-reset (of 111 words)
+**Per-IP summary**: 0 match / 0 drift / 128 no-svd-reset (of 128 words)
 
