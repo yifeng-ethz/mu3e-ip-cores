@@ -36,8 +36,28 @@ Severity legend:
 | [BUG-019-R](#bug-019-r-emulator-systemverilog-module-header-imports-blocked-quartus-181-firmware-compile) | R | non-datapath-refactor | `common (generated FEB firmware compile with emulator Type0 enabled)` | fixed | FEB top Quartus compile, 2026-05-17 | `a9e2dbad9d52` | Quartus 18.1 rejected emulator SystemVerilog module-header `import` syntax even though the generated simulation path accepted it. |
 | [BUG-020-R](#bug-020-r-mutrig-injector-running-cdc-was-timed-as-a-spare_clk_osc-setup-path) | R | non-datapath-refactor | `common (mode-3 injector support in fitted FEB firmware)` | fixed-with-residuals | FEB top TimeQuest closure, 2026-05-17 | `695b68441fc3`, this commit | The mode-3 injector already synchronized RUNNING into the oscillator clock domain, but the first synchronizer flop was not marked and the source-to-meta CDC crossing was not constrained, producing a false `spare_clk_osc` setup failure. |
 | [BUG-021-I](#bug-021-i-hit_type3_upper-lost-ready-and-starved-run-control-idles) | I | hard stuck error | `common (generated FEB upload path with realistic downstream backpressure)` | fixed / sim-validated | FEB generated upload backpressure repro, 2026-05-18 | this commit | Qsys auto-inserted an Avalon-ST adapter between `data_path_subsystem.hit_type3_upper` and `upload_subsystem.upload_data` with `inUseReady=0` and `outUseReady=1`; a missed Type3 EOP parks `upload_pkt_mux` on in0 and starves both the `upload_sc` packet input and the run-control/K28.5 idle input. |
+| [BUG-022-I](#bug-022-i-feb-board-top-wrapper-still-bound-dropped-legacy_firefly_mon-ports) | I | non-datapath-refactor | `common (any FEB v4 build after Phase B SC-hub rewire)` | fixed | FEB top Quartus map, 2026-05-18 | this commit | After Phase B dropped `legacy_firefly_bridge` from `debug_sc_system_v4.qsys`, `feb_system_v3_board_top.vhd` still bound 11 phantom `legacy_firefly_mon_*` formal ports on the regenerated entity, causing Quartus map Error 10349 at line 132. |
 
 ## 2026-05-18
+
+### BUG-022-I: FEB board-top wrapper still bound dropped legacy_firefly_mon ports
+
+- First seen:
+  - FEB v4 build Quartus map after the Phase B SC-hub rewire applied to `debug_sc_system_v4.qsys` and `scifi_datapath_system_v4.qsys` on 2026-05-18.
+- Symptom:
+  - `make flow_map` aborted at `Error (10349): VHDL Association List error at feb_system_v3_board_top.vhd(132): formal "legacy_firefly_mon_waitrequest" does not exist`.
+  - The error repeated for the other 10 `legacy_firefly_mon_*` formals: `_burstcount`, `_writedata`, `_address`, `_write`, `_read`, `_byteenable`, `_debugaccess`, `_readdata`, `_readdatavalid`, `_response`.
+- Root cause:
+  - Phase B of the v4 rewire dropped `legacy_firefly_bridge` from `quartus_systems/debug_sc_system_v4.qsys`. The regenerated `feb_system_v4` entity therefore no longer exposed any `legacy_firefly_mon_*` ports.
+  - `firmware_builds/systems/260518-feb-ok/syn/board_projects/fe_scifi_feb_v3/rtl/wrappers/feb_system_v3_board_top.vhd` still declared 10 internal `legacy_firefly_mon_*` signals on lines 73-82 and still mapped them onto the now-missing entity formals on lines 132-143.
+  - VHDL association is a strict formal-match contract, so Quartus map failed on the very first formal it could not find on the entity.
+- Fix:
+  - Delete the 11 dead port-map associations on lines 132-143 of `feb_system_v3_board_top.vhd` and inline-remove the 10 now-unused signal declarations on lines 73-82.
+- Evidence:
+  - `make flow_map` after the wrapper edit prints `Quartus Prime Shell was successful. 0 errors, 1708 warnings`.
+  - The deleted signals had no downstream consumer in the board top (no `read*` reads, no `write*` writes); their removal is a pure dead-code delete.
+- Residuals:
+  - Full `make flow` is running in the background to produce the new SOF; on-board probe via `script/probe_feb_ip_inventory.py --link 2` is the next gate after programming and the 20 s settle.
 
 ### BUG-021-I: hit_type3_upper lost ready and starved run-control idles
 
