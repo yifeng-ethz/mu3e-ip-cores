@@ -50,25 +50,43 @@ Region A footprint = 24 KB out of 64 KB. `legacy_firefly_bridge` is **dropped** 
 
 > **Note**: `onewire_master_0.ctrl` (the link-layer IP, 64 B at private base `0x0000`) is reached only via `onewire_master_controller_0.ctrl` master and is **not on Region A's bus**; sc_hub and JTAG drive the controller, the controller drives the link layer.
 
-## Region B — data-path subsystem (128 KB, flow-ordered)
+## Region B — data-path subsystem (128 KB, flow-ordered + TEST group)
 
 `sc_hub` view = `ctrl2data_mm_bridge` base 0x10000 + internal offset. `data_jtag` (`master_datapath`) view = internal directly. `mutrig_cfg_ctrl_0.avmm_cnt` shares the bridge with `sc_hub`.
+
+Flow order follows the actual MuTRiG → LVDS → arb → preprocessor → frame-assembly → monitor chain. The TEST group (chip-side stimulus IPs) is parked at the end so it never appears in the main data-path debug walk.
 
 | sc-byte | sc-word | data_jtag byte | slave | UID (hex) | UID (ASCII) | span | flow stage |
 |---|---|---|---|---|---|---|---|
 | `0x10000` | `0x04000` | `0x00000` | `lvds_rx_controller_pro_0.csr` | `0x4C564453` | `LVDS` | 64 B | 1. INPUT — LVDS receiver |
-| `0x11000` | `0x04400` | `0x01000` | `mutrig_reset_controller_0.reconfig_mgmt` | — | — | 256 B | 2. SOURCE RESET — chip resets upstream |
-| `0x12000` | `0x04800` | `0x02000` | `mutrig_injector_0.csr` | `0x4D494E4A` | `MINJ` | 64 B | 3. SOURCE STIMULUS — calibration injector |
-| `0x13000` | `0x04C00` | `0x03000` | `emulator_mutrig_qsys_inst.csr` | `0x454D5554` | `EMUT` | 256 B | 4. ALT SOURCE — synthetic MuTRiG hits |
-| `0x14000` | `0x05000` | `0x04000` | `mts_preprocessor_0.csr` | `0x4D545350` | `MTSP` | 32 B | 5a. TIMESTAMP — bank A |
-| `0x15000` | `0x05400` | `0x05000` | `mts_preprocessor_1.csr` | `0x4D545350` | `MTSP` | 32 B | 5b. TIMESTAMP — bank B |
-| `0x16000` | `0x05800` | `0x06000` | `arb_hit_type0_supercore_0` (lane 0..7 csr) | `0x41485430` | `AHT0` | 8 × 128 B = 1 KB | 6. ARBITRATION — lane 0..7 csr |
-| `0x17000` | `0x05C00` | `0x07000` | `histogram_statistics_0.csr` | `0x48495354` | `HIST` | 17 words (68 B) | 7. MONITOR — identity header at words 0-1, control/status at words 2-16 |
-| `0x18000` | `0x06000` | `0x08000` | `histogram_statistics_0.hist_bin` | — | — | 256 words (1 KB) | 8. MONITOR DATA — clean bin[0..255] burst aperture, no header |
+| `0x11000` | `0x04400` | `0x01000` | `emulator_mutrig_qsys_inst.csr` | `0x454D5554` | `EMUT` | 256 B | 2. ALT SOURCE — synthetic MuTRiG hits |
+| `0x12000` | `0x04800` | `0x02000` | `arb_hit_type0_supercore_0` (lane 0..7 csr in 8 × 128 B sub-slots) | `0x41485430` | `AHT0` | 1 KB | 3. ARBITRATION — lane 0..7 csr |
+| `0x13000` | `0x04C00` | `0x03000` | `mts_preprocessor_0.csr` | `0x4D545350` | `MTSP` | 32 B | 4a. TIMESTAMP — bank A |
+| `0x14000` | `0x05000` | `0x04000` | `mts_preprocessor_1.csr` | `0x4D545350` | `MTSP` | 32 B | 4b. TIMESTAMP — bank B |
+| `0x15000` | `0x05400` | `0x05000` | `hit_stack_subsystem_0` (5 slaves in sub-slots; see below) | mixed | mixed | 1 KB | 5a. FRAME ASSEMBLY — bank 0 |
+| `0x16000` | `0x05800` | `0x06000` | `hit_stack_subsystem_1` (5 slaves in sub-slots; see below) | mixed | mixed | 1 KB | 5b. FRAME ASSEMBLY — bank 1 |
+| `0x17000` | `0x05C00` | `0x07000` | `histogram_statistics_0.csr` | `0x48495354` | `HIST` | 17 words (68 B) | 6. MONITOR — identity header at words 0-1, control/status at words 2-16 |
+| `0x18000` | `0x06000` | `0x08000` | `histogram_statistics_0.hist_bin` | — | — | 256 words (1 KB) | 7. MONITOR DATA — clean bin[0..255] burst aperture, no header |
+| `0x19000` | `0x06400` | `0x09000` | `mutrig_reset_controller_0.reconfig_mgmt` | — | — | 256 B | 8. TEST — chip resets upstream |
+| `0x1A000` | `0x06800` | `0x0A000` | `mutrig_injector_0.csr` | `0x4D494E4A` | `MINJ` | 64 B | 9. TEST — calibration injector |
 
-Region B footprint = 36 KB out of 128 KB. `dbg_mm2runctrl_0` is **dropped** (replaced by `runctl_mgmt_host_0.runctl` AvST source which already injects run-control commands).
+Region B footprint = 44 KB out of 128 KB. `dbg_mm2runctrl_0` is **dropped** (replaced by `runctl_mgmt_host_0.runctl` AvST source which already injects run-control commands).
 
 `histogram_statistics_0.hist_bin` at internal `0x08000` (sc-byte `0x18000`) is 8 KB-aligned, leaving the entire low 256-word burst window unambiguous for both `sc_hub` and `mutrig_cfg_ctrl_0.avmm_cnt`.
+
+### hit_stack_subsystem_{0,1} sub-slot layout (1 KB per subsystem, inside its 4 KB Region B slot)
+
+| sub-offset | slave | UID (hex) | UID (ASCII) | span |
+|---|---|---|---|---|
+| `+0x000` | `feb_frame_assembly_0.csr` | TBD (no UID in current build) | `—` | 64 B |
+| `+0x100` | `ring_buffer_cam_0.csr` | `0x5242434D` | `RBCM` | 128 B |
+| `+0x200` | `ring_buffer_cam_1.csr` | `0x5242434D` | `RBCM` | 128 B |
+| `+0x300` | `ring_buffer_cam_2.csr` | `0x5242434D` | `RBCM` | 128 B |
+| `+0x400` | `ring_buffer_cam_3.csr` | `0x5242434D` | `RBCM` | 128 B |
+
+The 8 hit_stack slaves (4 RBCAM + 1 FFA per subsystem × 2 subsystems = 10 endpoints) are reachable via sc_hub through the widened `ctrl2data_mm_bridge`, and via `data_path_subsystem.master_datapath` JTAG at the same internal offsets.
+
+The hit_stack DC FIFOs (`run_ctrl_cdc_d2x` per subsystem) have **no avmm aperture** — they are pure data-path crossings. No additional slots needed.
 
 ## Region C — upload subsystem (64 KB)
 
@@ -82,9 +100,9 @@ Region C footprint = 128 B out of 64 KB.
 
 | master | own view | reach |
 |---|---|---|
-| `sc_hub_cmd_pipe.m0` | A: 0x00000..0x05FFF; B: 0x10000..0x18FFF; C: 0x30000..0x3007F | 6 + 9 + 1 = 16 slave endpoints |
+| `sc_hub_cmd_pipe.m0` | A: 0x00000..0x05FFF; B: 0x10000..0x1AFFF; C: 0x30000..0x3007F | 6 (A) + 26 (B) + 1 (C) = 33 slave endpoints |
 | `control_path_subsystem.jtag_master` | A direct, minus both cross-subsystem bridges | 6 slaves |
-| `data_path_subsystem.master_datapath` | B local: 0x00000..0x08FFF | 9 slaves |
+| `data_path_subsystem.master_datapath` | B local: 0x00000..0x0AFFF | 26 slave endpoints (1 lvds + 1 emu + 8 arb-lane csr + 2 mts + 10 hit_stack + 2 hist + 1 reset_ctrl + 1 injector) |
 | `upload_subsystem.upload_system_jtag_master` | C local: 0x00000..0x0007F | 1 slave |
 | `mutrig_cfg_ctrl_0.avmm_cnt` | B only (uses the same 0x10000-offset view as sc_hub) | 1 burst target (`hist_bin` at sc-byte `0x18000`) |
 
