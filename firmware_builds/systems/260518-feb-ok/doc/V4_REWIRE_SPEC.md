@@ -1,4 +1,4 @@
-# FEB SciFi v3 — proposed SC-hub address map (2026-05-18)
+# FEB SciFi v3 — v4 rewire address-map spec (2026-05-18)
 
 Status: **PROPOSAL** — awaiting approval before qsys rewiring.
 
@@ -146,3 +146,4 @@ Region C footprint = 128 B out of 64 KB.
 - `DV_BASIC.md` B004 — Per-subsystem JTAG reach (3 local masters, no bridges, no onewire).
 - `DV_EDGE.md` E002 — sc_hub burstcount=256 read of `hist_bin` at sc-byte `0x18000`.
 - `DV_CROSS.md` C002 — `mutrig_cfg_ctrl_0.avmm_cnt` 256-word burst read of `hist_bin` through the shared `ctrl2data_mm_bridge`.
+
