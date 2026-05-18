@@ -120,41 +120,50 @@ before running `qsys-generate`. The previous run failed with
 `qsys-from-tcl` step had `chmod a-w`-locked the .sopcinfo files and
 `qsys-generate` rewrites them in place during synthesis.
 
-### KNOWN-RESIDUAL: `mts_preprocessor.hit_type1_ts` integration drift
+### KNOWN-RESIDUAL: `mts_preprocessor.hit_type1_ts` interface needs IP merge
 
-After the search-path + sopcinfo fixes above, `make qsys-syn` cleared the
-26 missing-module errors and produced a complete `arb_hit_type0_supercore/`
-HDL tree, but now surfaces a true IP-integration drift in
-`scifi_datapath_system_v3.qsys`:
+After every fix above, `make qsys-syn` now resolves all 26 IPs cleanly
+(both `arb_hit_type0_supercore.sopcinfo` and
+`scifi_datapath_system_v3.sopcinfo` carry **0** `kind="missing_module"`
+entries), and produces the full HDL trees: `arb_hit_type0_supercore/`
+63 files, `scifi_datapath_system_v3/` 226 files. The remaining hard
+qsys-generate error is:
 
 ```
 Error: scifi_datapath_system_v3.mts_preprocessor_0.hit_type1_ts /
   histogram_statistics_0.type1_up_ts: Missing connection start
 Error: scifi_datapath_system_v3.mts_preprocessor_1.hit_type1_ts /
   histogram_statistics_0.type1_down_ts: Missing connection start
-Error: mts_preprocessor_1.hit_type1_ts has no associated clock
-Error: mts_preprocessor_1.hit_type1_ts has no associated reset
+Error: mts_preprocessor_1.hit_type1_ts has no associated clock / reset
 ```
 
-The `.qsys` (generated when `mts_preprocessor 26.3.3.517` exposed a
-`hit_type1_ts` interface) connects that interface to
-`histogram_statistics_0.type1_{up,down}_ts`, but the current
-`mts_preprocessor` IP no longer presents `hit_type1_ts` with an associated
-clock and reset. This is a real RTL-level drift, not a Makefile or
-search-path issue.
+Root cause traced (2026-05-18 12:22): the `mts_preprocessor` IP
+(`mutrig_timestamp_processor/mts_processor_hw.tcl`) on `master`
+**does not declare `hit_type1_ts`**. That interface lives only on commit
+`eb67302 [PATCH] MTS: split Type1 timestamp sideband`, which sits on
+branch `backup/codex/stream-debug-plane-feb-v3-20260515` and was never
+merged to `master`. Master instead has the parallel `hit_type1_extended_0`
+/ `hit_type1_extended_1` AvalonST sources from `1e4e619` plus the later
+`hit_type1_sidecar` debug conduit. The `.qsys` (generated against
+eb67302-era IP) wires the now-missing `hit_type1_ts` interface.
 
-Action items (not yet resolved in this commit):
-1. Inspect the current `mutrig_timestamp_processor` IP (which provides the
-   `mts_preprocessor` Qsys component) for the `hit_type1_ts` interface and
-   its associated clock / reset declarations.
-2. If the interface was renamed or split, patch the connection on the
-   `.qsys` side; otherwise restore the missing clock association on the IP
-   side.
+Action items (NOT resolved in this commit; require careful manual merge):
+1. Manually merge `eb67302`'s `add_interface hit_type1_ts conduit ...`
+   block into master's `mts_processor_hw.tcl` so the IP exposes BOTH
+   approaches (the AvalonST extended ports from master AND the conduit
+   timestamp from eb67302). The two paths are not mutually exclusive in
+   the RTL.
+2. Add the matching `coe_hit_type1_ts` Output 48 port to
+   `mutrig_timestamp_processor/mts_processor.vhd` (the cherry-pick of
+   eb67302 had real conflicts there — manual merge needed).
+3. Bump the canonical IP version (26.3.4.0515 -> 26.3.5.05XX) and
+   re-bump the `.qsys` to the new version once the IP merge lands.
 
 Until this is fixed, `make qsys-syn` will exit non-zero with `Error: null`,
 `generated/synthesis/feb_system_v3/` will not exist, and `make flow` will
-not be runnable. The `arb_hit_type0_supercore` HDL tree (63 files) and the
-partially-generated `scifi_datapath_system_v3` HDL tree (226 files) are
-left under `generated/synthesis/`.
+not be runnable. The two complete HDL trees that DO get emitted
+(`arb_hit_type0_supercore/`, `scifi_datapath_system_v3/`) are partial -
+they bind a stub for `mts_preprocessor.hit_type1_ts` and are not safe to
+commit to Quartus.
 
 ---
