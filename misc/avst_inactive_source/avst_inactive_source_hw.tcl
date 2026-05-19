@@ -46,16 +46,19 @@ proc elaborate {} {
     set_interface_property out symbolsPerBeat 1
     set_interface_property out maxChannel $max_channel
 
-    # Honour the downstream sink's usePackets contract. If the consumer
-    # mux/splitter has usePackets=false, an avst_inactive_source that always
-    # advertises SOP/EOP makes qsys-generate fail "source has startofpacket
-    # signal of 1 bits, but the sink does not". USE_PACKETS=0 hides the
-    # packet ports from the interface declaration; the RTL still drives
-    # them at 0 internally but they are not exported.
-    if {$use_packets == 0} {
-        set_interface_property out usePackets false
-    } else {
-        set_interface_property out usePackets true
+    # Build the out interface ports here so USE_PACKETS can hide
+    # aso_startofpacket / aso_endofpacket when the downstream sink (e.g.
+    # altera_multiplexer with usePackets=false) does not have matching
+    # packet inputs. The RTL still drives those bits at 0 internally; the
+    # interface declaration just omits them so qsys-generate does not flag
+    # a packet-width mismatch.
+    add_interface_port out aso_data data Output $data_width
+    add_interface_port out aso_valid valid Output 1
+    add_interface_port out aso_ready ready Input 1
+    add_interface_port out aso_channel channel Output $channel_width
+    if {$use_packets != 0} {
+        add_interface_port out aso_startofpacket startofpacket Output 1
+        add_interface_port out aso_endofpacket   endofpacket   Output 1
     }
 }
 
@@ -106,9 +109,4 @@ set_interface_property out readyLatency 0
 set_interface_property out maxChannel 15
 set_interface_property out firstSymbolInHighOrderBits true
 set_interface_property out ENABLED true
-add_interface_port out aso_data data Output DATA_WIDTH
-add_interface_port out aso_valid valid Output 1
-add_interface_port out aso_ready ready Input 1
-add_interface_port out aso_startofpacket startofpacket Output 1
-add_interface_port out aso_endofpacket endofpacket Output 1
-add_interface_port out aso_channel channel Output CHANNEL_WIDTH
+# Out port set is built in elaborate so USE_PACKETS=0 can omit SOP/EOP.
