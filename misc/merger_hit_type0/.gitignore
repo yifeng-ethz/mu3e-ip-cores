@@ -1,0 +1,13 @@
+# Sim work dirs (one per `make run`).
+tb/work_merger_*/
+tb/trash_bin/
+
+# Quartus build artifacts.
+syn/quartus/output_files/
+syn/quartus/db/
+syn/quartus/incremental_db/
+syn/quartus/c5_pin_model_dump.txt
+syn/quartus/a5_pin_model_dump.txt
+syn/quartus/*.qws
+syn/quartus/*.qarlog
+syn/quartus/PLLJ_PLLSPE_INFO.txt

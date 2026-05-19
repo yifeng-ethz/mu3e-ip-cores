@@ -1,0 +1,4 @@
+QUARTUS_VERSION = "18.1"
+DATE = "21:15:00  May 19, 2026"
+
+PROJECT_REVISION = "merger_hit_type0_standalone"
