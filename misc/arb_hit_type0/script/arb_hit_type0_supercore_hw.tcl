@@ -250,6 +250,10 @@ proc export_existing_interface {name type dir target} {
 }
 
 proc compose {} {
+    global VERSION_MAJOR_DEFAULT_CONST VERSION_MINOR_DEFAULT_CONST \
+           VERSION_PATCH_DEFAULT_CONST BUILD_DEFAULT_CONST \
+           VERSION_DATE_DEFAULT_CONST VERSION_GIT_DEFAULT_CONST \
+           IP_UID_DEFAULT_CONST VERSION_STRING_DEFAULT_CONST
     set lane_count [get_parameter_value LANE_COUNT]
     set mode_default [get_parameter_value MODE_DEFAULT]
     set watchdog_default [get_parameter_value WATCHDOG_DEFAULT]

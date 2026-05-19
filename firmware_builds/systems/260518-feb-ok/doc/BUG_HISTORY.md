@@ -37,6 +37,8 @@ Severity legend:
 | [BUG-020-R](#bug-020-r-mutrig-injector-running-cdc-was-timed-as-a-spare_clk_osc-setup-path) | R | non-datapath-refactor | `common (mode-3 injector support in fitted FEB firmware)` | fixed-with-residuals | FEB top TimeQuest closure, 2026-05-17 | `695b68441fc3`, this commit | The mode-3 injector already synchronized RUNNING into the oscillator clock domain, but the first synchronizer flop was not marked and the source-to-meta CDC crossing was not constrained, producing a false `spare_clk_osc` setup failure. |
 | [BUG-021-I](#bug-021-i-hit_type3_upper-lost-ready-and-starved-run-control-idles) | I | hard stuck error | `common (generated FEB upload path with realistic downstream backpressure)` | fixed / sim-validated | FEB generated upload backpressure repro, 2026-05-18 | this commit | Qsys auto-inserted an Avalon-ST adapter between `data_path_subsystem.hit_type3_upper` and `upload_subsystem.upload_data` with `inUseReady=0` and `outUseReady=1`; a missed Type3 EOP parks `upload_pkt_mux` on in0 and starves both the `upload_sc` packet input and the run-control/K28.5 idle input. |
 | [BUG-022-I](#bug-022-i-feb-board-top-wrapper-still-bound-dropped-legacy_firefly_mon-ports) | I | non-datapath-refactor | `common (any FEB v4 build after Phase B SC-hub rewire)` | fixed | FEB top Quartus map, 2026-05-18 | this commit | After Phase B dropped `legacy_firefly_bridge` from `debug_sc_system_v4.qsys`, `feb_system_v3_board_top.vhd` still bound 11 phantom `legacy_firefly_mon_*` formal ports on the regenerated entity, causing Quartus map Error 10349 at line 132. |
+| [BUG-024-I](#bug-024-i-feb_system_v4-nested-subsystem-generic-snapshot-does-not-refresh-when-scifi_datapath_system_v4-leaf-ips-bump) | I | non-datapath-refactor | `common (any leaf-IP bump that propagates only to the subsystem, not to feb_system_v4.qsys)` | open | FEB v3 RESETTING-contract rebuild + on-board re-probe, 2026-05-19 | this checkpoint | `feb_system_v4.qsys` caches the leaf-IP generics for every nested subsystem instance; the 2026-05-19 `qsys-refresh` of `scifi_datapath_system_v4` did not propagate the new `VERSION_PATCH/BUILD/DATE` values for `mu3e_lvds_controller_0`, `histogram_statistics_0`, `mutrig_injector_0` into the SOF, and `qsys-validate` does not walk into the nested snapshot. The contract-fix RTL is in the SOF; only the firmware identity word is stale. |
+| [BUG-025-I](#bug-025-i-region-b-mm_pipeline_lvds_csr_-bridges-past-offset-0x0000-are-csr-deaf-on-silicon) | I | hard stuck error | `common (FEB SC-ring probing of every Region B slave behind a non-low mm_pipeline_lvds_csr_* bridge)` | open | FEB v3 on-board re-probe, 2026-05-19 18:02 | this checkpoint | `mm_pipeline_lvds_csr_hist`, `mm_pipeline_lvds_csr_hitstack_ring`, `mm_pipeline_lvds_csr_emu_dbg`, and `mm_pipeline_lvds_csr_mutrig4_mts0` acknowledge SC packets but return all-zero payloads. `mm_pipeline_lvds_csr_low` works. Bridge wiring (clock = `mu3e_lvds_controller_0.outclock`, reset = `monitor_reset_sync.reset_out` synced to `monitor_clock_125`) is the suspect. Blocks every IP CSR access in Region B. NOT the RESETTING contract bug. |
 
 ## 2026-05-18
 
@@ -537,3 +539,55 @@ Severity legend:
 - Residuals:
   - The existing full sweep still reads `hist_bin` after END_RUN with `INTERVAL_CFG_NEVER_FIRE`; this image clears the frozen bank at END_RUN, so the per-row `hist_bin_sum` remains zero in the 32-row table.
   - The directed long-soak works around that by taking 256 single-word bin snapshots while RUNNING. Burst reads remain disabled because they corrupt the SC bridge on this bench.
+
+## 2026-05-19
+
+### BUG-024-I: feb_system_v4 nested-subsystem generic snapshot does not refresh when scifi_datapath_system_v4 leaf IPs bump
+
+- First seen in:
+  - FEB v3 RESETTING-contract rebuild on 2026-05-19 (commit `008c9447` + IP bumps `28b3fb9`, `caecaeb`, `630ef5b`)
+  - On-board re-probe at 2026-05-19 18:02 (`reports/feb_v4_resetting_contract_180200.md`):
+    - `mu3e_lvds_controller_0.csr` UID = `0x4C564453` ("LVDS") ✓
+    - VERSION = `0x1A021506` = 26.2.1.1286 — matches the **OLD** generic cache (`PATCH=1, BUILD=1286, DATE=20260518`) instead of the expected 26.2.2.1305
+- Symptom:
+  - The standalone subsystem qsys-syn output (`generated/synthesis/scifi_datapath_system_v4/synthesis/scifi_datapath_system_v4.vhd`) correctly carries `VERSION_PATCH=2, BUILD=1305, DATE=20260519` for the `mu3e_lvds_controller_0` instance (verified with `grep`).
+  - The FEB top-level wrapper that Quartus actually compiles (`generated/synthesis/feb_system_v4/synthesis/submodules/feb_system_v4_data_path_subsystem.vhd`) still passes `VERSION_PATCH=1, BUILD=1286, DATE=20260518` to the same IP instance.
+  - Three IPs affected: `mu3e_lvds_controller_0`, `histogram_statistics_0`, `mutrig_injector_0`. The contract-fix RTL `WAITING`/`gts_counter_clear`/`TRAIN_ASSERTING_*` is in the submodule sources compiled into the SOF, but the FIRMWARE IDENTITY word reported by each IP's META header is stale.
+- Root cause:
+  - `feb_system_v4.qsys` (the top-level) holds an Auto-cached snapshot of the leaf-IP generics for every nested subsystem instance.
+  - The 2026-05-19 `make qsys-refresh` target only re-elaborates `scifi_datapath_system_v4.qsys` (the subsystem). The top is **excluded** because `qsys-script` `save_system` on `feb_system_v4` is destructive — it silently drops 18 slaves whose nested-subsystem catalog lookup fails during re-elaboration (observed during the 2026-05-19 audit dropping `hit_stack_subsystem*`, `ring_buffer_cam*`, `feb_frame_assembly*`, `dbg_mm2runctrl*`, and `arb_hit_type0_supercore.csr_*`).
+  - The `make qsys-validate` script checks each `.qsys` file's `version="X.Y.Z.WWWW"` attribute against the latest catalog `_hw.tcl` but does NOT walk into the nested-subsystem instance Auto cache, so the stale generics go unflagged.
+- Fix status:
+  - state: open, queued for next session
+  - mechanism (proposed): add an explicit `set_instance_parameter_value data_path_subsystem ...` patcher Tcl that forces the new leaf-IP generics into `feb_system_v4.qsys` between `qsys-from-tcl` and `qsys-syn`, with no `save_system` on the top so no slave drop. Extend `validate_qsys_ip_versions.py` to walk into nested subsystems' Auto snapshots and warn.
+- Evidence:
+  - `reports/feb_v4_resetting_contract_180200.md` "qsys cache propagation finding" section.
+
+### BUG-025-I: Region B mm_pipeline_lvds_csr_* bridges past offset 0x0000 are CSR-deaf on silicon
+
+- First seen in:
+  - FEB v3 on-board re-probe at 2026-05-19 18:02 after the RESETTING-contract rebuild.
+  - Symptom predates this commit; first noted as the "hist/injector held-in-reset" hypothesis in the 2026-05-18 drift audit and re-classified here as a bridge-level mis-decode after the RTL contract fix landed without recovering the readback.
+- Symptom:
+  - `mu3e_lvds_controller_0.csr` (sc-word 0x04000, `mm_pipeline_lvds_csr_low` bridge offset 0x0000) returns valid UID + VERSION + status words.
+  - Every other Region B slave on a different `mm_pipeline_lvds_csr_*` bridge returns all-zero payloads:
+    - `emulator_mutrig_qsys_inst.csr` (sc-word 0x04400, `mm_pipeline_lvds_csr_emu_dbg`) → 0
+    - `mts_preprocessor_0.csr` (sc-word 0x04C00, `mm_pipeline_lvds_csr_mutrig4_mts0`) → 0
+    - `histogram_statistics_0.csr` (sc-word 0x05C00, `mm_pipeline_lvds_csr_hist`) → 0
+    - `mutrig_injector_0.csr` (sc-word 0x06800, `mm_pipeline_lvds_csr_hitstack_ring`) → 0
+  - `sc_hub_v2` internal diagnostic reports `ERR_FLAGS=0, ERR_COUNT=0` after the probes — bridges acknowledge but the slave datapath returns zero, NOT a bridge-timeout.
+- Root cause (working hypothesis):
+  - The deaf bridges have `ADDRESS_WIDTH != SYSINFO_ADDR_WIDTH`:
+    - `mm_pipeline_lvds_csr_low`: ADDR_W=13, SYSINFO_ADDR_W=13 (match — works)
+    - `mm_pipeline_lvds_csr_emu_dbg`: ADDR_W=12, SYSINFO_ADDR_W=12 (match — but still deaf, so width-mismatch alone is not the full story)
+    - `mm_pipeline_lvds_csr_hist`: ADDR_W=12, SYSINFO_ADDR_W=11 (MISMATCH)
+    - `mm_pipeline_lvds_csr_hitstack_ring`: ADDR_W=12, SYSINFO_ADDR_W=10 (MISMATCH)
+  - The `emu_dbg` bridge has matching widths but still appears deaf — suggesting the root cause may instead be an outclock-domain reset wiring issue (every deaf bridge is clocked by `mu3e_lvds_controller_0.outclock` and reset by `monitor_reset_sync.reset_out` which is synchronized to `monitor_clock_125`, a different domain).
+- Counter-evidence that this is NOT the RESETTING contract:
+  - Contract-fix RTL verified in `feb_system_v4/synthesis/submodules/` (mutrig_injector_multiheader.vhd has `WAITING`, histogram_statistics_v2.vhd has combinational `gts_counter_clear`, mu3e_lvds_controller.sv has `TRAIN_ASSERTING_*`).
+  - LVDS CSR responds — proving the LVDS-outclock domain is not in reset.
+- Fix status:
+  - state: open, queued for next session
+  - mechanism (proposed): re-elaborate the inner LVDS-csr bridges with `USE_AUTO_ADDRESS_WIDTH=0` and explicit matching `ADDRESS_WIDTH = SYSINFO_ADDR_WIDTH` widths, **or** move these slaves onto the `mm_pipeline_lvds_csr_low` bridge (proven to work).
+- Evidence:
+  - `reports/feb_v4_resetting_contract_180200.md` "Region B CSR-deafness finding" section.
