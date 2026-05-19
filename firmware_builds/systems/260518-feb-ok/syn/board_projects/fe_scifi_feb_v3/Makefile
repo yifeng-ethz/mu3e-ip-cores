@@ -80,7 +80,7 @@ define SEARCH_PATH_BOOTSTRAP
 endef
 
 # --- Phony list --------------------------------------------------------------
-.PHONY: all help qsys qsys-from-tcl qsys-patch qsys-syn qsys-gen app flow flow_map clean-trash sim-% test-%
+.PHONY: all help qsys qsys-from-tcl qsys-patch qsys-refresh qsys-validate qsys-syn qsys-gen app flow flow_map clean-trash sim-% test-%
 all: flow
 
 help:
@@ -160,6 +160,61 @@ qsys-patch:
 	@echo "  - feb_system_v3.qsys: add_mclk125_reset_bridge_v3.tcl + script/{update_feb_system_v3_dualport_version,update_emulator_type0_descriptions,update_scifi_datapath_v3_histogram_stats,set_readyless_ctrl_splitters}.tcl"
 	@echo "[qsys-patch] (no-op for now; the seeded .qsys files are used as-is)"
 
+# --- Optional: qsys-refresh --------------------------------------------------
+# Re-elaborate each .qsys in dependency order (subsystem first, top last) so
+# nested subsystem instances pick up fresh IP catalog versions. The parent
+# .qsys caches a snapshot of the subsystem's instance parameters; without a
+# load+save pass after an IP version bump, that snapshot stays stale and the
+# generated VHDL instantiates old VERSION_PATCH/BUILD/VERSION_DATE values.
+# Order matters: refresh leaves first, then roots, so each parent's load_system
+# sees the freshly-saved subsystem.
+#
+# Add new systems in dependency order. NOTE: feb_system_v4 (the top-level)
+# is intentionally NOT in the default list because Quartus 18.1 qsys-script's
+# save_system on the top is destructive — it silently drops slaves whose
+# nested-subsystem catalog lookup fails during re-elaboration (observed
+# 2026-05-19 dropping hit_stack_subsystem*, ring_buffer_cam*, frame_assembly*,
+# dbg_mm2runctrl*, arb_hit_type0_supercore.csr_*). Refresh the subsystem
+# only; the top stays whatever it was (sopcinfo cache prevails). For a true
+# top-level refresh, use the Platform Designer GUI's "Update IP" flow.
+QSYS_REFRESH_ORDER ?= scifi_datapath_system_v4
+
+qsys-refresh:
+	@chmod u+w $(GEN_QSYS_DIR) $(GEN_QSYS_DIR)/*.qsys 2>/dev/null || true
+	@bash -c ' \
+	set -euo pipefail; \
+	$(SEARCH_PATH_BOOTSTRAP); \
+	for q in $(QSYS_REFRESH_ORDER); do \
+	    in=$(GEN_QSYS_DIR)/$$q.qsys; \
+	    if [ ! -f $$in ]; then \
+	        echo "[qsys-refresh] SKIP $$q (missing $$in)" >&2; continue; \
+	    fi; \
+	    echo "[qsys-refresh] load+save $$q"; \
+	    $(QSYS_SCRIPT) --search-path="$$SEARCH_PATHS,\$$" \
+	        --cmd="set ::env(SYSTEM_DIR) {$(SYSTEM_DIR)}" \
+	        --cmd="set ::env(MU3E_IP_CORES_ROOT) {$(REPO_ROOT)}" \
+	        --script=$(QSYS_TCL_DIR)/script/refresh_qsys_load_save.tcl $$in; \
+	done; \
+	'
+
+# --- Optional: qsys-validate -------------------------------------------------
+# Audit each .qsys file for stale IP version pins. Each <module> in a .qsys
+# carries `version="X.Y.Z.WWWW"` that must match the latest VERSION available
+# in the IP catalog (highest VERSION_PATCH/BUILD across all _hw.tcl on the
+# QSYS search path). When an IP _hw.tcl is bumped, the .qsys still pins the
+# old version until something refreshes it.
+#
+# This target prints a per-instance report and exits non-zero on stale pins
+# (so it can gate qsys-syn / flow). For a soft warning, set WARN_ONLY=1.
+QSYS_VALIDATE_FILES ?= $(GEN_QSYS_DIR)/scifi_datapath_system_v4.qsys $(GEN_QSYS_DIR)/feb_system_v4.qsys
+WARN_ONLY ?=
+
+qsys-validate:
+	@python3 $(QSYS_TCL_DIR)/script/validate_qsys_ip_versions.py \
+	    $(foreach f,$(QSYS_VALIDATE_FILES),--qsys $(f)) \
+	    --catalog-root $(REPO_ROOT) \
+	    $(if $(WARN_ONLY),--warn-only,)
+
 # --- Step 2a: qsys-syn (synthesis HDL, DEBUG_LEVEL=0) ------------------------
 # VHDL-2008 is enabled at project scope via VHDL_INPUT_VERSION in
 # revisions/top.qsf. VHDL files that need the parser switched per file (e.g.
@@ -218,7 +273,7 @@ qsys-gen:
 	@find $(GEN_SIM_DIR) -mindepth 1 -type f -exec chmod a-w {} + 2>/dev/null || true
 
 # --- Full Qsys: tcl (+ optional patch) + synth + sim -------------------------
-qsys: qsys-from-tcl qsys-patch qsys-syn qsys-gen
+qsys: qsys-from-tcl qsys-patch qsys-refresh qsys-validate qsys-syn qsys-gen
 
 # --- Nios software -----------------------------------------------------------
 # Builds a HAL BSP from software/hal_bsp.tcl then compiles main.cpp into ELF.
