@@ -65,7 +65,7 @@ See [`V4_REWIRE_SPEC.md`](V4_REWIRE_SPEC.md) for the SC-hub byte map.
 | `mux_mutrig2processor` / `mux_mutrig2processor_0` | `hit_type0_readyless_mux4` | `26.1.0.0516` | OK |
 | `arb_hit_type0_supercore_0` (wrapper) | `arb_hit_type0_supercore` | `1.0` (kept) | **kept at 1.0** to avoid collision with the IP-Builder `arb_hit_type0_supercore_hw.tcl` variant (also kind=`arb_hit_type0_supercore`) that carries `26.6.5.0518` — bumping the qsys subsystem to a matching version makes Qsys's kind resolver pick the wrong (IP-Builder) variant and break port resolution |
 | `arb_hit_type0_supercore_0.lane_{0..7}` | `arb_hit_type0` | `26.6.5.0518` | OK |
-| `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.7.0519` | **kind OK + contract fix** (commit `630ef5b`): removed the `gts_reset_reg` latch process and `gts_counter_rst` signal; the `gts_counter_clear` pulse is now combinational on `i_rst or runctl_reset_hold or runctl_sync_start or runctl_run_start`, preserving SYNC-entry semantics with no latch. Closes BUG-011-R (standalone syn +0.465 ns @ 1.1x F_target). The `_v2`-named hw.tcl implements the v3 ingress contract (`type0_lane0..7` + `type1_up`/`type1_down` + 48-bit ts sideband). Live 2026-05-19 read returns `0x00000000` for UID + VERSION — bridge-deafness on `mm_pipeline_lvds_csr_hist`, NOT RESETTING. |
+| `histogram_statistics_0` | `histogram_statistics_v2` | `26.3.9.0519` | **kind OK + contract fix + rate-plot bugfix**. 26.3.7 (commit `630ef5b`) removed the `gts_reset_reg` latch process and made `gts_counter_clear` combinational. 26.3.8 (commit `2c3ea82`) switched the LOCK_KEY_RANGES default update key from TCC to {ASIC[2:0], CH[4:0]} (Type0 bits[43:36], Type1 bits[37:30]) so an N-channel rate plot has N non-zero bins. 26.3.9 (same commit) added the missing `asi_type1_up_ready` / `asi_type1_down_ready` ports to the hw.tcl interface declaration; the RTL had always driven those signals but qsys-generate had dropped them from the wrapper because the hw.tcl never advertised them, and the auto-inserted Avalon-ST timing_adapter on the Type1 snoop tap path then silently dropped every Type1 hit. Closes BUG-011-R, BUG-026-H, BUG-027-I. Live 2026-05-19 18:30 reprobe (after sc-byte address correction): UID "HIST" at sc-word 0x06900. |
 | `hit_stack_subsystem_{0,1}` | `hit_stack_system_v4` | `26.4.0.0518` | sub-subsystem, bumped from 1.0 |
 | `hit_stack_subsystem_{0,1}.feb_frame_assembly_0` | `feb_frame_assembly` | `26.0.0328` | OK |
 | `hit_stack_subsystem_{0,1}.ring_buffer_cam_{0..3}` | `ring_buffer_cam` | `26.2.13.0516` | OK |
@@ -192,36 +192,54 @@ Fix path queued for next session:
 - (b) extend `validate_qsys_ip_versions.py` to walk into nested
   subsystems' Auto generic snapshots and at least warn.
 
-## Region B CSR-deafness finding (2026-05-19, NEW)
+## Type1 plotting requires two ping-pong runs (2026-05-19 user clarification)
 
-Post-recompile reprobe shows the LVDS CSR (`mm_pipeline_lvds_csr_low`,
-offset 0x0000 inside the cross-clock master) responds with valid UID +
-VERSION, while every Region B slave behind a different
-`mm_pipeline_lvds_csr_*` bridge returns all-zero payloads:
+Type1 is single-bank in the hardware. Each `mts_preprocessor_*` only emits
+hits for the 4 ASICs on its bank, so a Type1 histogram run with
+`source_select = HIST_SOURCE_TYPE1_UP` (or `..._DOWN`) only fills
+**128 bins** of the 256-bin output:
 
-| slave | bridge | offset in cross-clock master | live read |
+| bank | source_select | ASICs | local CH | global rate-plot bin range |
+|---|---|---|---|---|
+| `mts_preprocessor_0` | `HIST_SOURCE_TYPE1_UP` (0b01) | 0..3 | 0..31 | 0..127 |
+| `mts_preprocessor_1` | `HIST_SOURCE_TYPE1_DOWN` (0b10) | 4..7 (or 0..3 local) | 0..31 | 128..255 |
+
+To cover the full [0, 255] channel range the plotting driver makes two
+separate 1 s ping-pong runs - one per bank - and concatenates the bin
+arrays. Same shape applies to Type1 delay mode. Type0 single-runs the
+full 8 ASICs through the type0_lane0..7 ports so a single Type0 rate
+plot already covers [0, 255].
+
+The `firmware_builds/systems/260518-feb-ok/script/board/run_emulator_rate_delay_20260519.py`
+test driver was extended on the 2026-05-19 re-run to drive the two-bank
+Type1 capture sequence.
+
+## Region B SC addressing correction (2026-05-19, supersedes the earlier "CSR-deafness" finding)
+
+The earlier write-up of a Region B CSR-deafness pattern was a **false alarm**
+caused by stale sc-byte values in `V4_REWIRE_SPEC.md`. The actual SC-hub-to-
+data-path-AVMM mapping is `sc-byte = avmm_port_byte + 0x10000` (Region B
+base), and the V4_REWIRE_SPEC table's sc-byte column was derived from
+`data_jtag_byte + 0x10000` which is a different master view.
+
+Corrected sc-word probes (2026-05-19 18:30) confirm every Region B slave
+responds:
+
+| slave | corrected sc-word | UID | VERSION (stale per BUG-024-I) |
 |---|---|---|---|
-| `mu3e_lvds_controller_0.csr` | `mm_pipeline_lvds_csr_low` | 0x0000 | OK (UID + VERSION valid) |
-| `emulator_mutrig_qsys_inst.csr` | `mm_pipeline_lvds_csr_emu_dbg` | 0x2000 | all zeros |
-| `mts_preprocessor_0.csr` | `mm_pipeline_lvds_csr_mutrig4_mts0` | 0x4000 | all zeros |
-| `histogram_statistics_0.csr` | `mm_pipeline_lvds_csr_hist` | 0xA000 (slave inside @ 0x400) | all zeros |
-| `mutrig_injector_0.csr` | `mm_pipeline_lvds_csr_hitstack_ring` | 0xB000 (slave inside @ 0x200) | all zeros |
+| `mu3e_lvds_controller_0.csr` | 0x04000 | "LVDS" | 26.2.1.1286 |
+| `emulator_mutrig_qsys_inst.csr` | 0x04800 | "EMUT" | 26.3.0.506 |
+| `mts_preprocessor_0.csr` | 0x05000 | (status reg 0x20000010) | n/a |
+| `histogram_statistics_0.csr` | 0x06900 | "HIST" | 26.3.4.517 |
+| `mutrig_injector_0.csr` | 0x06C80 | "MINJ" | 26.1.1.517 |
 
-sc_hub_v2 internal diagnostic reports `ERR_FLAGS=0, ERR_COUNT=0` after the
-deaf probes - bridges acknowledge the cycle but the slave datapath returns
-zero. The bridge parameters that differ from the working low-bridge:
-- `mm_pipeline_lvds_csr_low`: ADDRESS_WIDTH=13, SYSINFO_ADDR_WIDTH=13 (match)
-- `mm_pipeline_lvds_csr_emu_dbg`: ADDRESS_WIDTH=12, SYSINFO_ADDR_WIDTH=12 (match)
-- `mm_pipeline_lvds_csr_hist`: ADDRESS_WIDTH=12, SYSINFO_ADDR_WIDTH=11 (**MISMATCH**)
-- `mm_pipeline_lvds_csr_hitstack_ring`: ADDRESS_WIDTH=12, SYSINFO_ADDR_WIDTH=10 (**MISMATCH**)
+The `mm_pipeline_lvds_csr_*` bridges are healthy. Only [BUG-024-I](BUG_HISTORY.md)
+(qsys nested-subsystem generic cache) remains real from the 2026-05-19
+on-board re-probe.
 
-Suspect bridge address-aperture mis-decode. Fix path queued for next
-session: re-elaborate the inner bridges with `USE_AUTO_ADDRESS_WIDTH=0`
-and explicit matching widths, or move these slaves onto the
-`mm_pipeline_lvds_csr_low` bridge (proven to work).
-
-This is **NOT** the RESETTING contract bug. The contract-fix RTL was
-verified to be in the SOF submodule sources before the on-board re-probe.
+Follow-up: regenerate the V4_REWIRE_SPEC.md sc-byte column from the live
+`feb_system_v4.qsys` AUTO_AVMM_PORT_ADDRESS_MAP and keep the data_jtag
+byte column separate from the SC-hub view.
 
 ## Files moved to `quartus_systems/deprecated/` (2026-05-18 v3→v4 cut)
 

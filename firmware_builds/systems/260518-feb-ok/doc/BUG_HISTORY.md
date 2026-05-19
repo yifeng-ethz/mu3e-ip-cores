@@ -38,7 +38,9 @@ Severity legend:
 | [BUG-021-I](#bug-021-i-hit_type3_upper-lost-ready-and-starved-run-control-idles) | I | hard stuck error | `common (generated FEB upload path with realistic downstream backpressure)` | fixed / sim-validated | FEB generated upload backpressure repro, 2026-05-18 | this commit | Qsys auto-inserted an Avalon-ST adapter between `data_path_subsystem.hit_type3_upper` and `upload_subsystem.upload_data` with `inUseReady=0` and `outUseReady=1`; a missed Type3 EOP parks `upload_pkt_mux` on in0 and starves both the `upload_sc` packet input and the run-control/K28.5 idle input. |
 | [BUG-022-I](#bug-022-i-feb-board-top-wrapper-still-bound-dropped-legacy_firefly_mon-ports) | I | non-datapath-refactor | `common (any FEB v4 build after Phase B SC-hub rewire)` | fixed | FEB top Quartus map, 2026-05-18 | this commit | After Phase B dropped `legacy_firefly_bridge` from `debug_sc_system_v4.qsys`, `feb_system_v3_board_top.vhd` still bound 11 phantom `legacy_firefly_mon_*` formal ports on the regenerated entity, causing Quartus map Error 10349 at line 132. |
 | [BUG-024-I](#bug-024-i-feb_system_v4-nested-subsystem-generic-snapshot-does-not-refresh-when-scifi_datapath_system_v4-leaf-ips-bump) | I | non-datapath-refactor | `common (any leaf-IP bump that propagates only to the subsystem, not to feb_system_v4.qsys)` | open | FEB v3 RESETTING-contract rebuild + on-board re-probe, 2026-05-19 | this checkpoint | `feb_system_v4.qsys` caches the leaf-IP generics for every nested subsystem instance; the 2026-05-19 `qsys-refresh` of `scifi_datapath_system_v4` did not propagate the new `VERSION_PATCH/BUILD/DATE` values for `mu3e_lvds_controller_0`, `histogram_statistics_0`, `mutrig_injector_0` into the SOF, and `qsys-validate` does not walk into the nested snapshot. The contract-fix RTL is in the SOF; only the firmware identity word is stale. |
-| [BUG-025-I](#bug-025-i-region-b-mm_pipeline_lvds_csr_-bridges-past-offset-0x0000-are-csr-deaf-on-silicon) | I | hard stuck error | `common (FEB SC-ring probing of every Region B slave behind a non-low mm_pipeline_lvds_csr_* bridge)` | open | FEB v3 on-board re-probe, 2026-05-19 18:02 | this checkpoint | `mm_pipeline_lvds_csr_hist`, `mm_pipeline_lvds_csr_hitstack_ring`, `mm_pipeline_lvds_csr_emu_dbg`, and `mm_pipeline_lvds_csr_mutrig4_mts0` acknowledge SC packets but return all-zero payloads. `mm_pipeline_lvds_csr_low` works. Bridge wiring (clock = `mu3e_lvds_controller_0.outclock`, reset = `monitor_reset_sync.reset_out` synced to `monitor_clock_125`) is the suspect. Blocks every IP CSR access in Region B. NOT the RESETTING contract bug. |
+| [BUG-025-I](#bug-025-i-region-b-mm_pipeline_lvds_csr_-bridges-past-offset-0x0000-are-csr-deaf-on-silicon-INVALID) | I | hard stuck error | `common (FEB SC-ring probing of every Region B slave behind a non-low mm_pipeline_lvds_csr_* bridge)` | **INVALID / false alarm** | FEB v3 on-board re-probe, 2026-05-19 18:02 | this checkpoint | NOT a bug. The "deaf" reads came from incorrect sc-byte addresses derived from a stale V4_REWIRE_SPEC.md table. Correct mapping is `sc-byte = avmm_port_byte + 0x10000`. Hist csr is at sc-byte 0x1A400 (sc-word 0x06900), not the previously-tabulated 0x17000. With corrected addresses all Region B slaves respond with valid UIDs ("HIST", "MINJ", "EMUT", "MTSP"). The bridges are fine; only BUG-024-I (qsys cache stale generics) remains real. |
+| [BUG-026-H](#bug-026-h-hist-lock_key_ranges-keyed-on-tcc-instead-of-asic-ch-default-wrong-for-rate-plots) | H | non-datapath-refactor | `common (any FEB rate-plot regression that relies on LOCK_KEY_RANGES default)` | fixed | FEB v3 emulator rate-plot regression, 2026-05-19 19:01 | this commit | histogram_statistics_v2 default LOCK_KEY_RANGES update key was the TCC slice (Type0 data[35:21], Type1 data[29:17]) which gave a uniform distribution under a constant-rate emulator. Changed to {ASIC[2:0], CH[4:0]} (Type0 data[43:36], Type1 data[37:30]) so an N-channel rate plot has exactly N non-zero bins. Bumped hist 26.3.7.0519 -> 26.3.9.0519. |
+| [BUG-027-I](#bug-027-i-hist-hwtcl-omitted-asi_type1_-ready-port-causing-timing_adapter-to-drop-type1-hits-silently) | I | hard stuck error | `common (any FEB build with the type1_up or type1_down hist source-select selected)` | fixed | FEB v3 emulator regression, 2026-05-19 19:01 | this commit | histogram_statistics_v2_hw.tcl declared type1_up and type1_down sink interfaces with readyLatency=0 but never added the asi_*_ready port to the interface port list. RTL drove asi_type1_up_ready / asi_type1_down_ready as entity outputs (rtl line 1012-1013) but qsys-generate dropped them from the wrapper. The auto-inserted avalon_st_adapter_025 timing_adapter on the snoop tap path then saw out_0_ready unconnected, defaulted to 0, never consumed its FIFO, and silently dropped every Type1 hit. The Type0 path uses hit_type0_tap2 (truly readyless) so no timing_adapter is inserted there. Fixed by adding the ready ports in hist hw.tcl and bumping 26.3.7.0519 -> 26.3.9.0519. |
 
 ## 2026-05-18
 
@@ -563,31 +565,121 @@ Severity legend:
 - Evidence:
   - `reports/feb_v4_resetting_contract_180200.md` "qsys cache propagation finding" section.
 
-### BUG-025-I: Region B mm_pipeline_lvds_csr_* bridges past offset 0x0000 are CSR-deaf on silicon
+### BUG-025-I: Region B mm_pipeline_lvds_csr_* bridges past offset 0x0000 are CSR-deaf on silicon (INVALID / false alarm)
+
+**Status: INVALID. Closed 2026-05-19 18:30 after corrected-address re-probe.**
+
+- First raised: FEB v3 on-board re-probe at 2026-05-19 18:02 after the RESETTING-contract rebuild.
+- Reported symptom: hist/injector/emulator/mts CSRs return all-zero payloads when probed via sc_tool at sc-byte addresses 0x17000 (hist), 0x1B200 (injector via wrong derivation), 0x11000 (emulator), 0x13000 (mts0).
+- Actual root cause (re-derived from feb_system_v4.qsys AUTO_AVMM_PORT_ADDRESS_MAP, 2026-05-19 18:30):
+  - The correct mapping is `sc-byte = avmm_port_byte + 0x10000` (Region B base).
+  - The V4_REWIRE_SPEC.md table's sc-byte column was derived from `data_jtag_byte + 0x10000`, but the JTAG master view and the SC-hub avmm_port view do NOT share the same internal byte layout - the JTAG master has its own local address map starting at 0 while the avmm_port map starts at 0 too but with different slave offsets (per feb_system_v4.qsys AUTO_AVMM_PORT_ADDRESS_MAP).
+  - For example, the spec said hist csr = sc-byte 0x17000 (data_jtag byte 0x07000 + 0x10000), but the avmm_port has hist csr at byte 0xA400, so the correct sc-byte is 0x1A400 (= sc-word 0x06900).
+- Corrected-probe evidence (2026-05-19 18:30):
+  - `sc_tool 2 read 0x06900 2` → payload[0] = `0x48495354` ("HIST"), payload[1] = `0x1A034205` (VERSION 26.3.4.517, still stale per BUG-024-I but the IP responds)
+  - `sc_tool 2 read 0x06C80 2` → payload[0] = `0x4D494E4A` ("MINJ"), payload[1] = `0x1A011205` (VERSION 26.1.1.517, stale per BUG-024-I)
+  - `sc_tool 2 read 0x04800 2` → payload[0] = `0x454D5554` ("EMUT"), payload[1] = `0x1A0301FA` (VERSION 26.3.0.506, stale per BUG-024-I)
+  - `sc_tool 2 read 0x05000 2` and `0x06000 2` → mts_preprocessor_0 and mts_preprocessor_1 status registers return non-zero data.
+  - `sc_tool 2 read 0x06800 4` (hist_bin offset 0) → returns all-zero data, which is the CORRECT idle state for an unconfigured histogram.
+- Lesson:
+  - The `mm_pipeline_lvds_csr_*` bridges are not deaf and the address-width "mismatches" noted in the original BUG-025-I write-up are normal Qsys autoresize artifacts.
+  - The sc-byte values in V4_REWIRE_SPEC.md (and in `reports/feb_v4_resetting_contract_180200.md`) need to be regenerated from the live `feb_system_v4.qsys` AUTO_AVMM_PORT_ADDRESS_MAP rather than from the older data_jtag layout.
+- Follow-up:
+  - V4_REWIRE_SPEC.md sc-byte column refresh (queued for next session - keep the data_jtag byte column separate from the SC-hub view).
+  - Only BUG-024-I (qsys nested-subsystem generic cache) remains real and open from the 2026-05-19 on-board re-probe.
+
+### BUG-026-H: hist LOCK_KEY_RANGES keyed on TCC instead of ASIC+CH (default wrong for rate plots)
 
 - First seen in:
-  - FEB v3 on-board re-probe at 2026-05-19 18:02 after the RESETTING-contract rebuild.
-  - Symptom predates this commit; first noted as the "hist/injector held-in-reset" hypothesis in the 2026-05-18 drift audit and re-classified here as a bridge-level mis-decode after the RTL contract fix landed without recovering the readback.
+  - FEB v3 emulator rate-plot regression on 2026-05-19 19:01 against build
+    firmware_builds/systems/260518-feb-ok (driver:
+    `script/board/run_emulator_rate_delay_20260519.py`, outputs:
+    `script/board/REPORT/emu_rate_delay_20260519_190144/`).
+  - User intent for the regression: "rate plot [0,255] of type0 and type1.
+    Rate must match the enabled ch of the given rate." With 1ch/ASIC at
+    100 kHz and 8 lanes enabled the expected plot has 8 non-zero bins
+    each carrying the per-channel hit count.
 - Symptom:
-  - `mu3e_lvds_controller_0.csr` (sc-word 0x04000, `mm_pipeline_lvds_csr_low` bridge offset 0x0000) returns valid UID + VERSION + status words.
-  - Every other Region B slave on a different `mm_pipeline_lvds_csr_*` bridge returns all-zero payloads:
-    - `emulator_mutrig_qsys_inst.csr` (sc-word 0x04400, `mm_pipeline_lvds_csr_emu_dbg`) → 0
-    - `mts_preprocessor_0.csr` (sc-word 0x04C00, `mm_pipeline_lvds_csr_mutrig4_mts0`) → 0
-    - `histogram_statistics_0.csr` (sc-word 0x05C00, `mm_pipeline_lvds_csr_hist`) → 0
-    - `mutrig_injector_0.csr` (sc-word 0x06800, `mm_pipeline_lvds_csr_hitstack_ring`) → 0
-  - `sc_hub_v2` internal diagnostic reports `ERR_FLAGS=0, ERR_COUNT=0` after the probes — bridges acknowledge but the slave datapath returns zero, NOT a bridge-timeout.
-- Root cause (working hypothesis):
-  - The deaf bridges have `ADDRESS_WIDTH != SYSINFO_ADDR_WIDTH`:
-    - `mm_pipeline_lvds_csr_low`: ADDR_W=13, SYSINFO_ADDR_W=13 (match — works)
-    - `mm_pipeline_lvds_csr_emu_dbg`: ADDR_W=12, SYSINFO_ADDR_W=12 (match — but still deaf, so width-mismatch alone is not the full story)
-    - `mm_pipeline_lvds_csr_hist`: ADDR_W=12, SYSINFO_ADDR_W=11 (MISMATCH)
-    - `mm_pipeline_lvds_csr_hitstack_ring`: ADDR_W=12, SYSINFO_ADDR_W=10 (MISMATCH)
-  - The `emu_dbg` bridge has matching widths but still appears deaf — suggesting the root cause may instead be an outclock-domain reset wiring issue (every deaf bridge is clocked by `mu3e_lvds_controller_0.outclock` and reset by `monitor_reset_sync.reset_out` which is synchronized to `monitor_clock_125`, a different domain).
-- Counter-evidence that this is NOT the RESETTING contract:
-  - Contract-fix RTL verified in `feb_system_v4/synthesis/submodules/` (mutrig_injector_multiheader.vhd has `WAITING`, histogram_statistics_v2.vhd has combinational `gts_counter_clear`, mu3e_lvds_controller.sv has `TRAIN_ASSERTING_*`).
-  - LVDS CSR responds — proving the LVDS-outclock domain is not in reset.
-- Fix status:
-  - state: open, queued for next session
-  - mechanism (proposed): re-elaborate the inner LVDS-csr bridges with `USE_AUTO_ADDRESS_WIDTH=0` and explicit matching `ADDRESS_WIDTH = SYSINFO_ADDR_WIDTH` widths, **or** move these slaves onto the `mm_pipeline_lvds_csr_low` bridge (proven to work).
-- Evidence:
-  - `reports/feb_v4_resetting_contract_180200.md` "Region B CSR-deafness finding" section.
+  - Type0 rate plot showed ~99.18 kHz integrated across all 256 bins (each
+    bin ~ 388 counts), a uniform TCC distribution rather than 8 non-zero
+    channel bins. The emulator aggregate rate matched the configuration
+    (99183 hits in 1 s vs 100 kHz request) but the histogram was binning
+    the wrong field.
+- Root cause:
+  - `histogram_statistics/rtl/histogram_statistics_v2.vhd` constants
+    `TYPE0_UPDATE_KEY_LOW/HIGH_CONST = 21/35` and
+    `TYPE1_UPDATE_KEY_LOW/HIGH_CONST = 17/29` keyed on the TCC slice.
+  - The IP env_pkg HS_TYPE0_ASIC/CH and HS_TYPE1_ASIC/CH show the channel
+    index lives at Type0 bits[43:36] and Type1 bits[37:30] as
+    {ASIC[2:0], CH[4:0]} (8 bits, 256 unique values for 8 ASICs * 32
+    channels). The old TCC default was wrong for rate-mode plots.
+- Fix:
+  - Bumped `histogram_statistics_v2` 26.3.7.0519 -> 26.3.9.0519
+    (single submodule commit also lands BUG-027-I below).
+  - TYPE0_UPDATE_KEY 21:35 -> 36:43 ({ASIC[2:0], CH[4:0]}).
+  - TYPE1_UPDATE_KEY 17:29 -> 30:37 ({ASIC[2:0], CH[4:0]}).
+  - Filter slices remain ASIC (Type0 bits[44:41], Type1 bits[38:35]).
+  - TB env_pkg HS_DEF_UPDATE_LO/HI + HS_TYPE0_UPDATE + HS_TYPE1_UPDATE
+    updated to match the RTL.
+  - hw.tcl HTML "Key Extraction" panel refreshed.
+- Validation:
+  - Questa static screen on the new RTL: Lint 0, CDC 0, RDC 0
+    (`.questa_static_screen_asicch/questa_static_screen.log` then
+    `.questa_static_screen_t1ready/`).
+  - Per-bank Type1 plotting: per the user 2026-05-19 19:30 clarification,
+    Type1 is single-bank in the hardware: type1_up covers 4 ASICs * 32
+    channels = channels [0, 127], type1_down covers the other 4 ASICs =
+    channels [128, 255]. The plotting driver therefore needs to make TWO
+    separate ping-pong runs (one with source_select=Type1_up, one with
+    source_select=Type1_down) and concatenate the 256-bin outputs.
+    Same shape applies to Type1 delay.
+
+### BUG-027-I: hist hw.tcl omitted asi_type1_*_ready port causing timing_adapter to drop Type1 hits silently
+
+- First seen in:
+  - FEB v3 emulator regression on 2026-05-19 19:01 against build
+    firmware_builds/systems/260518-feb-ok.
+- Symptom:
+  - On 1ch/ASIC, 100 kHz, 1 s ping-pong:
+    - Type1 rate plot: bin_sum=0, no non-zero bins.
+    - Type1 delay plot: bin_sum=0, no non-zero bins.
+    - MTSP0/1 in RUNNING with `total_hit_cnt` climbing ~420 k/s/group.
+    - histogram_statistics_0 BANK_STATUS ping-ponged 0<->1 (interval
+      engine alive) but TOTAL_HITS stayed 0.
+  - sc_hub_v2 ERR_FLAGS=0 throughout.
+- Root cause:
+  - `histogram_statistics_v2_hw.tcl` declared the `type1_up` and
+    `type1_down` Avalon-ST sink interfaces with `readyLatency 0` but
+    never added the `asi_*_ready` port to the interface port list (the
+    foreach loop only emitted valid, data, sop, eop, channel, empty,
+    error).
+  - The RTL drives `asi_type1_up_ready` and `asi_type1_down_ready` as
+    entity outputs (rtl/histogram_statistics_v2.vhd:1012-1013), but
+    qsys-generate strips them from the wrapper because the hw.tcl
+    declaration is authoritative for what shows up on the wrapper
+    boundary. `grep asi_type1_up_ready
+    generated/synthesis/scifi_datapath_system_v4/synthesis/scifi_datapath_system_v4.vhd`
+    returned zero matches, confirming the signal was dropped.
+  - The auto-inserted `avalon_st_adapter_025` between
+    `hist_type1_up_tap.out1` (avst_snoop_splitter source) and
+    `histogram_statistics_0.type1_up` (sink) is a timing_adapter. With
+    its `out_0_ready` unconnected (because the sink hw.tcl never
+    advertised the ready port), the adapter defaulted that signal to 0,
+    never consumed from its internal FIFO, filled, and back-pressured
+    its input side (which the snoop tap intentionally ignores per the
+    SV comment "an unconnected or stalled monitor cannot backpressure
+    the observed datapath"). So every Type1 hit was silently dropped at
+    the adapter input.
+  - The Type0 path uses `hit_type0_tap2` which has NO ready ports on
+    either input or outputs, so Qsys does not insert any timing_adapter
+    there. That is why Type0 always worked.
+- Fix:
+  - Added `add_interface_port type1_up asi_type1_up_ready ready Output 1`
+    and the matching `type1_down` line to histogram_statistics_v2_hw.tcl.
+  - Bumped `histogram_statistics_v2` 26.3.7.0519 -> 26.3.9.0519 (with
+    BUG-026 in the same submodule commit).
+  - No RTL change required.
+- Validation:
+  - Questa static screen on the RTL (unchanged here): Lint 0, CDC 0,
+    RDC 0.
+  - FEB integration recompile + reprobe queued.
