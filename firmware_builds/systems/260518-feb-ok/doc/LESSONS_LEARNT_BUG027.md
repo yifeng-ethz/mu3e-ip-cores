@@ -107,6 +107,55 @@ the IP entity directly. The check is mechanical: did the vcom file list
 include `scifi_datapath_system_v4.vhd`? If not, the harness is not
 exercising the integration surface.
 
+## The strict rule - no driver inside the DUT
+
+User direction 2026-05-19 22:25 sharpens the lesson: **the tb_int DUT must
+be the whole qsys subsystem wrapper, the TB must not insert any driver
+inside the DUT, and the only observability is through debug ports the
+wrapper explicitly exposes (e.g. a `hit_meta` conduit on the wrapper
+boundary).** "No driver inside the DUT" is the structural fix that makes
+the bare-IP cheat impossible:
+
+1. **vcom file list contains the wrapper file and the submodules dir;
+   it does NOT separately compile `histogram_statistics_v2.vhd` or any
+   other leaf IP file.** With the leaf source file absent from the
+   compile, the TB cannot instantiate the bare IP entity even by
+   accident.
+2. **The TB instantiates ONLY the wrapper module** (e.g.
+   `scifi_datapath_system_v4 dut(...)`). Every signal the TB drives or
+   monitors lives on the wrapper's entity port list. The wrapper
+   entity port list is the authoritative integration surface.
+3. **No SystemVerilog hierarchical references into the DUT.** No
+   `dut.u_qsys.histogram_statistics_0.asi_type1_up_ready` backdoor.
+   That single discipline rule, combined with the no-leaf-vcom rule
+   above, structurally forbids the wrapper-bypass cheat. A linter or
+   grep gate enforces it: any tb_int that contains
+   `dut\.[a-z_]+\.[a-z_]+\.` is poking internals and must be reviewed.
+4. **Observability lives on the wrapper boundary or in explicit debug
+   conduits the wrapper exposes.** The histogram already declares
+   optional `debug_1..6` Avalon-ST sinks for instrumentation (16-bit,
+   N_DEBUG_INTERFACE-gated). A `hit_meta` style debug conduit that the
+   subsystem author chooses to export at the wrapper boundary is the
+   legitimate way for tb_int to peek at internal state. Any other
+   internal poke is the cheat that lets bugs like BUG-027-I escape sim.
+
+With those four rules, the wrapper-strip bug surfaces structurally:
+
+- Either the wrapper entity port list does not have `asi_type1_up_ready`
+  (because the hw.tcl omitted it). The TB cannot wire it. Either the TB
+  compile fails (the TB tried to wire a missing port and got an
+  elaboration error - **immediate signal**) or the TB simply has no
+  Type1 ingress handshake and the histogram drops every Type1 hit
+  exactly as on silicon. Either way the bug is caught in seconds.
+- Or the wrapper port list has `asi_type1_up_ready` but qsys-syn
+  inserted a timing_adapter on the snoop tap that drops hits. With the
+  TB driving the wrapper boundary, the same drop pattern manifests in
+  sim because the adapter is part of the compiled wrapper hierarchy.
+
+The bare-IP tb_int we have today gets NEITHER of those signals. That is
+why it shipped the BUG-027-I silicon image despite a Type1 source-select
+test scenario being present in the harness.
+
 ## What did expose it
 
 The board read in the 2026-05-19 18:02 regression:
