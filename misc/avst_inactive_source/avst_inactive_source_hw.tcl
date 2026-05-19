@@ -39,11 +39,24 @@ proc validate {} {
 proc elaborate {} {
     set data_width [get_parameter_value DATA_WIDTH]
     set channel_width [get_parameter_value CHANNEL_WIDTH]
+    set use_packets [get_parameter_value USE_PACKETS]
     set max_channel [expr {(1 << $channel_width) - 1}]
 
     set_interface_property out dataBitsPerSymbol $data_width
     set_interface_property out symbolsPerBeat 1
     set_interface_property out maxChannel $max_channel
+
+    # Honour the downstream sink's usePackets contract. If the consumer
+    # mux/splitter has usePackets=false, an avst_inactive_source that always
+    # advertises SOP/EOP makes qsys-generate fail "source has startofpacket
+    # signal of 1 bits, but the sink does not". USE_PACKETS=0 hides the
+    # packet ports from the interface declaration; the RTL still drives
+    # them at 0 internally but they are not exported.
+    if {$use_packets == 0} {
+        set_interface_property out usePackets false
+    } else {
+        set_interface_property out usePackets true
+    }
 }
 
 add_fileset QUARTUS_SYNTH QUARTUS_SYNTH "" ""
@@ -67,6 +80,12 @@ add_parameter CHANNEL_WIDTH NATURAL 4
 set_parameter_property CHANNEL_WIDTH DISPLAY_NAME "Channel Width"
 set_parameter_property CHANNEL_WIDTH HDL_PARAMETER true
 set_parameter_property CHANNEL_WIDTH ALLOWED_RANGES 1:64
+
+add_parameter USE_PACKETS NATURAL 1
+set_parameter_property USE_PACKETS DISPLAY_NAME "Expose startofpacket/endofpacket on the out interface"
+set_parameter_property USE_PACKETS HDL_PARAMETER false
+set_parameter_property USE_PACKETS ALLOWED_RANGES {0 1}
+set_parameter_property USE_PACKETS DESCRIPTION "Set to 0 when the downstream sink (e.g. an altera_multiplexer with usePackets=false) does not have matching SOP/EOP inputs. The RTL still drives those bits at 0; this only hides them from the interface declaration so qsys-generate does not flag a packet-width mismatch."
 
 add_interface clk clock end
 set_interface_property clk ENABLED true
