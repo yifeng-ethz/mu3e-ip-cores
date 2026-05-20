@@ -1984,6 +1984,8 @@
  <connection kind="avalon_streaming" version="18.1" start="mutrig_datapath_subsystem_7.hit_type0_out" end="arb_hit_type0_supercore_0.real_in_7" />
  <connection kind="avalon_streaming" version="18.1" start="mts_preprocessor_0.hit_type1_out" end="hist_type1_up_tap.in" />
  <connection kind="avalon_streaming" version="18.1" start="mts_preprocessor_1.hit_type1_out" end="hist_type1_down_tap.in" />
+ <connection kind="avalon_streaming" version="18.1" start="mts_preprocessor_0.hit_type1_extended_0" end="histogram_statistics_0.hit_type1_extended_0" />
+ <connection kind="avalon_streaming" version="18.1" start="mts_preprocessor_1.hit_type1_extended_1" end="histogram_statistics_0.hit_type1_extended_1" />
  <connection kind="avalon_streaming" version="18.1" start="mux_mutrig2processor.out" end="mts_preprocessor_0.hit_type0_in" />
  <connection kind="avalon_streaming" version="18.1" start="mux_mutrig2processor_0.out" end="mts_preprocessor_1.hit_type0_in" />
  <connection kind="avalon_streaming" version="18.1" start="decoded_lane_mux_0.out" end="decoded_lane_fifo_0.in" />
