@@ -9,14 +9,6 @@
    categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
-   element arb_hit_type0_supercore_0
-   {
-      datum _sortIndex
-      {
-         value = "55";
-         type = "int";
-      }
-   }
    element dbg_mm2runctrl_0
    {
       datum _sortIndex
@@ -28,134 +20,6 @@
       {
          value = "0";
          type = "boolean";
-      }
-   }
-   element decoded_lane_fifo_0
-   {
-      datum _sortIndex
-      {
-         value = "13";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_1
-   {
-      datum _sortIndex
-      {
-         value = "16";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_2
-   {
-      datum _sortIndex
-      {
-         value = "19";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_3
-   {
-      datum _sortIndex
-      {
-         value = "22";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_4
-   {
-      datum _sortIndex
-      {
-         value = "25";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_5
-   {
-      datum _sortIndex
-      {
-         value = "28";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_6
-   {
-      datum _sortIndex
-      {
-         value = "31";
-         type = "int";
-      }
-   }
-   element decoded_lane_fifo_7
-   {
-      datum _sortIndex
-      {
-         value = "34";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_0
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_1
-   {
-      datum _sortIndex
-      {
-         value = "15";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_2
-   {
-      datum _sortIndex
-      {
-         value = "18";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_3
-   {
-      datum _sortIndex
-      {
-         value = "21";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_4
-   {
-      datum _sortIndex
-      {
-         value = "24";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_5
-   {
-      datum _sortIndex
-      {
-         value = "27";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_6
-   {
-      datum _sortIndex
-      {
-         value = "30";
-         type = "int";
-      }
-   }
-   element decoded_lane_mux_7
-   {
-      datum _sortIndex
-      {
-         value = "33";
-         type = "int";
       }
    }
    element emulator_ctrl_splitter
@@ -975,304 +839,6 @@
    internal="xcvr156_clock.clk_in_reset"
    type="reset"
    dir="end" />
- <module
-   name="arb_hit_type0_supercore_0"
-   kind="arb_hit_type0_supercore"
-   version="26.6.5.518"
-   enabled="1">
-  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="4" />
-  <parameter name="AUTO_CLK_CLOCK_RATE" value="125000000" />
-  <parameter name="AUTO_CLK_RESET_DOMAIN" value="4" />
-  <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
-  <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
-  <parameter name="COUNTER_PROFILE" value="0" />
-  <parameter name="DEBUG_LEVEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="16" />
-  <parameter name="LANE_COUNT" value="8" />
-  <parameter name="MODE_DEFAULT" value="1" />
-  <parameter name="WATCHDOG_DEFAULT" value="500" />
- </module>
- <module
-   name="decoded_lane_fifo_0"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_1"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_2"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_3"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_4"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_5"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_6"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_fifo_7"
-   kind="altera_avalon_sc_fifo"
-   version="18.1"
-   enabled="1">
-  <parameter name="BITS_PER_SYMBOL" value="9" />
-  <parameter name="CHANNEL_WIDTH" value="5" />
-  <parameter name="EMPTY_LATENCY" value="3" />
-  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
-  <parameter name="ERROR_WIDTH" value="3" />
-  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
-  <parameter name="FIFO_DEPTH" value="8" />
-  <parameter name="SYMBOLS_PER_BEAT" value="1" />
-  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
-  <parameter name="USE_ALMOST_FULL_IF" value="0" />
-  <parameter name="USE_FILL_LEVEL" value="0" />
-  <parameter name="USE_MEMORY_BLOCKS" value="0" />
-  <parameter name="USE_PACKETS" value="0" />
-  <parameter name="USE_STORE_FORWARD" value="0" />
- </module>
- <module
-   name="decoded_lane_mux_0"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_1"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_2"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_3"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_4"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_5"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_6"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
- <module
-   name="decoded_lane_mux_7"
-   kind="multiplexer"
-   version="18.1"
-   enabled="1">
-  <parameter name="bitsPerSymbol" value="9" />
-  <parameter name="errorWidth" value="3" />
-  <parameter name="numInputInterfaces" value="2" />
-  <parameter name="outChannelWidth" value="5" />
-  <parameter name="packetScheduling" value="false" />
-  <parameter name="schedulingSize" value="1" />
-  <parameter name="symbolsPerBeat" value="1" />
-  <parameter name="useHighBitsOfChannel" value="true" />
-  <parameter name="usePackets" value="false" />
- </module>
  <module
    name="emulator_ctrl_splitter"
    kind="altera_avalon_st_splitter"
@@ -2345,78 +1911,6 @@
  <connection
    kind="avalon"
    version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0280" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0300" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_2">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0380" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_3">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0400" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_4">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0480" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_5">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0500" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_6">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0580" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="mm_pipeline_lvds_csr_emu_dbg.m0"
-   end="arb_hit_type0_supercore_0.csr_7">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0600" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
    start="mm_pipeline_lvds_csr_hist.m0"
    end="histogram_statistics_0.hist_bin">
   <parameter name="arbitrationPriority" value="1" />
@@ -2733,78 +2227,6 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2080" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_2">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2100" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_3">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2180" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_4">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2200" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_5">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2280" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_6">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2300" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
-   end="arb_hit_type0_supercore_0.csr_7">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2380" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.1"
-   start="master_datapath.master"
    end="histogram_statistics_0.hist_bin">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x8000" />
@@ -2823,42 +2245,42 @@
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded0"
-   end="decoded_lane_mux_0.in0" />
+   end="mutrig_datapath_subsystem_0.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded1"
-   end="decoded_lane_mux_1.in0" />
+   end="mutrig_datapath_subsystem_1.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded2"
-   end="decoded_lane_mux_2.in0" />
+   end="mutrig_datapath_subsystem_2.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded3"
-   end="decoded_lane_mux_3.in0" />
+   end="mutrig_datapath_subsystem_3.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded4"
-   end="decoded_lane_mux_4.in0" />
+   end="mutrig_datapath_subsystem_4.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded5"
-   end="decoded_lane_mux_5.in0" />
+   end="mutrig_datapath_subsystem_5.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded6"
-   end="decoded_lane_mux_6.in0" />
+   end="mutrig_datapath_subsystem_6.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
    start="mu3e_lvds_controller_0.decoded7"
-   end="decoded_lane_mux_7.in0" />
+   end="mutrig_datapath_subsystem_7.decoded_din" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3057,88 +2479,48 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="decoded_lane_mux_0.out"
-   end="decoded_lane_fifo_0.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_1.out"
-   end="decoded_lane_fifo_1.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_2.out"
-   end="decoded_lane_fifo_2.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_3.out"
-   end="decoded_lane_fifo_3.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_4.out"
-   end="decoded_lane_fifo_4.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_5.out"
-   end="decoded_lane_fifo_5.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_6.out"
-   end="decoded_lane_fifo_6.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="decoded_lane_mux_7.out"
-   end="decoded_lane_fifo_7.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_0.out"
-   end="arb_hit_type0_supercore_0.emu_in_0" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_1.out"
-   end="arb_hit_type0_supercore_0.emu_in_1" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_2.out"
-   end="arb_hit_type0_supercore_0.emu_in_2" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_3.out"
-   end="arb_hit_type0_supercore_0.emu_in_3" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_4.out"
-   end="arb_hit_type0_supercore_0.emu_in_4" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_5.out"
-   end="arb_hit_type0_supercore_0.emu_in_5" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_6.out"
-   end="arb_hit_type0_supercore_0.emu_in_6" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_7.out"
-   end="arb_hit_type0_supercore_0.emu_in_7" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
    start="run_control_splitter.out0"
    end="histogram_statistics_0.ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out2"
+   end="mutrig_datapath_subsystem_0.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out3"
+   end="mutrig_datapath_subsystem_1.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out4"
+   end="mutrig_datapath_subsystem_2.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out5"
+   end="mutrig_datapath_subsystem_3.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out8"
+   end="mutrig_datapath_subsystem_4.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out9"
+   end="mutrig_datapath_subsystem_5.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out10"
+   end="mutrig_datapath_subsystem_6.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out11"
+   end="mutrig_datapath_subsystem_7.run_ctrl" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3164,11 +2546,6 @@
    version="18.1"
    start="run_control_splitter.out1"
    end="mts_preprocessor_0.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="emulator_ctrl_splitter.out1"
-   end="arb_hit_type0_supercore_0.run_ctrl" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -3252,42 +2629,42 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_0"
+   start="merger_0.out"
    end="hist_type0_lane0_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_1"
+   start="merger_1.out"
    end="hist_type0_lane1_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_2"
+   start="merger_2.out"
    end="hist_type0_lane2_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_3"
+   start="merger_3.out"
    end="hist_type0_lane3_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_4"
+   start="merger_4.out"
    end="hist_type0_lane4_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_5"
+   start="merger_5.out"
    end="hist_type0_lane5_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_6"
+   start="merger_6.out"
    end="hist_type0_lane6_tap.in" />
  <connection
    kind="avalon_streaming"
    version="18.1"
-   start="arb_hit_type0_supercore_0.selected_out_7"
+   start="merger_7.out"
    end="hist_type0_lane7_tap.in" />
  <connection
    kind="clock"
@@ -3393,86 +2770,6 @@
    kind="clock"
    version="18.1"
    start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_0.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_0.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_1.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_1.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_2.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_2.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_3.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_3.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_4.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_4.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_5.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_5.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_6.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_6.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_mux_7.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="decoded_lane_fifo_7.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
    end="mm_pipeline_lvds_csr_low.clk" />
  <connection
    kind="clock"
@@ -3519,11 +2816,6 @@
    version="18.1"
    start="mu3e_lvds_controller_0.outclock"
    end="mm_pipeline_lvds_csr_hitstack_ring.clk" />
- <connection
-   kind="clock"
-   version="18.1"
-   start="mu3e_lvds_controller_0.outclock"
-   end="arb_hit_type0_supercore_0.clk" />
  <connection
    kind="clock"
    version="18.1"
@@ -3762,46 +3054,6 @@
    kind="reset"
    version="18.1"
    start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_0.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_1.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_2.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_3.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_4.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_5.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_6.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_fifo_7.clk_reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
    end="mu3e_lvds_controller_0.control_reset" />
  <connection
    kind="reset"
@@ -3843,46 +3095,6 @@
    version="18.1"
    start="monitor_reset_sync.reset_out"
    end="mm_pipeline_jtagmaster2rstctrl.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_0.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_1.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_2.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_3.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_4.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_5.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_6.reset" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="decoded_lane_mux_7.reset" />
  <connection
    kind="reset"
    version="18.1"
@@ -4008,11 +3220,6 @@
    version="18.1"
    start="monitor_reset_sync.reset_out"
    end="mts_preprocessor_1.reset_interface" />
- <connection
-   kind="reset"
-   version="18.1"
-   start="monitor_reset_sync.reset_out"
-   end="arb_hit_type0_supercore_0.rst" />
  <connection
    kind="reset"
    version="18.1"

@@ -572,10 +572,23 @@ module tb_scifi_v4_wrapper;
     // regression default. +S3_CYCLES=<n> +S5_CYCLES=<n>.
     int RUN_CYCLES_S3_HISTAT = RUN_CYCLES_S3_HISTAT_DEF;
     int RUN_CYCLES_S5        = RUN_CYCLES_S5_DEF;
+    // Periodic-mode rate sweep override for SCENARIO 1 (Type1 EXT0/EXT1 delay).
+    // emu_config_periodic() uses this 16-bit hit_rate so the same scenario can
+    // be re-run at 10k/100k/500k/1M hits/s. Default 0x0100 (256) preserves the
+    // committed regression behaviour (no plusarg => unchanged). Periodic fire
+    // period = 65536 / hit_rate cycles on the 156.25 MHz emulator data clock.
+    int S1_HITRATE = 16'h0100;
+    // SCENARIO 1 RUN window (monitor 125 MHz cycles). Defaults to RUN_CYCLES so
+    // the committed regression is unchanged, but at low periodic rates the fire
+    // period (65536/hit_rate emulator cycles) exceeds 8192 cyc, giving an EMPTY
+    // delay histogram. +S1_CYCLES=<n> lengthens the window for the rate sweep.
+    int RUN_CYCLES_S1 = RUN_CYCLES;
     initial begin
         int v;
         if ($value$plusargs("S3_CYCLES=%d", v)) RUN_CYCLES_S3_HISTAT = v;
         if ($value$plusargs("S5_CYCLES=%d", v)) RUN_CYCLES_S5        = v;
+        if ($value$plusargs("S1_HITRATE=%d", v)) S1_HITRATE          = v;
+        if ($value$plusargs("S1_CYCLES=%d", v)) RUN_CYCLES_S1        = v;
     end
     // Delay-histogram bin width (cycles per bin). Must match the BIN_WIDTH
     // written to CSR reg5 for scenario 1. The delay value of an occupied
@@ -720,12 +733,16 @@ module tb_scifi_v4_wrapper;
         // cycles. hit_rate=0x0100 (256) => ~256-cycle period per launch,
         // well below any FIFO fill that would distort the latency. Keep
         // noise_rate low so background does not crowd the signal lanes.
-        avmm_write(EMU_RATES, {16'h0040 /*noise*/, 16'h0100 /*hit*/});
+        avmm_write(EMU_RATES, {16'h0040 /*noise*/, S1_HITRATE[15:0] /*hit*/});
         // Keep global_enable set (default), all 8 lanes enabled (default).
         avmm_write(EMU_CENTRAL, 32'h0000_0001);
         repeat (8) @(posedge avmm_clk_clk);
         avmm_read(EMU_SIGNAL, v);
         $display("[tb] emulator SIGNAL readback = 0x%08h (sub_mode[1]=%b)", v, v[1]);
+        avmm_read(EMU_RATES, v);
+        $display("[tb] emulator RATES readback = 0x%08h (hit_rate=%0d => ~%0.0f Hz, period ~%0.0f cyc @156.25MHz)",
+                 v, v[15:0], 156.25e6 * real'(v[15:0]) / 65536.0,
+                 (v[15:0] != 0) ? 65536.0 / real'(v[15:0]) : 0.0);
     endtask
 
     // --- emulator BACKGROUND-mode config (reproduces the HW CH0-2 test) ---
@@ -1094,7 +1111,7 @@ module tb_scifi_v4_wrapper;
         runctl_mgmt_host_data  <= 9'h008;   // RUNNING - held for the window
         runctl_mgmt_host_valid <= 1'b1;
         monB_active = 1'b1;
-        repeat (RUN_CYCLES) @(posedge monitor_clock_125_in_clk);
+        repeat (RUN_CYCLES_S1) @(posedge monitor_clock_125_in_clk);
         // DIAGNOSTIC (live, before flush resets them): why are bins empty
         // while TOTAL_HITS counts accepts? underflow/overflow => the delay
         // key fell outside [left_bound,right_bound]; dropped => coalescing
@@ -1141,6 +1158,15 @@ module tb_scifi_v4_wrapper;
         $display("[tb] EXT0/delay: MonitorB boundary  hit_type3 upper beats=%0d (hits=%0d subhdr=%0d sop=%0d eop=%0d)  lower beats=%0d (hits=%0d subhdr=%0d)",
                  upper_beats, monB_up_hits, monB_up_subhdr, monB_up_sop, monB_up_eop,
                  lower_beats, monB_dn_hits, monB_dn_subhdr);
+        // Machine-parseable full-bin dump for the off-line latency plotter.
+        // Format: "S1DELAYBIN <bin> <delay_cyc> <count>" for every nonzero bin.
+        // bin b -> delay = b*S1_DELAY_BIN_W cycles.
+        $display("[tb] S1DELAY_META hitrate=%0d bin_w=%0d nbins=%0d total=%0d port=EXT0_T1up",
+                 S1_HITRATE, S1_DELAY_BIN_W, N_BINS, s1_total_delta);
+        for (int b = 0; b < N_BINS; b++)
+            if (monA_bin[b] != 0)
+                $display("[tb] S1DELAYBIN %0d %0d %0d", b, b*S1_DELAY_BIN_W, monA_bin[b]);
+        $display("[tb] S1DELAY_END");
 
         // ============================================================
         //  SCENARIO 2 - mode 0 (value histogram) on EXT1 (lower bank).
@@ -1264,11 +1290,11 @@ module tb_scifi_v4_wrapper;
                  s3_emit_ch[0], s3_emit_ch[1], s3_emit_ch[2], s3_emit_ch[3], s3_emit_total);
         $display("[tb] S3 PROBE hist type0_lane0 ingress per-CH: CH0=%0d CH1=%0d CH2=%0d CH3=%0d  total=%0d",
                  s3_ing_ch[0], s3_ing_ch[1], s3_ing_ch[2], s3_ing_ch[3], s3_ing_total);
-        $display("[tb] S3 PROBE arb egress source: emu=%0d real=%0d (arb MODE_DEFAULT=REAL; emu flows only if mode==EMU at runtime)",
+        $display("[tb] S3 PROBE merger egress source: emu=%0d real=%0d (merger SOURCE_SEL_DEFAULT=EMU; arb supercore removed in #63)",
                  s3_arb_emu, s3_arb_real);
         // TYPE0 stall-localisation chain (lane 0). First stage reading 0
         // while its upstream is nonzero is the break.
-        $display("[tb] S3 TYPE0-CHAIN(lane0): emu_aso_valid=%0d -> merger_asi_emu_valid=%0d | cfg_source_is_emu(cycles=1)=%0d (last=%b) | merger_aso_out_valid=%0d -> arb_real_in0_valid=%0d",
+        $display("[tb] S3 TYPE0-CHAIN(lane0): emu_aso_valid=%0d -> merger_asi_emu_valid=%0d | cfg_source_is_emu(cycles=1)=%0d (last=%b) | merger_aso_out_valid=%0d -> hist_type0_lane0_tap.in=%0d",
                  s3_mrg_emu_out, s3_mrg_emu_in, s3_mrg_src_emu,
                  tb_chan_probe_pkg::mrg_src_is_emu_last,
                  s3_mrg_out, s3_mrg_arb_in);
@@ -1803,7 +1829,10 @@ bind merger_hit_type0 tb_merger_chain_probe #(.INSTANCE_ID(INSTANCE_ID)) u_merge
     .aso_out_valid     (aso_out_valid)
 );
 
-// Arb egress source probe: counts emu vs real selected hit beats.
+// Egress source probe: counts emu vs real selected hit beats. Post-#63 the
+// arb_hit_type0_supercore is removed and merger_hit_type0.out is the TYPE0
+// egress straight into the histogram tap, so this binds into the merger and
+// classifies each output beat by the merger's source-select state.
 module tb_arb_egress_probe (
     input  logic clk,
     input  logic valid,
@@ -1818,14 +1847,15 @@ module tb_arb_egress_probe (
     end
 endmodule
 
-// Bind the arb egress probe by module name into arb_hit_type0. There is one
-// arb_hit_type0 instance per supercore lane (8 lanes); binding by module name
-// attaches to ALL of them, so arb_emu/arb_real aggregate across lanes. That is
-// fine for the emu-vs-real source question.
-bind arb_hit_type0 tb_arb_egress_probe u_arb_egress_probe (
+// Bind the egress probe by module name into merger_hit_type0. One merger
+// instance per lane (8 lanes); binding by module name attaches to ALL of them,
+// so arb_emu/arb_real aggregate across lanes - fine for the emu-vs-real source
+// question. aso_out_valid is the merger egress (now feeding the hist tap),
+// cfg_source_is_emu is the merger's runtime source-select.
+bind merger_hit_type0 tb_arb_egress_probe u_arb_egress_probe (
     .clk        (clk),
-    .valid      (arbiter_egress_valid & ~arbiter_egress_synthesized),
-    .source_emu (arbiter_egress_source_emu)
+    .valid      (aso_out_valid),
+    .source_emu (cfg_source_is_emu)
 );
 
 // Bind the emitter probe by module name. be_mutrig_lane_type0_emit has a
