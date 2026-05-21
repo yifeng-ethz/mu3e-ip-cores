@@ -35,7 +35,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Set, Tuple
 
 # ----------------------------------------------------------------------
 # Parsers
@@ -171,18 +171,30 @@ def vlog_one(vlog_bin: Path, modelsim_ini: Path, file_path: Path,
 def multipass_compile(parsed: Dict[str, object], qsys_simdir: Path,
                        run_dir: Path, vcom_bin: Path, vlog_bin: Path,
                        modelsim_ini: Path, vhdl_opts: List[str],
-                       vlog_opts: List[str]) -> Tuple[List, List]:
+                       vlog_opts: List[str],
+                       skip_basenames: Optional[Set[str]] = None) -> Tuple[List, List]:
     """Iterate vcom/vlog over the file list with retry on failure. Verilog
     files are compiled first (their order is usually fine and they have
     no `use` deps); VHDL files are retried until convergence.
-    Returns (failures, attempts_per_pass)."""
+    Returns (failures, attempts_per_pass).
+
+    skip_basenames: source basenames to drop from the compile list. Used to
+    exclude STALE generated leftovers that qsys-generate did not delete when
+    the .qsys removed the corresponding instance (e.g. a 0-output run_control_mux
+    after the run-control network was made readyless). Such a file is NOT in the
+    DUT (it is not instantiated in the top .v) but is still listed in
+    msim_setup.tcl; compiling it can fail and would otherwise abort elaboration.
+    Skipping it does not alter the DUT."""
+    skip_basenames = skip_basenames or set()
     vlog_pending: List[Tuple[Path, str]] = [
         (Path(expand_qsys_simdir(f, qsys_simdir)), lib)
         for (f, lib) in parsed["vlog"]
+        if Path(expand_qsys_simdir(f, qsys_simdir)).name not in skip_basenames
     ]
     vcom_pending: List[Tuple[Path, str]] = [
         (Path(expand_qsys_simdir(f, qsys_simdir)), lib)
         for (f, lib) in parsed["vcom"]
+        if Path(expand_qsys_simdir(f, qsys_simdir)).name not in skip_basenames
     ]
     log_path = run_dir / "multipass_compile.log"
     attempts: List[Tuple[int, int]] = []
@@ -283,6 +295,9 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
                    default="-voptargs=+acc -suppress 19 -suppress 3009 -suppress 3473",
                    help="vsim user-elab opts")
     p.add_argument("--no-elab", action="store_true")
+    p.add_argument("--skip-file", action="append", default=[],
+                   help="source basename to drop from the compile list "
+                        "(stale generated leftover not in the DUT; repeatable)")
     return p.parse_args(argv)
 
 
@@ -321,9 +336,13 @@ def main(argv: List[str]) -> int:
 
     print(f"[multipass] multi-pass compile begin")
     t0 = time.time()
+    skip_basenames = set(args.skip_file)
+    if skip_basenames:
+        print(f"[multipass] skipping stale leftover file(s): "
+              f"{', '.join(sorted(skip_basenames))}")
     failures, attempts = multipass_compile(
         parsed, qsys_simdir, run_dir, vcom_bin, vlog_bin, modelsim_ini,
-        args.vhdl_opt, args.vlog_opt,
+        args.vhdl_opt, args.vlog_opt, skip_basenames,
     )
     dt = time.time() - t0
     print(f"[multipass] compile wall: {dt:.1f}s, passes: {len(attempts)}")
