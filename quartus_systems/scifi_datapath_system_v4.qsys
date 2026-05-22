@@ -42,7 +42,7 @@
    {
       datum _sortIndex
       {
-         value = "54";
+         value = "38";
          type = "int";
       }
    }
@@ -50,7 +50,7 @@
    {
       datum _sortIndex
       {
-         value = "43";
+         value = "27";
          type = "int";
       }
    }
@@ -58,7 +58,7 @@
    {
       datum _sortIndex
       {
-         value = "42";
+         value = "26";
          type = "int";
       }
    }
@@ -66,7 +66,7 @@
    {
       datum _sortIndex
       {
-         value = "59";
+         value = "42";
          type = "int";
       }
    }
@@ -74,7 +74,7 @@
    {
       datum _sortIndex
       {
-         value = "60";
+         value = "43";
          type = "int";
       }
    }
@@ -82,7 +82,7 @@
    {
       datum _sortIndex
       {
-         value = "61";
+         value = "44";
          type = "int";
       }
    }
@@ -90,7 +90,7 @@
    {
       datum _sortIndex
       {
-         value = "62";
+         value = "45";
          type = "int";
       }
    }
@@ -98,7 +98,7 @@
    {
       datum _sortIndex
       {
-         value = "63";
+         value = "46";
          type = "int";
       }
    }
@@ -106,7 +106,7 @@
    {
       datum _sortIndex
       {
-         value = "64";
+         value = "47";
          type = "int";
       }
    }
@@ -114,7 +114,7 @@
    {
       datum _sortIndex
       {
-         value = "65";
+         value = "48";
          type = "int";
       }
    }
@@ -122,7 +122,7 @@
    {
       datum _sortIndex
       {
-         value = "66";
+         value = "49";
          type = "int";
       }
    }
@@ -130,7 +130,7 @@
    {
       datum _sortIndex
       {
-         value = "68";
+         value = "51";
          type = "int";
       }
    }
@@ -138,7 +138,7 @@
    {
       datum _sortIndex
       {
-         value = "67";
+         value = "50";
          type = "int";
       }
    }
@@ -146,7 +146,7 @@
    {
       datum _sortIndex
       {
-         value = "37";
+         value = "21";
          type = "int";
       }
       datum sopceditor_expanded
@@ -185,7 +185,7 @@
    {
       datum _sortIndex
       {
-         value = "39";
+         value = "23";
          type = "int";
       }
       datum sopceditor_expanded
@@ -198,7 +198,7 @@
    {
       datum _sortIndex
       {
-         value = "41";
+         value = "25";
          type = "int";
       }
    }
@@ -230,7 +230,7 @@
    {
       datum _sortIndex
       {
-         value = "69";
+         value = "52";
          type = "int";
       }
    }
@@ -238,7 +238,7 @@
    {
       datum _sortIndex
       {
-         value = "71";
+         value = "53";
          type = "int";
       }
    }
@@ -246,7 +246,7 @@
    {
       datum _sortIndex
       {
-         value = "73";
+         value = "54";
          type = "int";
       }
    }
@@ -254,7 +254,7 @@
    {
       datum _sortIndex
       {
-         value = "75";
+         value = "55";
          type = "int";
       }
    }
@@ -262,7 +262,7 @@
    {
       datum _sortIndex
       {
-         value = "77";
+         value = "56";
          type = "int";
       }
    }
@@ -270,7 +270,7 @@
    {
       datum _sortIndex
       {
-         value = "79";
+         value = "57";
          type = "int";
       }
    }
@@ -278,7 +278,7 @@
    {
       datum _sortIndex
       {
-         value = "81";
+         value = "58";
          type = "int";
       }
    }
@@ -286,7 +286,7 @@
    {
       datum _sortIndex
       {
-         value = "83";
+         value = "59";
          type = "int";
       }
    }
@@ -328,7 +328,7 @@
    {
       datum _sortIndex
       {
-         value = "45";
+         value = "29";
          type = "int";
       }
    }
@@ -336,7 +336,7 @@
    {
       datum _sortIndex
       {
-         value = "52";
+         value = "36";
          type = "int";
       }
    }
@@ -344,7 +344,7 @@
    {
       datum _sortIndex
       {
-         value = "53";
+         value = "37";
          type = "int";
       }
    }
@@ -352,7 +352,7 @@
    {
       datum _sortIndex
       {
-         value = "44";
+         value = "28";
          type = "int";
       }
    }
@@ -360,7 +360,7 @@
    {
       datum _sortIndex
       {
-         value = "51";
+         value = "35";
          type = "int";
       }
    }
@@ -368,7 +368,7 @@
    {
       datum _sortIndex
       {
-         value = "46";
+         value = "30";
          type = "int";
       }
    }
@@ -376,7 +376,7 @@
    {
       datum _sortIndex
       {
-         value = "47";
+         value = "31";
          type = "int";
       }
    }
@@ -384,7 +384,7 @@
    {
       datum _sortIndex
       {
-         value = "48";
+         value = "32";
          type = "int";
       }
    }
@@ -392,7 +392,7 @@
    {
       datum _sortIndex
       {
-         value = "49";
+         value = "33";
          type = "int";
       }
    }
@@ -400,7 +400,7 @@
    {
       datum _sortIndex
       {
-         value = "50";
+         value = "34";
          type = "int";
       }
    }
@@ -416,7 +416,7 @@
    {
       datum _sortIndex
       {
-         value = "56";
+         value = "39";
          type = "int";
       }
    }
@@ -424,7 +424,7 @@
    {
       datum _sortIndex
       {
-         value = "38";
+         value = "22";
          type = "int";
       }
       datum sopceditor_expanded
@@ -450,7 +450,7 @@
    {
       datum _sortIndex
       {
-         value = "40";
+         value = "24";
          type = "int";
       }
    }
@@ -474,7 +474,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
+         value = "12";
          type = "int";
       }
    }
@@ -495,7 +495,7 @@
    {
       datum _sortIndex
       {
-         value = "17";
+         value = "13";
          type = "int";
       }
    }
@@ -516,7 +516,7 @@
    {
       datum _sortIndex
       {
-         value = "20";
+         value = "14";
          type = "int";
       }
    }
@@ -537,7 +537,7 @@
    {
       datum _sortIndex
       {
-         value = "23";
+         value = "15";
          type = "int";
       }
    }
@@ -558,7 +558,7 @@
    {
       datum _sortIndex
       {
-         value = "26";
+         value = "16";
          type = "int";
       }
    }
@@ -574,7 +574,7 @@
    {
       datum _sortIndex
       {
-         value = "29";
+         value = "17";
          type = "int";
       }
    }
@@ -590,7 +590,7 @@
    {
       datum _sortIndex
       {
-         value = "32";
+         value = "18";
          type = "int";
       }
    }
@@ -606,7 +606,7 @@
    {
       datum _sortIndex
       {
-         value = "35";
+         value = "19";
          type = "int";
       }
    }
@@ -622,7 +622,7 @@
    {
       datum _sortIndex
       {
-         value = "36";
+         value = "20";
          type = "int";
       }
    }
@@ -664,7 +664,7 @@
    {
       datum _sortIndex
       {
-         value = "57";
+         value = "40";
          type = "int";
       }
    }
@@ -672,7 +672,7 @@
    {
       datum _sortIndex
       {
-         value = "58";
+         value = "41";
          type = "int";
       }
    }
@@ -1558,10 +1558,10 @@
   <parameter name="VERSION_MINOR" value="3" />
   <parameter name="VERSION_PATCH" value="3" />
  </module>
-<module
+ <module
    name="mu3e_lvds_controller_0"
    kind="mu3e_lvds_controller"
-   version="26.2.3.522"
+   version="26.2.4.522"
    enabled="1">
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
@@ -1583,7 +1583,7 @@
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="2" />
   <parameter name="VERSION_PATCH" value="3" />
-</module>
+ </module>
  <module
    name="mutrig_datapath_subsystem_0"
    kind="mutrig_datapath_system_v4"
@@ -1959,7 +1959,7 @@
    start="mm_pipeline_lvds_csr_emu_dbg.m0"
    end="merger_5.csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01A0" />
+  <parameter name="baseAddress" value="0x01a0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1968,7 +1968,7 @@
    start="mm_pipeline_lvds_csr_emu_dbg.m0"
    end="merger_6.csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01C0" />
+  <parameter name="baseAddress" value="0x01c0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1977,7 +1977,79 @@
    start="mm_pipeline_lvds_csr_emu_dbg.m0"
    end="merger_7.csr">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01E0" />
+  <parameter name="baseAddress" value="0x01e0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mutrig_datapath_subsystem_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x10a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_low.m0"
+   end="mutrig_datapath_subsystem_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x18a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="mutrig_datapath_subsystem_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x08a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig3.m0"
+   end="mutrig_datapath_subsystem_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x08a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig4_mts0.m0"
+   end="mutrig_datapath_subsystem_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x08a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig5.m0"
+   end="mutrig_datapath_subsystem_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x08a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig6.m0"
+   end="mutrig_datapath_subsystem_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x08a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_mutrig7.m0"
+   end="mutrig_datapath_subsystem_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x08a0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -2299,6 +2371,78 @@
    kind="avalon"
    version="18.1"
    start="master_datapath.master"
+   end="mutrig_datapath_subsystem_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x88a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x18a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x28a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x38a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x48a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x58a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x68a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
+   end="mutrig_datapath_subsystem_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x78a0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="master_datapath.master"
    end="histogram_statistics_0.hist_bin">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x8000" />
@@ -2551,48 +2695,48 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="merger_0.out"
+   end="hist_type0_lane0_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_1.out"
+   end="hist_type0_lane1_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_2.out"
+   end="hist_type0_lane2_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_3.out"
+   end="hist_type0_lane3_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_4.out"
+   end="hist_type0_lane4_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_5.out"
+   end="hist_type0_lane5_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_6.out"
+   end="hist_type0_lane6_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="merger_7.out"
+   end="hist_type0_lane7_tap.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="run_control_splitter.out0"
    end="histogram_statistics_0.ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out2"
-   end="mutrig_datapath_subsystem_0.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out3"
-   end="mutrig_datapath_subsystem_1.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out4"
-   end="mutrig_datapath_subsystem_2.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out5"
-   end="mutrig_datapath_subsystem_3.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out8"
-   end="mutrig_datapath_subsystem_4.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out9"
-   end="mutrig_datapath_subsystem_5.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out10"
-   end="mutrig_datapath_subsystem_6.run_ctrl" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="run_control_splitter.out11"
-   end="mutrig_datapath_subsystem_7.run_ctrl" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -2631,6 +2775,16 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="run_control_splitter.out10"
+   end="mutrig_datapath_subsystem_6.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out11"
+   end="mutrig_datapath_subsystem_7.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="run_control_splitter.out12"
    end="mts_preprocessor_1.run_ctrl" />
  <connection
@@ -2651,6 +2805,26 @@
  <connection
    kind="avalon_streaming"
    version="18.1"
+   start="run_control_splitter.out2"
+   end="mutrig_datapath_subsystem_0.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out3"
+   end="mutrig_datapath_subsystem_1.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out4"
+   end="mutrig_datapath_subsystem_2.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out5"
+   end="mutrig_datapath_subsystem_3.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
    start="run_control_splitter.out6"
    end="hit_stack_subsystem_0.run_control_signal" />
  <connection
@@ -2658,6 +2832,16 @@
    version="18.1"
    start="run_control_splitter.out7"
    end="mutrig_reset_controller_0.runcontrol" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out8"
+   end="mutrig_datapath_subsystem_4.run_ctrl" />
+ <connection
+   kind="avalon_streaming"
+   version="18.1"
+   start="run_control_splitter.out9"
+   end="mutrig_datapath_subsystem_5.run_ctrl" />
  <connection
    kind="avalon_streaming"
    version="18.1"
@@ -2698,46 +2882,6 @@
    version="18.1"
    start="hist_type0_lane7_tap.primary"
    end="mux_mutrig2processor_0.in3" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_0.out"
-   end="hist_type0_lane0_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_1.out"
-   end="hist_type0_lane1_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_2.out"
-   end="hist_type0_lane2_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_3.out"
-   end="hist_type0_lane3_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_4.out"
-   end="hist_type0_lane4_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_5.out"
-   end="hist_type0_lane5_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_6.out"
-   end="hist_type0_lane6_tap.in" />
- <connection
-   kind="avalon_streaming"
-   version="18.1"
-   start="merger_7.out"
-   end="hist_type0_lane7_tap.in" />
  <connection
    kind="clock"
    version="18.1"

@@ -37,3 +37,26 @@ Subsystem kind: `scifi_datapath_system_v4`  ·  version: `26.4.0.518`  ·  role:
 - regenerated: 2026-05-18T17:30:14
 
 <!-- END auto-generated -->
+
+## Manual Overlay: MuTRiG Frame-Deassembly CSR
+
+Incremental Qsys patch: `qsys_tcl/patch_scifi_datapath_v4_frame_deassembly_csr.tcl`.
+This section is outside the generated block until `script/generate_csr_docs.py` learns to emit directly mapped exported slaves from sub-subsystems.
+
+| lane | exported endpoint | data JTAG byte addr | data SC local byte addr | sc_hub byte addr | span | description |
+|---:|---|---:|---:|---:|---:|---|
+| 0 | `mutrig_datapath_subsystem_0.csr` | `0x000088A0` | `0x000010A0` | `0x000110A0` | 16 B | Lane-0 `mutrig_frame_deassembly_0.csr`; JTAG lane-0 stays in the high slot to avoid the emulator window. |
+| 1 | `mutrig_datapath_subsystem_1.csr` | `0x000018A0` | `0x000018A0` | `0x000118A0` | 16 B | Lane-1 `mutrig_frame_deassembly_0.csr`. |
+| 2 | `mutrig_datapath_subsystem_2.csr` | `0x000028A0` | `0x000028A0` | `0x000128A0` | 16 B | Lane-2 `mutrig_frame_deassembly_0.csr`. |
+| 3 | `mutrig_datapath_subsystem_3.csr` | `0x000038A0` | `0x000038A0` | `0x000138A0` | 16 B | Lane-3 `mutrig_frame_deassembly_0.csr`. |
+| 4 | `mutrig_datapath_subsystem_4.csr` | `0x000048A0` | `0x000048A0` | `0x000148A0` | 16 B | Lane-4 `mutrig_frame_deassembly_0.csr`. |
+| 5 | `mutrig_datapath_subsystem_5.csr` | `0x000058A0` | `0x000058A0` | `0x000158A0` | 16 B | Lane-5 `mutrig_frame_deassembly_0.csr`. |
+| 6 | `mutrig_datapath_subsystem_6.csr` | `0x000068A0` | `0x000068A0` | `0x000168A0` | 16 B | Lane-6 `mutrig_frame_deassembly_0.csr`. |
+| 7 | `mutrig_datapath_subsystem_7.csr` | `0x000078A0` | `0x000078A0` | `0x000178A0` | 16 B | Lane-7 `mutrig_frame_deassembly_0.csr`. |
+
+| Word | byte offset | name | description |
+|---:|---:|---|---|
+| 0 | `+0x00` | `CONTROL_STATUS` | Bits `[7:0]` are the control/mask write image; bit 0 should be `1` for normal RUNNING header pickup. Bits `[29:24]` mirror the latest decoded `frame_flags` after a headerinfo update. |
+| 1 | `+0x04` | `CRC_ERR_COUNT` | Counts frames rejected at CRC check. A healthy configured link should keep this at zero. |
+| 2 | `+0x08` | `FRAME_COUNT_DELTA` | Snapshot of `frame_counter_head - frame_counter_tail`; this proves parser frame progress but can remain zero for balanced empty frames. |
+| 3 | `+0x0C` | `RESERVED` | Reserved/undefined by the current `mutrig_frame_deassembly` SVD. |
