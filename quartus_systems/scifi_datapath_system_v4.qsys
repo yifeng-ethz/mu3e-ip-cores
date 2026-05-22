@@ -1558,15 +1558,15 @@
   <parameter name="VERSION_MINOR" value="3" />
   <parameter name="VERSION_PATCH" value="3" />
  </module>
- <module
+<module
    name="mu3e_lvds_controller_0"
    kind="mu3e_lvds_controller"
-   version="26.2.2.519"
+   version="26.2.3.522"
    enabled="1">
   <parameter name="AUTO_DEVICE" value="5AGXBA7D4F31C5" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Arria V" />
   <parameter name="AUTO_DEVICE_SPEEDGRADE" value="5_H4" />
-  <parameter name="BUILD" value="1286" />
+  <parameter name="BUILD" value="1314" />
   <parameter name="DEBUG_LEVEL" value="0" />
   <parameter name="INSTANCE_ID" value="0" />
   <parameter name="IP_UID" value="1280722003" />
@@ -1578,12 +1578,12 @@
   <parameter name="SCORE_WINDOW_W" value="10" />
   <parameter name="STEER_QUEUE_DEPTH" value="4" />
   <parameter name="SYNC_PATTERN" value="250" />
-  <parameter name="VERSION_DATE" value="539362566" />
+  <parameter name="VERSION_DATE" value="539362594" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="2" />
-  <parameter name="VERSION_PATCH" value="1" />
- </module>
+  <parameter name="VERSION_PATCH" value="3" />
+</module>
  <module
    name="mutrig_datapath_subsystem_0"
    kind="mutrig_datapath_system_v4"
@@ -1906,6 +1906,78 @@
    end="emulator_mutrig_qsys_inst.csr">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0100" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_1.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0120" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_2.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0140" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_3.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0160" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_4.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0180" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_5.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x01A0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_6.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x01C0" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.1"
+   start="mm_pipeline_lvds_csr_emu_dbg.m0"
+   end="merger_7.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x01E0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
