@@ -546,6 +546,241 @@ module tb_scifi_v4_wrapper;
         end
     endtask
 
+    // ----------------------------------------------------------------
+    //  BUG-014-R integration sequence: lane-8 RX_BITREV decode.
+    //
+    //  This focused path keeps the DUT as the generated
+    //  scifi_datapath_system_v4 wrapper, then forces only the generated LVDS
+    //  PHY's parallel output/status nets. That exercises the generated
+    //  mu3e_lvds_controller Qsys wrapper, the phy_adapter wiring, the
+    //  RX_BITREV CSR path, and the real 8b/10b decoder without replacing the
+    //  decoder with a behavioral model.
+    // ----------------------------------------------------------------
+    localparam [13:0] LVDS_CSR_BASE              = 14'h0000;
+    localparam [13:0] LVDS_CSR_LANE_GO           = LVDS_CSR_BASE + 14'd4;
+    localparam [13:0] LVDS_CSR_RX_BITREV         = LVDS_CSR_BASE + 14'd28;
+    localparam logic [8:0] B014_DEC_K285         = 9'h1BC;
+    localparam logic [8:0] B014_DEC_D010         = 9'h010;
+    localparam logic [8:0] B014_DEC_D011         = 9'h011;
+    localparam logic [8:0] B014_DEC_D012         = 9'h012;
+    localparam logic [8:0] B014_DEC_D013         = 9'h013;
+    localparam logic [9:0] B014_ENC_K285_P       = 10'b0011111010;
+    localparam logic [9:0] B014_ENC_K285_N       = 10'b1100000101;
+    localparam logic [9:0] B014_ENC_D010         = 10'b1001001011;
+    localparam logic [9:0] B014_ENC_D011         = 10'b1000110100;
+    localparam logic [9:0] B014_ENC_D012         = 10'b0100111011;
+    localparam logic [9:0] B014_ENC_D013         = 10'b1100100100;
+
+    logic [89:0] b014_parallel_word;
+    bit          b014_idle_phase = 1'b0;
+
+    function automatic logic [9:0] b014_bit_reverse10(input logic [9:0] symbol);
+        return {<<{ symbol }};
+    endfunction
+
+    task automatic b014_force_phy_status();
+        force dut.mu3e_lvds_controller_0.phy_ctrl_plllock  = 1'b1;
+        force dut.mu3e_lvds_controller_0.phy_ctrl_dpalock  = 9'h1FF;
+        force dut.mu3e_lvds_controller_0.phy_ctrl_rollover = 9'h000;
+        redriver_losn = 9'h1FF;
+    endtask
+
+    task automatic b014_reset_lvds_core();
+        // The focused B014 path bypasses the normal board-level bring-up that
+        // toggles the generated data reset bridge. Pulse only the LVDS data
+        // reset so cfg_data and the data-domain CDC mirrors start from RTL
+        // reset values without resetting the LVDS PLL model/outclock.
+        force dut.rst_controller_001_reset_out_reset = 1'b1; // data reset
+        repeat (8) @(posedge lvds_outclock_clk);
+        force dut.rst_controller_001_reset_out_reset = 1'b0;
+        repeat (24) @(posedge lvds_outclock_clk);
+        repeat (8) @(posedge avmm_clk_clk);
+    endtask
+
+    task automatic b014_release_phy_status();
+        release dut.rst_controller_001_reset_out_reset;
+        release dut.mu3e_lvds_controller_0.phy_ctrl_plllock;
+        release dut.mu3e_lvds_controller_0.phy_ctrl_dpalock;
+        release dut.mu3e_lvds_controller_0.phy_ctrl_rollover;
+        release dut.mu3e_lvds_controller_0.phy_parallel_data;
+    endtask
+
+    task automatic b014_drive_parallel(input logic [9:0] lane8_symbol,
+                                       input bit         lane8_is_bitreversed,
+                                       input logic [9:0] normal_symbol);
+        logic [9:0] lane8_drive;
+
+        lane8_drive = lane8_is_bitreversed ? b014_bit_reverse10(lane8_symbol) : lane8_symbol;
+        for (int lane_idx = 0; lane_idx < 9; lane_idx++) begin
+            b014_parallel_word[lane_idx * 10 +: 10] = normal_symbol;
+        end
+        b014_parallel_word[8 * 10 +: 10] = lane8_drive;
+        force dut.mu3e_lvds_controller_0.phy_parallel_data = b014_parallel_word;
+        @(posedge lvds_outclock_clk);
+        #1;
+    endtask
+
+    task automatic b014_drive_bitreversed_lane8(input logic [9:0] normal_symbol);
+        logic [9:0] bg;
+
+        bg = b014_idle_phase ? B014_ENC_K285_N : B014_ENC_K285_P;
+        b014_idle_phase = !b014_idle_phase;
+        b014_drive_parallel(normal_symbol, 1'b1, bg);
+    endtask
+
+    task automatic b014_wait_lane8_clean(input logic [8:0] expected,
+                                         input string      label);
+        bit found;
+
+        found = 1'b0;
+        for (int wait_idx = 0; wait_idx < 48; wait_idx++) begin
+            @(posedge lvds_outclock_clk);
+            #1;
+            if (dut.mu3e_lvds_controller_0.core.core_decoded_valid[8] &&
+                (rstlink_data == expected) &&
+                (rstlink_error == 3'b000)) begin
+                found = 1'b1;
+                break;
+            end
+        end
+        check_true(label, found);
+        if (found) begin
+            $display("[tb] B014 lane8 decoded=0x%03h error=0x%01h", rstlink_data, rstlink_error);
+        end else begin
+            $display("[tb] B014 lane8 last decoded=0x%03h error=0x%01h valid=%b",
+                     rstlink_data, rstlink_error,
+                     dut.mu3e_lvds_controller_0.core.core_decoded_valid[8]);
+        end
+    endtask
+
+    task automatic int_b014_lane8_bitreverse_decode_sequence();
+        logic [31:0] rb;
+        logic [9:0] stream_symbol [0:4];
+        logic [8:0] stream_expect [0:4];
+        int error_events;
+        int clean_d_events;
+        bit lane_seen [0:7][0:4];
+
+        $display("--- int_b014_lane8_bitreverse_decode_sequence (BUG-014-R) ---");
+
+        stream_symbol[0] = B014_ENC_K285_P;
+        stream_symbol[1] = B014_ENC_D010;
+        stream_symbol[2] = B014_ENC_D011;
+        stream_symbol[3] = B014_ENC_D012;
+        stream_symbol[4] = B014_ENC_D013;
+
+        stream_expect[0] = B014_DEC_K285;
+        stream_expect[1] = B014_DEC_D010;
+        stream_expect[2] = B014_DEC_D011;
+        stream_expect[3] = B014_DEC_D012;
+        stream_expect[4] = B014_DEC_D013;
+
+        b014_reset_lvds_core();
+        b014_force_phy_status();
+        b014_idle_phase = 1'b0;
+
+        repeat (64) b014_drive_parallel(B014_ENC_K285_P, 1'b0, B014_ENC_K285_P);
+        check_true("B014 dpalock[8] forced stable",
+                   dut.mu3e_lvds_controller_0.phy_ctrl_dpalock[8] === 1'b1);
+
+        // The generated wrapper brings the LVDS core through Qsys reset bridges.
+        // Make the lane enable mask explicit so this integration repro is not
+        // sensitive to simulator X-propagation through reset synchronizers.
+        avmm_write(LVDS_CSR_LANE_GO, 32'h0000_01FF);
+        repeat (8) @(posedge lvds_outclock_clk);
+        avmm_read(LVDS_CSR_LANE_GO, rb);
+        expect_eq("B014 LANE_GO explicit all-lane enable", rb, 32'h0000_01FF);
+
+        avmm_read(LVDS_CSR_RX_BITREV, rb);
+        expect_eq("B014 RX_BITREV default", rb, 32'h0000_0000);
+
+        error_events  = 0;
+        clean_d_events = 0;
+        for (int repeat_idx = 0; repeat_idx < 6; repeat_idx++) begin
+            b014_drive_bitreversed_lane8(B014_ENC_K285_P);
+            for (int sym_idx = 1; sym_idx < 5; sym_idx++) begin
+                b014_drive_bitreversed_lane8(stream_symbol[sym_idx]);
+                if (dut.mu3e_lvds_controller_0.core.core_decoded_valid[8]) begin
+                    if (rstlink_error[1:0] != 2'b00) begin
+                        error_events++;
+                    end
+                    if ((rstlink_error == 3'b000) &&
+                        (rstlink_data inside {B014_DEC_D010, B014_DEC_D011,
+                                              B014_DEC_D012, B014_DEC_D013})) begin
+                        clean_d_events++;
+                    end
+                end
+            end
+        end
+        check_true("B014 RX_BITREV[8]=0 reproduces lane8 code/disparity errors",
+                   error_events >= 8);
+        expect_eq("B014 RX_BITREV[8]=0 clean D-byte count",
+                  clean_d_events[31:0], 32'h0000_0000);
+
+        avmm_write(LVDS_CSR_RX_BITREV, 32'h0000_0100);
+        avmm_read(LVDS_CSR_RX_BITREV, rb);
+        expect_eq("B014 RX_BITREV readback", rb, 32'h0000_0100);
+        for (int idle_idx = 0; idle_idx < 16; idle_idx++) begin
+            b014_drive_parallel(idle_idx[0] ? B014_ENC_K285_N : B014_ENC_K285_P,
+                                1'b1,
+                                idle_idx[0] ? B014_ENC_K285_N : B014_ENC_K285_P);
+        end
+
+        for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
+            for (int sym_idx = 0; sym_idx < 5; sym_idx++) begin
+                lane_seen[lane_idx][sym_idx] = 1'b0;
+            end
+        end
+
+        for (int cycle_idx = 0; cycle_idx < 18; cycle_idx++) begin
+            if (cycle_idx < 5) begin
+                b014_drive_parallel(stream_symbol[cycle_idx], 1'b1, stream_symbol[cycle_idx]);
+            end else begin
+                b014_drive_parallel(B014_ENC_K285_P, 1'b1, B014_ENC_K285_P);
+            end
+            for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
+                if (dut.mu3e_lvds_controller_0.core.core_decoded_valid[lane_idx] &&
+                    (dut.mu3e_lvds_controller_0.core.core_decoded_error[lane_idx] == 3'b000)) begin
+                    for (int sym_idx = 0; sym_idx < 5; sym_idx++) begin
+                        if (dut.mu3e_lvds_controller_0.core.core_decoded_data[lane_idx] ==
+                            stream_expect[sym_idx]) begin
+                            lane_seen[lane_idx][sym_idx] = 1'b1;
+                        end
+                    end
+                end
+            end
+        end
+
+        for (int lane_idx = 0; lane_idx < 8; lane_idx++) begin
+            for (int sym_idx = 0; sym_idx < 5; sym_idx++) begin
+                check_true($sformatf("B014 lane%0d normal stream[%0d] clean with RX_BITREV[7:0]=0",
+                                     lane_idx, sym_idx),
+                           lane_seen[lane_idx][sym_idx]);
+            end
+        end
+
+        for (int idle_idx = 0; idle_idx < 12; idle_idx++) begin
+            b014_drive_bitreversed_lane8(idle_idx[0] ? B014_ENC_K285_N : B014_ENC_K285_P);
+        end
+
+        for (int sym_idx = 0; sym_idx < 5; sym_idx++) begin
+            b014_drive_bitreversed_lane8(stream_symbol[sym_idx]);
+            b014_wait_lane8_clean(stream_expect[sym_idx],
+                                  $sformatf("B014 RX_BITREV[8]=1 lane8 stream[%0d] decodes 0x%03h",
+                                            sym_idx, stream_expect[sym_idx]));
+        end
+
+        b014_release_phy_status();
+        if (fail_count == 0) begin
+            $display("*** int_b014_lane8_bitreverse_decode_sequence PASSED ***");
+            $display("SCIFI_V4_WRAPPER SCENARIO PASSED");
+        end else begin
+            $display("*** int_b014_lane8_bitreverse_decode_sequence FAILED: %0d check(s) tripped ***",
+                     fail_count);
+            $display("SCIFI_V4_WRAPPER SCENARIO FAILED");
+        end
+    endtask
+
     // RUN window length in monitor (125 MHz) cycles. ~64 us; long enough
     // for several 1.6 us frame boundaries to fire on hit_type3.
     localparam int RUN_CYCLES = 8192;
@@ -1058,6 +1293,11 @@ module tb_scifi_v4_wrapper;
 
         // Allow reset to release.
         #2_000;
+
+        if ($test$plusargs("B014_ONLY")) begin
+            int_b014_lane8_bitreverse_decode_sequence();
+            $finish;
+        end
 
         // ---- sanity: avmm path to hist alive (UID = "HIST") ----------
         avmm_read(HIST_UID, readback);
