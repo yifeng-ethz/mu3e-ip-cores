@@ -1023,12 +1023,12 @@
  <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.3.15.520"
+   version="26.4.0.526"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="45" />
   <parameter name="AVS_ADDR_WIDTH" value="8" />
-  <parameter name="BUILD" value="517" />
+  <parameter name="BUILD" value="526" />
   <parameter name="CHANNELS_PER_PORT" value="32" />
   <parameter name="COAL_QUEUE_DEPTH" value="4" />
   <parameter name="DEBUG" value="0" />
@@ -1059,11 +1059,11 @@
   <parameter name="UPDATE_KEY_BIT_HI" value="34" />
   <parameter name="UPDATE_KEY_BIT_LO" value="30" />
   <parameter name="UPDATE_KEY_REPRESENTATION" value="SIGNED" />
-  <parameter name="VERSION_DATE" value="20260517" />
+  <parameter name="VERSION_DATE" value="20260526" />
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
-  <parameter name="VERSION_MINOR" value="3" />
-  <parameter name="VERSION_PATCH" value="4" />
+  <parameter name="VERSION_MINOR" value="4" />
+  <parameter name="VERSION_PATCH" value="0" />
  </module>
  <module
    name="hit_stack_subsystem_0"
