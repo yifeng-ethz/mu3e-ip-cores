@@ -1023,7 +1023,7 @@
  <module
    name="histogram_statistics_0"
    kind="histogram_statistics_v2"
-   version="26.4.1.527"
+   version="26.4.2.527"
    enabled="1">
   <parameter name="AVST_CHANNEL_WIDTH" value="4" />
   <parameter name="AVST_DATA_WIDTH" value="45" />
@@ -1063,7 +1063,7 @@
   <parameter name="VERSION_GIT" value="0" />
   <parameter name="VERSION_MAJOR" value="26" />
   <parameter name="VERSION_MINOR" value="4" />
-  <parameter name="VERSION_PATCH" value="1" />
+  <parameter name="VERSION_PATCH" value="2" />
  </module>
  <module
    name="hit_stack_subsystem_0"
