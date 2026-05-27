@@ -1,0 +1,19 @@
+# Glob-include all VHDL sources under misc/util/, misc/util/quartus/, misc/util/generated/.
+# These are the shared mu3e-feb utility packages (util, util_slv, reset_sync,
+# rx_align, ip_dcfifo_v2, components_pkg, ...). Sourced from
+# system_20260427_testplanphase5/src/common/util/ and src/common/util/quartus/.
+
+foreach f [ lsort [ glob -directory $::quartus(qip_path) -nocomplain "*.vhd" ] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    set_global_assignment -name VHDL_FILE $f
+}
+
+foreach f [ lsort [ glob -directory [ file join $::quartus(qip_path) "quartus" ] -nocomplain "*.vhd" ] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    set_global_assignment -name VHDL_FILE $f
+}
+
+foreach f [ lsort [ glob -directory [ file join $::quartus(qip_path) "generated" ] -nocomplain "*.vhd" ] ] {
+    if { [ string match "*_tb.vhd" $f ] } { continue }
+    set_global_assignment -name VHDL_FILE $f
+}

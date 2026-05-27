@@ -1,0 +1,145 @@
+--------------------------------------------------------------------------------
+ Version 18.1 625
+ Copyright (C) 2018 Intel Corporation. All rights reserved.
+ Your use of Intel Corporation's design tools, logic functions
+ and other software and tools, and its AMPP partner logic
+ functions, and any output files from any of the foregoing
+ (including device programming or simulation files), and any
+ associated documentation or information is expressly subject
+ to the terms and conditions of the Intel Program License
+ Subscription Agreement, the Intel Quartus Prime License Agreement,
+ the Intel MegaCore Function License Agreement, or other
+ applicable license agreement, including, without limitation,
+ that your use is for the sole purpose of programming logic
+ devices manufactured by Intel and sold by Intel or its
+ authorized distributors.  Please refer to the applicable
+ agreement for further details.
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ Welcome to Intel's FPGA System Console
+
+ This Tcl console provides access to the hardware modules instantiated in your
+ FPGA. You can use System Console for all of the following purposes:
+
+    * To start, stop, or step a Nios II processor
+    * To read or write Avalon Memory-Mapped (Avalon-MM) slaves using special
+     masters
+    * To sample the SOPC system clock as well as system reset signal
+    * To run JTAG loopback tests to analyze board noise problems
+    * To shift arbitrary instruction register and data register values to
+     instantiated system level debug (SLD) nodes
+
+ In addition, the directory <QuartusII Dir>/sopc_builder/system_console/scripts
+ contains Tcl files that provide miscellaneous utilities and examples of how to
+ access the functionality provided. You can include those macros in your
+ scripts by issuing Tcl source commands.
+--------------------------------------------------------------------------------
+% JTAG_PROBE master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master} status=PROBED uid={}
+PROXY_MASTER path={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master}
+PROXY_BLOCK block=LVDS_GLOBAL base=0x00000000 count=28
+PROXY_WORD block=LVDS_GLOBAL index=0 addr=0x00000000 value=0x4C564453 name=UID desc={LVDS controller UID, expected ASCII LVDS}
+PROXY_WORD block=LVDS_GLOBAL index=1 addr=0x00000004 value=0x1A024522 name=META desc={Read-multiplexed LVDS metadata page}
+PROXY_WORD block=LVDS_GLOBAL index=2 addr=0x00000008 value=0x1A01090A name=CAPABILITY desc={Compiled lane, engine, score, and routing capability}
+PROXY_WORD block=LVDS_GLOBAL index=3 addr=0x0000000C value=0x000000FA name=SYNC_PATTERN desc={10-bit synchronization symbol accepted by lane alignment}
+PROXY_WORD block=LVDS_GLOBAL index=4 addr=0x00000010 value=0x000001FF name=LANE_GO desc={Per-lane enable mask}
+PROXY_WORD block=LVDS_GLOBAL index=5 addr=0x00000014 value=0x00000000 name=DPA_HOLD desc={Per-lane DPA hold mask}
+PROXY_WORD block=LVDS_GLOBAL index=6 addr=0x00000018 value=0x00000000 name=SOFT_RESET desc={Per-lane soft reset request latch}
+PROXY_WORD block=LVDS_GLOBAL index=7 addr=0x0000001C value=0x00000000 name=MODE_MASK desc={Global lane mode, bits 1:0 currently consumed}
+PROXY_WORD block=LVDS_GLOBAL index=8 addr=0x00000020 value=0x00000008 name=SCORE_ACCEPT desc={Engine steering accept threshold}
+PROXY_WORD block=LVDS_GLOBAL index=9 addr=0x00000024 value=0x00000002 name=SCORE_REJECT desc={Engine steering reject threshold}
+PROXY_WORD block=LVDS_GLOBAL index=10 addr=0x00000028 value=0x00000000 name=STEER_STATUS desc={Steering queue count and overflow low bits}
+PROXY_WORD block=LVDS_GLOBAL index=11 addr=0x0000002C value=0x00000001 name=PHY_STATUS desc={PLL lock plus aggregate LOS, DPA unlock, FIFO reset, and DPA reset flags}
+PROXY_WORD block=LVDS_GLOBAL index=12 addr=0x00000030 value=0x000001FF name=PHY_LOSN_STATUS desc={Per-lane redriver LOS_N status, bit=1 means signal present}
+PROXY_WORD block=LVDS_GLOBAL index=13 addr=0x00000034 value=0x00000000 name=PHY_LOS_ALERT desc={Sticky per-lane LOS alert, write-one-to-clear}
+PROXY_WORD block=LVDS_GLOBAL index=14 addr=0x00000038 value=0x000001FF name=PHY_DPALOCK_STATUS desc={Per-lane DPA lock status}
+PROXY_WORD block=LVDS_GLOBAL index=15 addr=0x0000003C value=0x00000000 name=PHY_FIFORST_STATUS desc={Per-lane controller FIFO reset output toward the PHY}
+PROXY_WORD block=LVDS_GLOBAL index=16 addr=0x00000040 value=0x00000008 name=LANE_SELECT desc={Selected lane for the counter snapshot window}
+PROXY_WORD block=LVDS_GLOBAL index=17 addr=0x00000044 value=0x00000000 name=CODE_VIOLATIONS desc={Selected-lane illegal or unexpected 8b/10b symbol events}
+PROXY_WORD block=LVDS_GLOBAL index=18 addr=0x00000048 value=0x00000000 name=DISP_VIOLATIONS desc={Selected-lane disparity violation events}
+PROXY_WORD block=LVDS_GLOBAL index=19 addr=0x0000004C value=0x00000000 name=COMMA_LOSSES desc={Selected-lane comma or sync-pattern loss events}
+PROXY_WORD block=LVDS_GLOBAL index=20 addr=0x00000050 value=0x00000000 name=BITSLIP_EVENTS desc={Selected-lane bitslip control events}
+PROXY_WORD block=LVDS_GLOBAL index=21 addr=0x00000054 value=0x00000000 name=DPA_UNLOCKS desc={Selected-lane DPA unlock events}
+PROXY_WORD block=LVDS_GLOBAL index=22 addr=0x00000058 value=0x00000000 name=REALIGNS desc={Selected-lane realignment events}
+PROXY_WORD block=LVDS_GLOBAL index=23 addr=0x0000005C value=0x00000000 name=SCORE_CHANGES desc={Selected-lane engine-score change events}
+PROXY_WORD block=LVDS_GLOBAL index=24 addr=0x00000060 value=0x00000000 name=ENGINE_STEER desc={Selected-lane engine steering decisions}
+PROXY_WORD block=LVDS_GLOBAL index=25 addr=0x00000064 value=0x00000000 name=SOFT_RESETS desc={Selected-lane soft-reset completions}
+PROXY_WORD block=LVDS_GLOBAL index=26 addr=0x00000068 value=0x00000000 name=UPTIME desc={Selected-lane uptime counter in data-clock cycles}
+PROXY_WORD block=LVDS_GLOBAL index=27 addr=0x0000006C value=0x00000000 name=LANE_TRAIN_STATUS desc={Selected-lane training-state snapshot}
+PROXY_BLOCK block=BP_LANE0 base=0x00008860 count=4
+PROXY_WORD block=BP_LANE0 index=0 addr=0x00008860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE0 index=1 addr=0x00008864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE0 index=2 addr=0x00008868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE0 index=3 addr=0x0000886C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE1 base=0x00001860 count=4
+PROXY_WORD block=BP_LANE1 index=0 addr=0x00001860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE1 index=1 addr=0x00001864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE1 index=2 addr=0x00001868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE1 index=3 addr=0x0000186C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE2 base=0x00002860 count=4
+PROXY_WORD block=BP_LANE2 index=0 addr=0x00002860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE2 index=1 addr=0x00002864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE2 index=2 addr=0x00002868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE2 index=3 addr=0x0000286C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE3 base=0x00003860 count=4
+PROXY_WORD block=BP_LANE3 index=0 addr=0x00003860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE3 index=1 addr=0x00003864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE3 index=2 addr=0x00003868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE3 index=3 addr=0x0000386C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE4 base=0x00004860 count=4
+PROXY_WORD block=BP_LANE4 index=0 addr=0x00004860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE4 index=1 addr=0x00004864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE4 index=2 addr=0x00004868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE4 index=3 addr=0x0000486C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE5 base=0x00005860 count=4
+PROXY_WORD block=BP_LANE5 index=0 addr=0x00005860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE5 index=1 addr=0x00005864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE5 index=2 addr=0x00005868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE5 index=3 addr=0x0000586C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE6 base=0x00006860 count=4
+PROXY_WORD block=BP_LANE6 index=0 addr=0x00006860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE6 index=1 addr=0x00006864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE6 index=2 addr=0x00006868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE6 index=3 addr=0x0000686C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=BP_LANE7 base=0x00007860 count=4
+PROXY_WORD block=BP_LANE7 index=0 addr=0x00007860 value=0x00000000 name=WORD000 desc={Raw backpressure FIFO CSR word 0}
+PROXY_WORD block=BP_LANE7 index=1 addr=0x00007864 value=0x00000000 name=WORD001 desc={Raw backpressure FIFO CSR word 1}
+PROXY_WORD block=BP_LANE7 index=2 addr=0x00007868 value=0x00000000 name=WORD002 desc={Raw backpressure FIFO CSR word 2}
+PROXY_WORD block=BP_LANE7 index=3 addr=0x0000786C value=0x00000000 name=WORD003 desc={Raw backpressure FIFO CSR word 3}
+PROXY_BLOCK block=HISTOGRAM base=0x00007000 count=19
+PROXY_WORD block=HISTOGRAM index=0 addr=0x00007000 value=0x48495354 name=UID desc={Histogram UID, expected ASCII HIST}
+PROXY_WORD block=HISTOGRAM index=1 addr=0x00007004 value=0x1A034205 name=META desc={Read-multiplexed histogram metadata page}
+PROXY_WORD block=HISTOGRAM index=2 addr=0x00007008 value=0x00000000 name=CONTROL desc={Apply, source port, mode, key interpretation, filter control, and validation status}
+PROXY_WORD block=HISTOGRAM index=3 addr=0x0000700C value=0x00000000 name=LEFT_BOUND desc={Signed left histogram boundary}
+PROXY_WORD block=HISTOGRAM index=4 addr=0x00007010 value=0x00000100 name=RIGHT_BOUND desc={Signed right histogram boundary}
+PROXY_WORD block=HISTOGRAM index=5 addr=0x00007014 value=0x00000001 name=BIN_WIDTH desc={Bin width in key-space units}
+PROXY_WORD block=HISTOGRAM index=6 addr=0x00007018 value=0x2623221E name=KEY_LOC desc={Packed bit-slice locations for update and filter keys}
+PROXY_WORD block=HISTOGRAM index=7 addr=0x0000701C value=0x00000000 name=KEY_VALUE desc={Packed runtime key overrides}
+PROXY_WORD block=HISTOGRAM index=8 addr=0x00007020 value=0x00000000 name=UNDERFLOW_COUNT desc={Keys below configured range}
+PROXY_WORD block=HISTOGRAM index=9 addr=0x00007024 value=0x00000000 name=OVERFLOW_COUNT desc={Keys above configured range}
+PROXY_WORD block=HISTOGRAM index=10 addr=0x00007028 value=0x07735940 name=INTERVAL_CFG desc={Ping-pong interval timer configuration}
+PROXY_WORD block=HISTOGRAM index=11 addr=0x0000702C value=0x00000000 name=BANK_STATUS desc={Active bank and flush-progress status}
+PROXY_WORD block=HISTOGRAM index=12 addr=0x00007030 value=0x000000FF name=PORT_STATUS desc={Ingress FIFO empty mask and maximum observed fill level}
+PROXY_WORD block=HISTOGRAM index=13 addr=0x00007034 value=0x00000000 name=TOTAL_HITS desc={Live accepted-hit count in the current interval}
+PROXY_WORD block=HISTOGRAM index=14 addr=0x00007038 value=0x00000000 name=DROPPED_HITS desc={Live dropped-hit count caused by FIFO or queue overflow}
+PROXY_WORD block=HISTOGRAM index=15 addr=0x0000703C value=0x00000000 name=COAL_STATUS desc={Coalescing queue occupancy, maximum occupancy, and overflow count}
+PROXY_WORD block=HISTOGRAM index=16 addr=0x00007040 value=0x00000000 name=SCRATCH desc={General-purpose scratch register}
+PROXY_WORD block=HISTOGRAM index=17 addr=0x00007044 value=0x00000000 name=LAST_INTERVAL_TOTAL_HITS desc={Accepted-hit count latched at most recent interval pulse}
+PROXY_WORD block=HISTOGRAM index=18 addr=0x00007048 value=0x00000000 name=LAST_INTERVAL_DROPPED_HITS desc={Dropped-hit count latched at most recent interval pulse}
+PROXY_BLOCK block=MUTRIG_INJECTOR base=0x0000A000 count=16
+PROXY_WORD block=MUTRIG_INJECTOR index=0 addr=0x0000A000 value=0x4D494E4A name=UID desc={Injector UID, expected ASCII MINJ}
+PROXY_WORD block=MUTRIG_INJECTOR index=1 addr=0x0000A004 value=0x1A011205 name=META desc={Read-multiplexed injector metadata page}
+PROXY_WORD block=MUTRIG_INJECTOR index=2 addr=0x0000A008 value=0x00000000 name=MODE desc={Injection mode selector, 0=off, 1=header synchronous, 2/3=periodic, 4=one-click, 5=PRBS}
+PROXY_WORD block=MUTRIG_INJECTOR index=3 addr=0x0000A00C value=0x00000064 name=HEADER_DELAY desc={Main-clock delay from selected header match to first header-synchronous pulse}
+PROXY_WORD block=MUTRIG_INJECTOR index=4 addr=0x0000A010 value=0x00000001 name=HEADER_INTERVAL desc={Number of selected header matches between mode-1 bursts}
+PROXY_WORD block=MUTRIG_INJECTOR index=5 addr=0x0000A014 value=0x00000001 name=INJECTION_MULTIPLICITY desc={Number of pulses per header-triggered or PRBS-triggered burst}
+PROXY_WORD block=MUTRIG_INJECTOR index=6 addr=0x0000A018 value=0x00000000 name=HEADER_CH desc={Selected headerinfo channel compared against all eight headerinfo sidebands}
+PROXY_WORD block=MUTRIG_INJECTOR index=7 addr=0x0000A01C value=0x000003E8 name=PULSE_INTERVAL desc={Mode-2 interval in main-clock cycles}
+PROXY_WORD block=MUTRIG_INJECTOR index=8 addr=0x0000A020 value=0x00000005 name=PULSE_HIGH_CYCLES desc={Pulse high duration, low byte consumed by RTL}
+PROXY_WORD block=MUTRIG_INJECTOR index=9 addr=0x0000A024 value=0x000003E7 name=PRBS_RATE desc={Main-clock cycles between PRBS state advances in mode 5}
+PROXY_WORD block=MUTRIG_INJECTOR index=10 addr=0x0000A028 value=0x00000001 name=PRBS_PATTERN desc={Pattern compared against selected low PRBS bits}
+PROXY_WORD block=MUTRIG_INJECTOR index=11 addr=0x0000A02C value=0x0000ACE1 name=PRBS_SEED desc={Seed used when entering or reseeding PRBS mode}
+PROXY_WORD block=MUTRIG_INJECTOR index=12 addr=0x0000A030 value=0x00000004 name=PRBS_CTRL desc={PRBS polynomial and match-width selector}
+PROXY_WORD block=MUTRIG_INJECTOR index=13 addr=0x0000A034 value=0x00000000 name=RESERVED13 desc={Reserved decoded word, current RTL returns zero}
+PROXY_WORD block=MUTRIG_INJECTOR index=14 addr=0x0000A038 value=0x00000000 name=RESERVED14 desc={Reserved decoded word, current RTL returns zero}
+PROXY_WORD block=MUTRIG_INJECTOR index=15 addr=0x0000A03C value=0x00000000 name=RESERVED15 desc={Reserved decoded word, current RTL returns zero}
+PROXY_RESULT status=OK master={/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master}
