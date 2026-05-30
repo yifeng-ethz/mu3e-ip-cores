@@ -3212,6 +3212,28 @@
  <connection
    kind="conduit"
    version="18.1"
+   start="mts_preprocessor_1.hit_arrival_gts"
+   end="histogram_statistics_0.type1_down_gts">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
+   start="mts_preprocessor_0.hit_arrival_gts"
+   end="histogram_statistics_0.type1_up_gts">
+  <parameter name="endPort" value="" />
+  <parameter name="endPortLSB" value="0" />
+  <parameter name="startPort" value="" />
+  <parameter name="startPortLSB" value="0" />
+  <parameter name="width" value="0" />
+ </connection>
+ <connection
+   kind="conduit"
+   version="18.1"
    start="mutrig_injector_0.inject"
    end="emulator_inject_fanout.inject_in">
   <parameter name="endPort" value="" />

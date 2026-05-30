@@ -41,6 +41,85 @@ Severity legend:
 | [BUG-025-I](#bug-025-i-region-b-mm_pipeline_lvds_csr_-bridges-past-offset-0x0000-are-csr-deaf-on-silicon-INVALID) | I | hard stuck error | `common (FEB SC-ring probing of every Region B slave behind a non-low mm_pipeline_lvds_csr_* bridge)` | **INVALID / false alarm** | FEB v3 on-board re-probe, 2026-05-19 18:02 | this checkpoint | NOT a bug. The "deaf" reads came from incorrect sc-byte addresses derived from a stale V4_REWIRE_SPEC.md table. Correct mapping is `sc-byte = avmm_port_byte + 0x10000`. Hist csr is at sc-byte 0x1A400 (sc-word 0x06900), not the previously-tabulated 0x17000. With corrected addresses all Region B slaves respond with valid UIDs ("HIST", "MINJ", "EMUT", "MTSP"). The bridges are fine; only BUG-024-I (qsys cache stale generics) remains real. |
 | [BUG-026-H](#bug-026-h-hist-lock_key_ranges-keyed-on-tcc-instead-of-asic-ch-default-wrong-for-rate-plots) | H | non-datapath-refactor | `common (any FEB rate-plot regression that relies on LOCK_KEY_RANGES default)` | fixed | FEB v3 emulator rate-plot regression, 2026-05-19 19:01 | this commit | histogram_statistics_v2 default LOCK_KEY_RANGES update key was the TCC slice (Type0 data[35:21], Type1 data[29:17]) which gave a uniform distribution under a constant-rate emulator. Changed to {ASIC[2:0], CH[4:0]} (Type0 data[43:36], Type1 data[37:30]) so an N-channel rate plot has exactly N non-zero bins. Bumped hist 26.3.7.0519 -> 26.3.9.0519. |
 | [BUG-027-I](#bug-027-i-hist-hwtcl-omitted-asi_type1_-ready-port-causing-timing_adapter-to-drop-type1-hits-silently) | I | hard stuck error | `common (any FEB build with the type1_up or type1_down hist source-select selected)` | fixed | FEB v3 emulator regression, 2026-05-19 19:01 | this commit | histogram_statistics_v2_hw.tcl declared type1_up and type1_down sink interfaces with readyLatency=0 but never added the asi_*_ready port to the interface port list. RTL drove asi_type1_up_ready / asi_type1_down_ready as entity outputs (rtl line 1012-1013) but qsys-generate dropped them from the wrapper. The auto-inserted avalon_st_adapter_025 timing_adapter on the snoop tap path then saw out_0_ready unconnected, defaulted to 0, never consumed its FIFO, and silently dropped every Type1 hit. The Type0 path uses hit_type0_tap2 (truly readyless) so no timing_adapter is inserted there. Fixed by adding the ready ports in hist hw.tcl and bumping 26.3.7.0519 -> 26.3.9.0519. |
+| [BUG-012-R](#bug-012-r-hist-delay-mode-gts-unify-per-sync-2-20-offset-between-hist-gts_8n-and-mts-reconstructed-ts) | R | soft error | `common (any FEB build using histogram delay-mode, mode=1, on Type1 source)` | fixed / silicon-validated | FEB v4 hist delay-mode investigation, 2026-05-29 | this commit | Histogram delay-mode (`delay = gts_8n - hit_ts`) used the histogram's OWN free-running `gts_8n`, while `hit_ts` is the MTS-reconstructed emission ts in the MTS counter epoch. The two counters are SYNC-zeroed by independent handlers (hist `run_state_cmd=SYNC` vs MTS `processor_state=RESET,reset_flow=SYNC`), so their relative offset is RANDOM per SYNC (~2^20 cyc), sliding the delay distribution out of the bin window. On silicon the delay center landed anywhere in +/-2^20 (measured centers -1028096/+39024/-71680/+678912; spread ~750k) with a broad near-uniform shape. |
+
+## 2026-05-29
+
+### BUG-012-R: hist delay-mode gts-unify (per-SYNC ~2^20 offset between hist gts_8n and MTS reconstructed ts)
+
+- First seen:
+  - FEB v4 (260526-feb-bug012) on-silicon histogram delay-mode investigation,
+    2026-05-29. Delay-mode peak vs injector header_delay did not show the
+    math-predicted slope and the distribution was broad/erratic, sliding to a
+    different center every SYNC.
+- Symptom:
+  - Delay-mode (`CONTROL.mode=1`) on a Type1 source produced a near-uniform
+    distribution whose center moved randomly per SYNC across the full 2^21 tick
+    range. Measured centers across 4 SYNCs: -1028096, +39024, -71680, +678912
+    (spread ~750000 cycles). Type0 count mode and Type1 count mode were healthy;
+    only the delay computation was wrong. `open_frame_count=0` was a separate red
+    herring (it is the LVDS-path frame counter; the emulator bypasses frame_rcv).
+- Root cause:
+  - `delay = gts_8n - hit_ts` (histogram_statistics_v2.vhd build_delay_key_from_ts).
+    `gts_8n` is the histogram's OWN free-running 48-bit counter, zeroed on
+    `run_state_cmd=SYNC`. `hit_ts` is the MTS-reconstructed absolute emission ts
+    `(cc_out + counter_ov_base_1n6)/5`, in the MTS counter epoch, zeroed by the
+    SEPARATE MTS run-control (`processor_state=RESET, reset_flow=SYNC`,
+    mts_processor.vhd:1509/1557). The two counters are independent; their SYNC
+    release cycles differ non-deterministically, so `(gts_8n - hit_ts)` carries a
+    random per-SYNC offset that, after the 48->21 truncation, lands near 2^20.
+    Structurally one hist `gts_8n` could never track the TWO MTS bank counters
+    (mts_preprocessor_0/1). Prior revisions 1.31/1.32 aligned the clear CONDITION
+    but not the release CYCLE and so could not fix it.
+- Fix (gts-unify):
+  - `mts_processor.vhd` (26.3.13 -> 26.3.14): export the bank's `counter_gts_8n`
+    on a new conduit `coe_hit_arrival_gts_8n`, co-sampled on the SAME hit_out beat
+    as `coe_hit_type1_ts`. `mts_processor_hw.tcl`: add `hit_arrival_gts` conduit.
+  - `histogram_statistics_v2.vhd` (-> 26.4.3): add `asi_type1_{up,down}_gts` inputs;
+    `port_arrival_gts(0)` muxed by `cfg_source_select`; delay key now
+    `gts_value => port_arrival_gts(idx)` (the MTS-epoch arrival GTS) instead of the
+    local `gts_8n`. The local `gts_8n`/`gts_counter_clear`/`runctl_reset_hold`
+    island was removed (dead after repoint). `_hw.tcl`: add `type1_{up,down}_gts`
+    sink conduits.
+  - Qsys re-wire (`quartus_systems/scifi_datapath_system_v4.qsys` +
+    `qsys_tcl/patch_scifi_datapath_v4_hist_arrival_gts.tcl`): connect
+    `mts_preprocessor_0/1.hit_arrival_gts -> histogram_statistics_0.type1_{up,down}_gts`.
+  - Result: `delay = arrival_gts - hit_ts`, both in ONE MTS epoch -> the bounded
+    readout latency, with no cross-IP SYNC race.
+- Validation:
+  - Directed repro at BOTH levels: standalone hist tb `B12_delay_mode_48b_sideband`
+    (drives the arrival input, PASS) + the silicon repro (per-SYNC offset). MTS
+    standalone tb run_math/term/rearm/asic_id all PASS.
+  - Questa static screen on mts_processor.vhd: Lint Error(0), CDC Violations(0),
+    RDC Violation(0).
+  - Integration: `make qsys-syn` regenerated feb_system_v4 cleanly; the connection
+    is wired in `feb_system_v4_data_path_subsystem.vhd`
+    (mts_preprocessor_0/1:coe_hit_arrival_gts_8n -> histogram_statistics_0:asi_type1_{up,down}_gts).
+    Quartus compile: 0 errors, worst setup slack +0.359 ns, SOF produced.
+  - On silicon (post-fix SOF, source=TYPE1_UP/FILL): the per-SYNC ~2^20 slide is
+    ELIMINATED. Across SYNCs the delay center is bounded near zero (fine-window
+    centers 768/480/-2000/1984, all within +/-~2k cyc; vs pre-fix ~750000 spread)
+    -- a ~400x reduction. The residual ~1520c width is the expected emulator
+    background-hit frame-phase spread (uniform over the long-frame period), not the
+    SYNC bug; a perfectly sharp peak would need an isolated injector hit (emulator
+    cannot fire one standalone -- the engine_occupied gate -- a separate limitation,
+    deliberately NOT addressed here, see the dropped "Change 2").
+- Follow-up (2026-05-29/30) -- delay-mode is a TRANSPORT-LATENCY histogram, not
+  in-frame phase (see `FINDINGS_20260529_delay_is_transport_latency.md`):
+  - The post-fix `delay = arrival_gts - hit_ts` subtracts TWO ABSOLUTE timestamps
+    (arrival `counter_gts_8n` and MTS-reconstructed emission `(cc+counter_ov_base)/5`).
+    Both grow equally with the injector `header_delay`, so their difference is the
+    transport latency and is FLAT vs `header_delay` BY CONSTRUCTION. Silicon
+    confirms: single-lane long-dwell sweep centroid slope +0.011, flat +1363+/-60c
+    across header_delay 0..960. This is correct, not a residual bug.
+  - The "expected slope=-1" premise conflated this latency histogram with kbriggl's
+    IN-FRAME-PHASE scan (`frame_base - emission`, wraps at FRAME_INTERVAL_SHORT 910)
+    -- a different observable the MTS absolutizes away by adding `counter_ov_base`.
+    RTL proof: injector emits a bare 1-wire `coe_inject_pulse` (no ts); the engine
+    stamps the free-running `tcc_anchor` (frontend_trigger_engine.sv:441). Decision
+    (2026-05-30): KEEP the latency observable; slope=-1 would need a new frame-base
+    sideband + recompile, deliberately not done. Evidence + plot under
+    `report/delay_latency_20260529/`.
 
 ## 2026-05-18
 

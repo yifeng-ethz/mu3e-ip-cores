@@ -57,8 +57,11 @@ if [[ ! -f "${MSIM_SETUP}" ]] || [[ -n "${FORCE_QSYS_GEN:-}" ]]; then
     # Unlock any read-only outputs from prior runs.
     find "${BUILD_DIR}/generated/simulation" -mindepth 1 -type f -exec chmod u+w {} + 2>/dev/null || true
     find "${BUILD_DIR}/generated/simulation" -mindepth 1 -type d -exec chmod u+w {} + 2>/dev/null || true
+    # FORCE_QSYS_GEN implies a full --clean rebuild: the tool's idempotency keys
+    # on .qsys mtime, but an IP _hw.tcl edit (e.g. adding a SIM fileset) does not
+    # touch the .qsys, so without --clean a stale/partial sim tree is reused.
     python3 "${BUILD_DIR}/scripts/qsys_generate_recursive.py" \
-        --top scifi_datapath_system_v4 --jobs 8
+        --top scifi_datapath_system_v4 --jobs 8 ${FORCE_QSYS_GEN:+--clean}
 fi
 
 if [[ ! -f "${MSIM_SETUP}" ]]; then
