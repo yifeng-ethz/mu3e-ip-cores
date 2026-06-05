@@ -1,0 +1,5 @@
+Removing PCIe device 0000:0b:00.0
+Rescanning PCIe bus
+Bound 0000:0b:00.0 (1172:0004) to uio_pci_generic
+UIO node: /dev/uio0
+Example: ./build-codex/farm_pc/tools/bar0_mmio_test /dev/uio0 8 0xA5A5A5A5

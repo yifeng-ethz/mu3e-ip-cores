@@ -1,0 +1,2 @@
+ERROR: could not mmap region 4 in read-only mode: Invalid argument
+err: failed to open device /dev/uio0

@@ -1,0 +1,31 @@
+Info: *******************************************************************
+Info: Running Quartus Prime Programmer
+    Info: Version 18.1.0 Build 625 09/12/2018 SJ Standard Edition
+    Info: Copyright (C) 2018  Intel Corporation. All rights reserved.
+    Info: Your use of Intel Corporation's design tools, logic functions
+    Info: and other software and tools, and its AMPP partner logic
+    Info: functions, and any output files from any of the foregoing
+    Info: (including device programming or simulation files), and any
+    Info: associated documentation or information are expressly subject
+    Info: to the terms and conditions of the Intel Program License
+    Info: Subscription Agreement, the Intel Quartus Prime License Agreement,
+    Info: the Intel FPGA IP License Agreement, or other applicable license
+    Info: agreement, including, without limitation, that your use is for
+    Info: the sole purpose of programming logic devices manufactured by
+    Info: Intel and sold by Intel or its authorized distributors.  Please
+    Info: refer to the applicable agreement for further details.
+    Info: Processing started: Fri Jun  5 11:27:46 2026
+Info: Command: quartus_pgm -c "USB-BlasterII [7-2]" -m JTAG -o p;firmware_builds/systems/260526-feb-bug012/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof
+Info (213045): Using programming cable "USB-BlasterII [7-2]"
+Info (213011): Using programming file firmware_builds/systems/260526-feb-bug012/syn/board_projects/fe_scifi_feb_v3/output_files/top.sof with checksum 0x1EE809A8 for device 5AGXBA7D4F31@1
+Info (209060): Started Programmer operation at Fri Jun  5 11:27:48 2026
+Info (209016): Configuring device index 1
+Info (209017): Device 1 contains JTAG ID code 0x02A020DD
+Info (209007): Configuration succeeded -- 1 device(s) configured
+Info (209011): Successfully performed operation(s)
+Info (209061): Ended Programmer operation at Fri Jun  5 11:27:53 2026
+Info: Quartus Prime Programmer was successful. 0 errors, 0 warnings
+    Info: Peak virtual memory: 476 megabytes
+    Info: Processing ended: Fri Jun  5 11:27:53 2026
+    Info: Elapsed time: 00:00:07
+    Info: Total CPU time (on all processors): 00:00:02

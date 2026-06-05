@@ -1,0 +1,49 @@
+JTAG_RUNCTL_PROBE_20260605
+TIME=2026-06-05 11:38:19 CEST
+MASTER_COUNT=7
+MASTER[0]=/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(110:132 v1 #0)/phy_0/master
+MASTER[1]=/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(110:132 v1 #1)/phy_1/master
+MASTER[2]=/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(70:34 v3 #0)/nios2_0
+MASTER[3]=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #0)/phy_0/master
+MASTER[4]=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master
+MASTER[5]=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #2)/phy_2/master
+MASTER[6]=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(70:34 v3 #0)/nios2_0
+SKIP_NON_FEB=/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(110:132 v1 #0)/phy_0/master
+SKIP_NON_FEB=/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(110:132 v1 #1)/phy_1/master
+SKIP_NON_FEB=/devices/10AX115H1(.|E2|ES)|10AX115H2|..@1#3-6.2#DE5/(link)/JTAG/(70:34 v3 #0)/nios2_0
+CLAIM_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #0)/phy_0/master
+READ runctl_uid             addr=0x00016000 value=0x52434d48
+READ runctl_control         addr=0x00016008 value=0x00000000
+READ runctl_status          addr=0x0001600c value=0x80000002
+READ runctl_last_cmd        addr=0x00016010 value=0x00000000
+READ runctl_local_cmd       addr=0x0001604c value=0x00000000
+READ datapath_hist_uid      addr=0x00007000 value=0x52434d48
+READ datapath_inj_uid       addr=0x0000a000 value=0x52434d48
+CLOSE_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #0)/phy_0/master
+CLAIM_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master
+READ runctl_uid             addr=0x00016000 value=0x4c564453
+READ runctl_control         addr=0x00016008 value=0x1a01090a
+READ runctl_status          addr=0x0001600c value=0x000000fa
+READ runctl_last_cmd        addr=0x00016010 value=0x000001ff
+READ runctl_local_cmd       addr=0x0001604c value=0x00000000
+READ datapath_hist_uid      addr=0x00007000 value=0x48495354
+READ datapath_inj_uid       addr=0x0000a000 value=0x4d494e4a
+CLOSE_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master
+CLAIM_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #2)/phy_2/master
+READ runctl_uid             addr=0x00016000 value=0x52434d48
+READ runctl_control         addr=0x00016008 value=0x00000000
+READ runctl_status          addr=0x0001600c value=0x80000403
+READ runctl_last_cmd        addr=0x00016010 value=0x00000000
+READ runctl_local_cmd       addr=0x0001604c value=0x00000000
+READ datapath_hist_uid      addr=0x00007000 value=0x52434d48
+READ datapath_inj_uid       addr=0x0000a000 value=0x52434d48
+CLOSE_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #2)/phy_2/master
+CLAIM_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(70:34 v3 #0)/nios2_0
+READ runctl_uid             addr=0x00016000 value=0x00000000
+READ runctl_control         addr=0x00016008 value=0x00000000
+READ runctl_status          addr=0x0001600c value=0x00000000
+READ runctl_last_cmd        addr=0x00016010 value=0x00000000
+READ runctl_local_cmd       addr=0x0001604c value=0x00000000
+READ datapath_hist_uid      addr=0x00007000 value=0xffffffff
+READ datapath_inj_uid       addr=0x0000a000 value=0x00000000
+CLOSE_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(70:34 v3 #0)/nios2_0

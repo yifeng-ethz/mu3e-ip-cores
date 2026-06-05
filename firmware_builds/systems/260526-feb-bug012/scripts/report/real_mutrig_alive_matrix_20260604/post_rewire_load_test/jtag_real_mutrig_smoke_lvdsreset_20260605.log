@@ -1,0 +1,127 @@
+JTAG_REAL_MUTRIG_SMOKE_20260605
+TIME=2026-06-05 11:42:41 CEST
+DATAPATH_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #1)/phy_1/master
+RUNCTL_MASTER=/devices/5AGT(FC7H3|MC7G3)|5AGXBA7D4|..@1#7-2/(link)/JTAG/(110:132 v1 #2)/phy_2/master
+UIDS hist=0x48495354 inj=0x4D494E4A runctl=0x52434D48
+BEFORE_LVDS uid=0x4C564453 lane_go=0x000001FF soft_reset=0x00000000 phy_losn=0x00000135 phy_dpalock=0x00000135
+VERIFY lvds.lane_go             addr=0x00000010 write=0x000001FF read=0x000001FF PASS
+LVDS_SOFT_RESET_WRITE mask=0x000001ff
+AFTER_LVDS uid=0x4C564453 lane_go=0x000001FF soft_reset=0x00000000 phy_losn=0x00000135 phy_dpalock=0x00000135
+WINDOW_START label=type0 interval=12500 ctrl=0x00000101
+VERIFY emu.central              addr=0x0000101C write=0x00000000 read=0x00000000 PASS
+VERIFY emu.background           addr=0x00001024 write=0x00000000 read=0x00000000 PASS
+VERIFY emu.signal               addr=0x00001020 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.mode.off             addr=0x0000A008 write=0x00000000 read=0x00000000 PASS
+VERIFY merger0.real             addr=0x0000240C write=0x00000000 read=0x00000000 PASS
+VERIFY merger1.real             addr=0x0000248C write=0x00000000 read=0x00000000 PASS
+VERIFY merger2.real             addr=0x0000250C write=0x00000000 read=0x00000000 PASS
+VERIFY merger3.real             addr=0x0000258C write=0x00000000 read=0x00000000 PASS
+VERIFY merger4.real             addr=0x0000260C write=0x00000000 read=0x00000000 PASS
+VERIFY merger5.real             addr=0x0000268C write=0x00000000 read=0x00000000 PASS
+VERIFY merger6.real             addr=0x0000270C write=0x00000000 read=0x00000000 PASS
+VERIFY merger7.real             addr=0x0000278C write=0x00000000 read=0x00000000 PASS
+VERIFY frame0.enable            addr=0x000088A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame1.enable            addr=0x000018A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame2.enable            addr=0x000028A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame3.enable            addr=0x000038A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame4.enable            addr=0x000048A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame5.enable            addr=0x000058A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame6.enable            addr=0x000068A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame7.enable            addr=0x000078A0 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.mode.off             addr=0x0000A008 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.header_ch            addr=0x0000A018 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.header_delay         addr=0x0000A00C write=0x0000012C read=0x0000012C PASS
+VERIFY inj.header_interval      addr=0x0000A010 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.multiplicity         addr=0x0000A014 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.pulse_interval       addr=0x0000A01C write=0x000030D4 read=0x000030D4 PASS
+VERIFY inj.pulse_high           addr=0x0000A020 write=0x00000005 read=0x00000005 PASS
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013
+RUNCTL cmd=0x00000110 status=0x00000003 last_cmd=0x00000010
+RUNCTL cmd=0x00000011 status=0x00000003 last_cmd=0x00000011
+RUNCTL cmd=0x00000012 status=0x00000003 last_cmd=0x00000012
+VERIFY hist.left                addr=0x0000700C write=0x00000000 read=0x00000000 PASS
+VERIFY hist.right               addr=0x00007010 write=0x00000100 read=0x00000100 PASS
+VERIFY hist.bin_width           addr=0x00007014 write=0x00000001 read=0x00000001 PASS
+HIST_ARM ctrl=0x00000101 control_after=0x00000100
+VERIFY inj.mode.periodic        addr=0x0000A008 write=0x00000002 read=0x00000002 PASS
+WINDOW_RESULT label=type0 status=0x00000003 total=530688 last_total=640000 dropped=0 last_drop=0 coal=0x00000100 occupied=64 bin_sum=640000 max_bin=128 max_value=10000
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013
+WINDOW_START label=type1_up interval=12500 ctrl=0x00010105
+VERIFY emu.central              addr=0x0000101C write=0x00000000 read=0x00000000 PASS
+VERIFY emu.background           addr=0x00001024 write=0x00000000 read=0x00000000 PASS
+VERIFY emu.signal               addr=0x00001020 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.mode.off             addr=0x0000A008 write=0x00000000 read=0x00000000 PASS
+VERIFY merger0.real             addr=0x0000240C write=0x00000000 read=0x00000000 PASS
+VERIFY merger1.real             addr=0x0000248C write=0x00000000 read=0x00000000 PASS
+VERIFY merger2.real             addr=0x0000250C write=0x00000000 read=0x00000000 PASS
+VERIFY merger3.real             addr=0x0000258C write=0x00000000 read=0x00000000 PASS
+VERIFY merger4.real             addr=0x0000260C write=0x00000000 read=0x00000000 PASS
+VERIFY merger5.real             addr=0x0000268C write=0x00000000 read=0x00000000 PASS
+VERIFY merger6.real             addr=0x0000270C write=0x00000000 read=0x00000000 PASS
+VERIFY merger7.real             addr=0x0000278C write=0x00000000 read=0x00000000 PASS
+VERIFY frame0.enable            addr=0x000088A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame1.enable            addr=0x000018A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame2.enable            addr=0x000028A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame3.enable            addr=0x000038A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame4.enable            addr=0x000048A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame5.enable            addr=0x000058A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame6.enable            addr=0x000068A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame7.enable            addr=0x000078A0 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.mode.off             addr=0x0000A008 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.header_ch            addr=0x0000A018 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.header_delay         addr=0x0000A00C write=0x0000012C read=0x0000012C PASS
+VERIFY inj.header_interval      addr=0x0000A010 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.multiplicity         addr=0x0000A014 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.pulse_interval       addr=0x0000A01C write=0x000030D4 read=0x000030D4 PASS
+VERIFY inj.pulse_high           addr=0x0000A020 write=0x00000005 read=0x00000005 PASS
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013
+RUNCTL cmd=0x00000110 status=0x00000003 last_cmd=0x00000010
+RUNCTL cmd=0x00000011 status=0x00000003 last_cmd=0x00000011
+RUNCTL cmd=0x00000012 status=0x00000003 last_cmd=0x00000012
+VERIFY hist.left                addr=0x0000700C write=0x00000000 read=0x00000000 PASS
+VERIFY hist.right               addr=0x00007010 write=0x00000100 read=0x00000100 PASS
+VERIFY hist.bin_width           addr=0x00007014 write=0x00000001 read=0x00000001 PASS
+HIST_ARM ctrl=0x00010105 control_after=0x00010104
+VERIFY inj.mode.periodic        addr=0x0000A008 write=0x00000002 read=0x00000002 PASS
+WINDOW_RESULT label=type1_up status=0x00000003 total=0 last_total=0 dropped=0 last_drop=0 coal=0x00000000 occupied=0 bin_sum=0 max_bin=0 max_value=0
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013
+WINDOW_START label=type1_down interval=12500 ctrl=0x00020109
+VERIFY emu.central              addr=0x0000101C write=0x00000000 read=0x00000000 PASS
+VERIFY emu.background           addr=0x00001024 write=0x00000000 read=0x00000000 PASS
+VERIFY emu.signal               addr=0x00001020 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.mode.off             addr=0x0000A008 write=0x00000000 read=0x00000000 PASS
+VERIFY merger0.real             addr=0x0000240C write=0x00000000 read=0x00000000 PASS
+VERIFY merger1.real             addr=0x0000248C write=0x00000000 read=0x00000000 PASS
+VERIFY merger2.real             addr=0x0000250C write=0x00000000 read=0x00000000 PASS
+VERIFY merger3.real             addr=0x0000258C write=0x00000000 read=0x00000000 PASS
+VERIFY merger4.real             addr=0x0000260C write=0x00000000 read=0x00000000 PASS
+VERIFY merger5.real             addr=0x0000268C write=0x00000000 read=0x00000000 PASS
+VERIFY merger6.real             addr=0x0000270C write=0x00000000 read=0x00000000 PASS
+VERIFY merger7.real             addr=0x0000278C write=0x00000000 read=0x00000000 PASS
+VERIFY frame0.enable            addr=0x000088A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame1.enable            addr=0x000018A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame2.enable            addr=0x000028A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame3.enable            addr=0x000038A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame4.enable            addr=0x000048A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame5.enable            addr=0x000058A0 write=0x00000001 read=0x31000001 PASS
+VERIFY frame6.enable            addr=0x000068A0 write=0x00000001 read=0x00000001 PASS
+VERIFY frame7.enable            addr=0x000078A0 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.mode.off             addr=0x0000A008 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.header_ch            addr=0x0000A018 write=0x00000000 read=0x00000000 PASS
+VERIFY inj.header_delay         addr=0x0000A00C write=0x0000012C read=0x0000012C PASS
+VERIFY inj.header_interval      addr=0x0000A010 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.multiplicity         addr=0x0000A014 write=0x00000001 read=0x00000001 PASS
+VERIFY inj.pulse_interval       addr=0x0000A01C write=0x000030D4 read=0x000030D4 PASS
+VERIFY inj.pulse_high           addr=0x0000A020 write=0x00000005 read=0x00000005 PASS
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013
+RUNCTL cmd=0x00000110 status=0x00000003 last_cmd=0x00000010
+RUNCTL cmd=0x00000011 status=0x00000003 last_cmd=0x00000011
+RUNCTL cmd=0x00000012 status=0x00000003 last_cmd=0x00000012
+VERIFY hist.left                addr=0x0000700C write=0x00000000 read=0x00000000 PASS
+VERIFY hist.right               addr=0x00007010 write=0x00000100 read=0x00000100 PASS
+VERIFY hist.bin_width           addr=0x00007014 write=0x00000001 read=0x00000001 PASS
+HIST_ARM ctrl=0x00020109 control_after=0x00020108
+VERIFY inj.mode.periodic        addr=0x0000A008 write=0x00000002 read=0x00000002 PASS
+WINDOW_RESULT label=type1_down status=0x00000003 total=531328 last_total=640000 dropped=0 last_drop=0 coal=0x00000100 occupied=64 bin_sum=640000 max_bin=128 max_value=10000
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013
+RUNCTL cmd=0x00000013 status=0x00000003 last_cmd=0x00000013

@@ -186,6 +186,61 @@ TimeQuest closed timing with worst setup slack `+0.102 ns`, worst hold slack
 FEB SOF SHA256 is
 `6ec67bec276c42a2f852821c71c057e718b4cd62efbeca92d659e994abdfa938`.
 
+## 2026-06-05 Timing-Fix Load And JTAG Smoke
+
+The timing-fix FEB SOF and the SWB SOF were loaded after the successful q4
+compile:
+
+- [SWB programmer log](quartus_pgm_swb_20260605.log)
+- [FEB programmer log](quartus_pgm_feb_20260605.log)
+
+Normal SWB slow-control scan could not be rerun after the load because the PCIe
+endpoint was left bound to `uio_pci_generic`, `/dev/mudaq0` and
+`/dev/mudaq0_dmabuf` were absent, and `sc_tool --device /dev/uio0` failed to
+map the needed BAR region. The non-privileged recovery path could rescan to
+UIO, but could not complete the `mudaq` device recovery in this shell.
+
+Recovery artifacts:
+
+- [pcie_uio_rescan_20260605.log](pcie_uio_rescan_20260605.log)
+- [mudaq_recover_pcie_20260605.log](mudaq_recover_pcie_20260605.log)
+- [sc_read_uio0_hist_uid_20260605.log](sc_read_uio0_hist_uid_20260605.log)
+
+The FEB-side JTAG masters were usable, so the post-load smoke was run through
+System Console instead. The datapath master read `HIST=0x48495354`,
+`MINJ=0x4D494E4A`, and `LVDS=0x4C564453`; the run-control master read
+`RCMH=0x52434D48`.
+
+JTAG artifacts:
+
+- [jtag_hist_probe_20260605.log](jtag_hist_probe_20260605.log)
+- [jtag_runctl_probe_20260605.log](jtag_runctl_probe_20260605.log)
+- [jtag_real_mutrig_smoke_20260605.log](jtag_real_mutrig_smoke_20260605.log)
+- [jtag_real_mutrig_smoke_20260605_counts.csv](jtag_real_mutrig_smoke_20260605_counts.csv)
+- [jtag_real_mutrig_smoke_lvdsreset_20260605.log](jtag_real_mutrig_smoke_lvdsreset_20260605.log)
+- [jtag_real_mutrig_smoke_lvdsreset_20260605_counts.csv](jtag_real_mutrig_smoke_lvdsreset_20260605_counts.csv)
+
+One 10 kHz requested-rate JTAG smoke was run for Type0, Type1-up, and
+Type1-down. Histogram drops stayed at zero in all nonzero windows, and
+`COAL_STATUS` stayed `0x00000100`, matching the q4 direct-sim result that the
+histogram ingress no longer drops the real-MuTRiG burst.
+
+| Window | LVDS reset | Occupied bins | Bin sum | DROPPED_HITS | LAST_INTERVAL_DROPPED_HITS | COAL_STATUS |
+|---|---|---:|---:|---:|---:|---|
+| Type0 | no | `96/256` | `960000` | `0` | `0` | `0x00000100` |
+| Type1 up | no | `32/256` | `320000` | `0` | `0` | `0x00000100` |
+| Type1 down | no | `64/256` | `640000` | `0` | `0` | `0x00000100` |
+| Type0 | yes | `64/256` | `640000` | `0` | `0` | `0x00000100` |
+| Type1 up | yes | `0/256` | `0` | `0` | `0` | `0x00000000` |
+| Type1 down | yes | `64/256` | `640000` | `0` | `0` | `0x00000100` |
+
+The reduced occupancy after today’s reload is a link/physical-state symptom,
+not a histogram ingress symptom. Before and after LVDS soft reset, both
+`PHY_LOSN_STATUS` and `PHY_DPALOCK_STATUS` were `0x00000135`, so only the
+locked subset of lanes could contribute. The old Type0 undercount signature
+was drops in the histogram ingress with clean link CRCs; the timing-fix image
+now reports zero histogram drops on the lanes that are actually locked.
+
 ## Final Quiet State
 
 Final readback after the scan:
