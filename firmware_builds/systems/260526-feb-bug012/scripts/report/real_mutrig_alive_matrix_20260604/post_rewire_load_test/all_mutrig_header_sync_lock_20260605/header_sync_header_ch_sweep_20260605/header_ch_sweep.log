@@ -1,0 +1,25 @@
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0x20 read=0
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0x40 read=0
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0x60 read=0
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0x80 read=0
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0xa0 read=0
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0xc0 read=0
+# WARNING: verify failed INJ.HEADER_CH addr=0x6c86 write=0xe0 read=0
+# header-sync HEADER_CH sweep, real path, Type0 rate histogram, dwell=0.8s
+# hch=  0 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch=  1 occ=190/256 sum=21873940 hist_total=25192290 last=26098780 ranges=[(32, 63), (96, 229), (231, 231), (233, 255)]
+# hch=  2 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch=  3 occ=190/256 sum=24004870 hist_total=11969620 last=26098780 ranges=[(32, 63), (96, 229), (231, 231), (233, 255)]
+# hch=  4 occ=190/256 sum=21261950 hist_total=17356310 last=21261950 ranges=[(32, 63), (96, 229), (231, 231), (233, 255)]
+# hch=  5 occ=190/256 sum=21504960 hist_total=22085600 last=21504960 ranges=[(32, 63), (96, 229), (231, 231), (233, 255)]
+# hch=  6 occ=190/256 sum=21210270 hist_total=16712970 last=21210270 ranges=[(32, 63), (96, 229), (231, 231), (233, 255)]
+# hch=  7 occ=190/256 sum=20762250 hist_total=25613330 last=26098780 ranges=[(32, 63), (96, 229), (231, 231), (233, 255)]
+# hch= 32 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch= 64 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch= 96 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch=128 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch=160 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch=192 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# hch=224 occ=  0/256 sum=       0 hist_total=       0 last=       0 ranges=[]
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/header_sync_header_ch_sweep_20260605/header_ch_sweep.json
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/header_sync_header_ch_sweep_20260605/header_ch_sweep.csv

@@ -1,0 +1,8 @@
+# feb_real_mutrig_type1_periodic_delay_scan link=2 intervals=[50000, 12500, 5000] dwell_s=2.0 window=[0,1024] bw=4
+# UIDs: HIST=1212765012 RUNCTL=1380142408 INJ=1296649802
+# interval=50000 requested=   2500.0 Hz total=  329483 nz=256/256 span=[2,1022] peak=682 cyc plateau[0,1000]=97.7498%
+# interval=12500 requested=  10000.0 Hz total= 1319090 nz=256/256 span=[2,1022] peak=726 cyc plateau[0,1000]=97.7916%
+# interval=5000 requested=  25000.0 Hz total= 3319137 nz=256/256 span=[2,1022] peak=850 cyc plateau[0,1000]=97.7543%
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type1_periodic_delay_plateau_all_mutrig_20260605/real_mutrig_type1_periodic_delay_plateau.json
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type1_periodic_delay_plateau_all_mutrig_20260605/real_mutrig_type1_periodic_delay_plateau_bins.csv
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type1_periodic_delay_plateau_all_mutrig_20260605/real_mutrig_type1_periodic_delay_plateau_summary.csv

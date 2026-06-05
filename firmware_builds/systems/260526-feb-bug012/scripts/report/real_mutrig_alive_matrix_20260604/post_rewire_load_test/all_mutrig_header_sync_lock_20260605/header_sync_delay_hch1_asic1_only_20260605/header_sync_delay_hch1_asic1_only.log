@@ -1,0 +1,8 @@
+# header-sync frame-mode delay, real path, HEADER_CH=1, ASIC1 TDC-test only, dwell=2s
+# hd=100 exp=810 total=4403364 nz=256 peak=922 peak_frac=0.0624 p05_p95=100 in[0,1000]=99.9982% span=[2,1022]
+# hd=300 exp=610 total=4396297 nz=240 peak=722 peak_frac=0.0625 p05_p95=100 in[0,1000]=99.9991% span=[2,1022]
+# hd=500 exp=410 total=4403360 nz=256 peak=438 peak_frac=0.0624 p05_p95=100 in[0,1000]=99.9965% span=[2,1022]
+# hd=700 exp=210 total=4419484 nz=256 peak=238 peak_frac=0.0622 p05_p95=100 in[0,1000]=99.9881% span=[2,1022]
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/header_sync_delay_hch1_asic1_only_20260605/real_mutrig_type1_header_sync_delay_hch1_asic1_only.json
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/header_sync_delay_hch1_asic1_only_20260605/real_mutrig_type1_header_sync_delay_hch1_asic1_only_bins.csv
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/header_sync_delay_hch1_asic1_only_20260605/real_mutrig_type1_header_sync_delay_hch1_asic1_only_summary.csv

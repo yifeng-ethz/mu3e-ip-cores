@@ -272,17 +272,65 @@ readback still shows `PHY_LOSN_STATUS=0x00000135` and
 LVDS physical-lock subset, not a histogram-rate loss. The board was left quiet
 with `inj_mode=0x00000000` and `runctl_last_cmd=0x00000013`.
 
+## 2026-06-05 All-MuTRiG Rate, Periodic Plateau, And Header-Sync Lock
+
+The known-good SMB3/SMB5 TDC-test XML was reloaded for ASICs `0..7` with
+`recv_all=1`, `cml_sc=0`, `channel_enable_mask=0xffffffff`,
+`tdctest_channel_mask=0xffffffff`, and CML flush `0 -> 8 -> 0`. The all-ASIC
+configuration passed `24/24` operations. After an SC burst-read retry with PCIe
+recovery, the all-MuTRiG periodic rate scan was clean.
+
+Main outputs:
+
+- [all-MuTRiG Type0/Type1 rate contact sheet](all_mutrig_header_sync_lock_20260605/main_dislin_outputs_20260605/real_mutrig_type0_type1_rate_histograms_dislin.png)
+- [all-MuTRiG Type1 periodic delay plateau](all_mutrig_header_sync_lock_20260605/main_dislin_outputs_20260605/real_mutrig_type1_periodic_delay_plateau_dislin.png)
+- [ASIC1 header-sync Type1 delay lock plot](all_mutrig_header_sync_lock_20260605/main_dislin_outputs_20260605/real_mutrig_header_sync_delay_asic1_hch1_dislin.png)
+- [all-MuTRiG rate summary CSV](all_mutrig_header_sync_lock_20260605/type0_type1_scan_all_mutrig_periodic_20260605_clean_retry/real_mutrig_type0_type1_scan_summary.csv)
+- [periodic plateau summary CSV](all_mutrig_header_sync_lock_20260605/type1_periodic_delay_plateau_all_mutrig_20260605/real_mutrig_type1_periodic_delay_plateau_summary.csv)
+- [ASIC1 header-sync summary CSV](all_mutrig_header_sync_lock_20260605/header_sync_delay_hch1_asic1_only_20260605/real_mutrig_type1_header_sync_delay_hch1_asic1_only_summary.csv)
+
+The all-MuTRiG rate scan populated `191/256` bins at each requested rate.
+The reproducible missing bins are `0..31`, `64..95`, and `230`; populated bins
+sit on the red requested-rate line for both Type0 and Type1. This is now a
+physical/channel availability pattern, not a histogram drop or ping-pong
+interval artifact.
+
+Periodic Type1 delay used `LEFT=0`, `RIGHT=1024`, and `BIN_WIDTH=4`. All three
+periodic points occupied all `256/256` delay bins, spanning `2..1022` cycles.
+The strict `[0,1000]` fraction is `97.75%..97.79%`; the remainder is the six
+4-cycle bin centers at `1002..1022`, so the observed shape is the expected
+periodic plateau over the frame interval.
+
+For header-sync, `HEADER_CH=0` produced no traffic. A directed header-channel
+sweep showed live mode-1 traffic for `HEADER_CH=1,3,4,5,6,7`, while values like
+`32/64/96/...` read back as zero. The PLL-lock delay plot therefore isolates
+ASIC1 by disabling TDC-test on all ASICs, enabling only ASIC1, and using
+`HEADER_CH=1`. The four header-delay points (`100,300,500,700`) have p05-p95
+width `100` cycles and `99.988%..99.999%` of counts inside `[0,1000]`. The
+peak moves with header delay (`922,722,438,238` cycles), giving the expected
+header-sync narrow cluster rather than the periodic plateau.
+
+After the isolated ASIC1 check, the all-ASIC TDC-test XML/mask was restored and
+the restore passed `24/24` CML start/flush/final operations.
+
 ## Final Quiet State
 
-Final readback after the scan:
+Final readback after the all-ASIC restore:
 
 - `inj_mode=0x00000000`
-- `inj_pulse_interval=0x00001388`
+- `inj_header_delay=0x000002bc`
+- `inj_header_interval=0x00000001`
+- `inj_multiplicity=0x00000001`
+- `inj_header_ch=0x00000001`
+- `inj_pulse_interval=0x000030d4`
 - `inj_pulse_high=0x00000005`
-- `runctl_status=0x00000003`
+- `runctl_status=0x00000002`
 - `runctl_last_cmd=0x00000013`
+- `hist_uid=0x48495354`
+- `lvds[0x400c..0x400e]=0x000001ff,0x000000ca,0x000001ff`
 
-The board was left with the injector disabled and run-control terminated.
+The board was left with the injector disabled, run-control terminated, and the
+all-ASIC TDC-test mask restored.
 
 ## Conclusion
 

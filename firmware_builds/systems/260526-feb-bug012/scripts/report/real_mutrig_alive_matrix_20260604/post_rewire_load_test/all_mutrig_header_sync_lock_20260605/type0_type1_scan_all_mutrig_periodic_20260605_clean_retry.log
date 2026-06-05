@@ -1,0 +1,10 @@
+# feb_real_mutrig_type0_type1_scan link=2 intervals=[50000, 12500, 5000] dwell_s=2.0
+# UIDs: EMU=1162696020 HIST=1212765012 RUNCTL=1380142408 INJ=1296649802
+# interval=50000 requested=   2500.0 Hz Type0 occ=191/256 sum=  477500 Type1 occ=191/256 sum=  475502 UP= 64 DN=127
+# interval=12500 requested=  10000.0 Hz Type0 occ=191/256 sum= 1910000 Type1 occ=191/256 sum= 1907377 UP= 64 DN=127
+# interval=5000 requested=  25000.0 Hz Type0 occ=191/256 sum= 4775000 Type1 occ=191/256 sum= 4773434 UP= 64 DN=127
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type0_type1_scan_all_mutrig_periodic_20260605_clean_retry/real_mutrig_type0_type1_scan.json
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type0_type1_scan_all_mutrig_periodic_20260605_clean_retry/real_mutrig_type0_type1_scan_summary.csv
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type0_type1_scan_all_mutrig_periodic_20260605_clean_retry/real_mutrig_type0_type1_scan_channels.csv
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type0_type1_scan_all_mutrig_periodic_20260605_clean_retry/real_mutrig_type0_channel_heatmap.png
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_header_sync_lock_20260605/type0_type1_scan_all_mutrig_periodic_20260605_clean_retry/real_mutrig_type1_channel_heatmap.png
