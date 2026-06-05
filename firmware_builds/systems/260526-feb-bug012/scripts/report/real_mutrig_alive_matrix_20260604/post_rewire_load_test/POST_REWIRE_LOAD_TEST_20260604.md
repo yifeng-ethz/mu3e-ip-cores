@@ -241,6 +241,37 @@ locked subset of lanes could contribute. The old Type0 undercount signature
 was drops in the histogram ingress with clean link CRCs; the timing-fix image
 now reports zero histogram drops on the lanes that are actually locked.
 
+## 2026-06-05 Passwordless SWB Reload Rate Redo
+
+After passwordless SWB reload and `mudaq` recovery, the Type0/Type1 rate plot
+was rerun through the normal `/dev/mudaq0` slow-control path. The first retry
+exposed a software sequencing issue: `runctl_mgmt_host.STATUS` is a host-FSM
+diagnostic word, so valid accepted START commands can read back as
+`0x00000302` rather than low-nibble `0x3`. The scan helper now accepts START
+when `LAST_CMD[7:0] == 0x12` and the host command path is idle.
+
+Main outputs:
+
+- [Type0/Type1 rate contact sheet](type0_type1_scan_20260605_passwordless_retry/real_mutrig_type0_type1_rate_histograms_dislin.png)
+- [Type0/Type1 rate contact sheet PDF](type0_type1_scan_20260605_passwordless_retry/real_mutrig_type0_type1_rate_histograms_dislin.pdf)
+- [rate summary CSV](type0_type1_scan_20260605_passwordless_retry/real_mutrig_type0_type1_scan_summary.csv)
+- [raw scan JSON](type0_type1_scan_20260605_passwordless_retry/real_mutrig_type0_type1_scan.json)
+- [scan log](type0_type1_scan_20260605_passwordless_retry/feb_real_mutrig_type0_type1_scan.log)
+
+All populated bins match the red requested-rate reference exactly:
+
+| Requested rate | Type0 populated bins | Type0 bin count | Type1 populated bins | Type1 bin count |
+|---:|---:|---:|---:|---:|
+| `2500 Hz` | `64` | `2500` | `64` | `2500` |
+| `10000 Hz` | `64` | `10000` | `64` | `10000` |
+| `25000 Hz` | `64` | `25000` | `64` | `25000` |
+
+The populated range is bins `128..191` for both Type0 and Type1. Final
+readback still shows `PHY_LOSN_STATUS=0x00000135` and
+`PHY_DPALOCK_STATUS=0x00000135`, so the reduced 64-bin occupancy is the current
+LVDS physical-lock subset, not a histogram-rate loss. The board was left quiet
+with `inj_mode=0x00000000` and `runctl_last_cmd=0x00000013`.
+
 ## Final Quiet State
 
 Final readback after the scan:
