@@ -1,0 +1,4 @@
+phase=main asic=1 opcode=0x01110054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+report=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_per_asic_delay_rate_20260605/per_asic_delay_100k_header1_20260605/configure_asic1_tdc_mask_off_after_measure.md
+json=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/all_mutrig_per_asic_delay_rate_20260605/per_asic_delay_100k_header1_20260605/configure_asic1_tdc_mask_off_after_measure.json
+SUMMARY pass=1 fail=0

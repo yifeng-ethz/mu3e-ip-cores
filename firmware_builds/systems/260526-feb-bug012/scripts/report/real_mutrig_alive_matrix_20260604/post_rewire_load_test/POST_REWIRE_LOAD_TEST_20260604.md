@@ -346,23 +346,52 @@ was present but ASIC2 dropped. Since both ASICs are alive in isolated mode and
 both are present together at 2.5 kHz, the 10 kHz all-source missing-window
 signature is a shared-rate/path symptom, not dead ASIC0 or ASIC2 silicon.
 
+## 2026-06-05 Filled-Bin Rate And Per-ASIC Delay Plots
+
+The refreshed plots below use filled step/shaded histograms instead of separate
+thin bars, so adjacent occupied bins are rendered as one continuous piece and
+only real holes remain visible.
+
+Main outputs only:
+
+- [Type0/Type1 rate scan, filled bins](all_mutrig_per_asic_delay_rate_20260605/main_dislin_outputs_20260605/real_mutrig_type0_type1_rate_histograms_filled_dislin.png)
+- [per-ASIC periodic Type1 delay, 100 kHz per channel](all_mutrig_per_asic_delay_rate_20260605/main_dislin_outputs_20260605/real_mutrig_per_asic_periodic_delay_filled_dislin.png)
+- [per-ASIC header-sync Type1 delay, 1 pulse per frame](all_mutrig_per_asic_delay_rate_20260605/main_dislin_outputs_20260605/real_mutrig_per_asic_headersync_delay_filled_dislin.png)
+
+The all-ASIC rate scan now has Type0 and Type1 `255/256` nonzero bins at
+requested rates `2.5 kHz`, `10 kHz`, and `25 kHz`. The remaining zero bin is
+`230` in both paths at all three rates. Type1 bin `245` is below `90%` of the
+requested count at `2.5 kHz` and `10 kHz`, then recovers at `25 kHz`.
+
+The per-ASIC periodic delay scan used isolated ASIC TDC-test injection at
+`100 kHz` per channel. ASIC1/2/4/6/7 show the expected broad periodic plateau
+mostly inside `[0,1000]`, with strict in-window fractions from `97.70%` to
+`97.87%`. ASIC0 is alive but sparse in this dwell (`64` total hits), and ASIC3
+and ASIC5 have lower totals than the stronger ASICs.
+
+The per-ASIC header-sync scan used one pulse per frame. ASIC1/2/4/6/7 produce
+compact locked peaks inside `[0,1000]` with p05-p95 widths near `96..104`
+cycles for ASIC1/2/4/6/7, while ASIC0 remains sparse and ASIC3/5 remain broad.
+
 ## Final Quiet State
 
-Final readback after the ASIC0/ASIC2 recovery probes:
+Final readback after the filled-bin per-ASIC delay and Type0/Type1 rate scans:
 
 - `inj_mode=0x00000000`
 - `inj_header_delay=0x0000012c`
 - `inj_header_interval=0x00000001`
 - `inj_multiplicity=0x00000001`
 - `inj_header_ch=0x00000001`
-- `inj_pulse_interval=0x0000c350`
+- `inj_pulse_interval=0x00001388`
 - `inj_pulse_high=0x00000005`
 - `runctl_status=0x00000003`
 - `runctl_last_cmd=0x00000013`
 - `hist_uid=0x48495354`
-- `lvds[0x400c..0x400e]=0x000001ff,0x000000ca,0x000001ff`
+- `lvds_phy_losn=0x000001ff`
+- `lvds_phy_dpa_locked=0x000000ca`
+- `lvds_lane_go=0x000001ff`
 - `frame_receiver[0..7].word0=0x31000001`
-- [final CSR readback log](asic0_asic2_alive_debug_20260605/final_csr_after_asic0_2_revive_20260605_144648.log)
+- [final CSR readback log](all_mutrig_per_asic_delay_rate_20260605/final_csr_after_filled_plot_scans_20260605.log)
 
 The board was left with the injector disabled, run-control terminated, all
 frame receivers in short-hit mode, and the all-ASIC TDC-test mask restored.

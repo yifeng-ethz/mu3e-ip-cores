@@ -1,0 +1,148 @@
+inj_mode                 addr=0x06c82 value=0x00000000
+inj_header_delay         addr=0x06c83 value=0x0000012c
+inj_header_interval      addr=0x06c84 value=0x00000001
+inj_multiplicity         addr=0x06c85 value=0x00000001
+inj_header_ch            addr=0x06c86 value=0x00000001
+inj_pulse_interval       addr=0x06c87 value=0x00001388
+inj_pulse_high           addr=0x06c88 value=0x00000005
+runctl_status            addr=0x0c003 value=0x00000003
+runctl_last_cmd          addr=0x0c013 value=0x00000013
+hist_uid                 addr=0x0a900 value=0x48495354
+lvds_phy_losn            addr=0x0400c value=0x000001ff
+lvds_phy_dpa_locked      addr=0x0400d value=0x000000ca
+lvds_lane_go             addr=0x04004 value=0x000001ff
+frame0: base=0x04428 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame1: base=0x04628 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame2: base=0x04a28 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame3: base=0x04e28 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame4: base=0x05228 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame5: base=0x05628 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame6: base=0x05a28 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+frame7: base=0x05e28 word0=0x31000001 status=49 ctrl=1 crc=0x00000000 frames=1
+{
+  "rows": [
+    {
+      "name": "inj_mode",
+      "addr": 27778,
+      "value": 0
+    },
+    {
+      "name": "inj_header_delay",
+      "addr": 27779,
+      "value": 300
+    },
+    {
+      "name": "inj_header_interval",
+      "addr": 27780,
+      "value": 1
+    },
+    {
+      "name": "inj_multiplicity",
+      "addr": 27781,
+      "value": 1
+    },
+    {
+      "name": "inj_header_ch",
+      "addr": 27782,
+      "value": 1
+    },
+    {
+      "name": "inj_pulse_interval",
+      "addr": 27783,
+      "value": 5000
+    },
+    {
+      "name": "inj_pulse_high",
+      "addr": 27784,
+      "value": 5
+    },
+    {
+      "name": "runctl_status",
+      "addr": 49155,
+      "value": 3
+    },
+    {
+      "name": "runctl_last_cmd",
+      "addr": 49171,
+      "value": 19
+    },
+    {
+      "name": "hist_uid",
+      "addr": 43264,
+      "value": 1212765012
+    },
+    {
+      "name": "lvds_phy_losn",
+      "addr": 16396,
+      "value": 511
+    },
+    {
+      "name": "lvds_phy_dpa_locked",
+      "addr": 16397,
+      "value": 202
+    },
+    {
+      "name": "lvds_lane_go",
+      "addr": 16388,
+      "value": 511
+    }
+  ],
+  "frames": [
+    {
+      "asic": 0,
+      "base": 17448,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 1,
+      "base": 17960,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 2,
+      "base": 18984,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 3,
+      "base": 20008,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 4,
+      "base": 21032,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 5,
+      "base": 22056,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 6,
+      "base": 23080,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    },
+    {
+      "asic": 7,
+      "base": 24104,
+      "word0": 822083585,
+      "crc": 0,
+      "frame_count": 1
+    }
+  ]
+}
