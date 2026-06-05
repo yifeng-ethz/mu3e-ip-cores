@@ -1,0 +1,117 @@
+Reading pref.tcl
+# ** Warning: (vsim-222) -modelsimini will be deprecated in future releases. Please use -ini instead.
+
+# 2026.1_1
+
+# ** Warning: (vsim-222) -modelsimini will be deprecated in future releases. Please use -ini instead.
+# ** Note: (vsim-220) '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics/tb/uvm/work_hist_uvm/modelsim.ini' is used as the ini file.
+# vsim -modelsimini /home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics/tb/uvm/work_hist_uvm/modelsim.ini -c -work work_hist_uvm -t ps -dpicpppath /usr/bin/gcc -sv_lib /data1/questaone_sim/questasim/uvm-1.2/linux_x86_64/uvm_dpi -voptargs="+acc" -suppress 19 -suppress 3009 -suppress 3473 "+UVM_TESTNAME=hist_type0_interval_stress_test" -sv_seed 11 -do "quietly set NumericStdNoWarnings 1; quietly set StdArithNoWarnings 1; run -all; quit -f" tb_top
+# Start time: 10:17:14 on Jun 05,2026
+# Loading /tmp/yifeng@teferi.ethz.ch_dpi_7734/linux_x86_64_gcc-12/export_tramp.so
+# ** Note: (vsim-3812) Design is being optimized...
+# ** Warning: (vopt-10587) Some optimizations are turned off because the +acc switch is in effect. This will cause your simulation to run slowly. Please use -access/-debug to maintain needed visibility. The +acc switch would be deprecated in a future release.
+# ** Note: (vopt-220) '/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/histogram_statistics/tb/uvm/work_hist_uvm/modelsim.ini' is used as the ini file.
+# ** Note: (vopt-143) Recognized 1 FSM in architecture body "histogram_statistics_v2(rtl)".
+# ** Note: (vsim-12126) Error and warning message counts have been restored: Errors=0, Warnings=2.
+# //  Questa Sim-64
+# //  Version 2026.1_1 linux_x86_64 Mar  2 2026
+# //
+# // Unpublished work. Copyright 2026 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# ** Note: (vsim-8785) UVM-aware debugging capabilities will be disabled since no compiled "questa_uvm_pkg" can be found.
+# This also means that later if you turn on UVM-aware debugging your debug simulations may have
+# different random seeds from your non-debug simulations.
+# Loading sv_std.std
+# Loading work.hist_csr_if(fast)
+# Loading work.hist_bin_if(fast)
+# Loading work.hist_fill_if(fast)
+# Loading work.hist_ctrl_if(fast)
+# Loading work.hist_debug_if(fast)
+# Loading work.hist_snoop_if(fast)
+# Loading work.hist_probe_if(fast)
+# Loading work.uvm_pkg(fast)
+# Loading work.hist_env_pkg(fast)
+# Loading work.tb_top(fast)
+# Loading work.hist_csr_if(fast__2)
+# Loading work.hist_bin_if(fast__2)
+# Loading work.hist_fill_if(fast__3)
+# Loading work.hist_snoop_if(fast__2)
+# Loading work.hist_ctrl_if(fast__2)
+# Loading work.hist_probe_if(fast__2)
+# Loading work.hist_avst_sva(fast)
+# Loading work.hist_avst_sva(fast__1)
+# Loading work.hist_avmm_sva(fast)
+# Loading work.hist_fifo_sva(fast)
+# Loading work.hist_pipeline_sva(fast)
+# Loading work.hist_fill_if(fast__2)
+# Loading work.hist_debug_if(fast__2)
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading work.histogram_statistics_v2_pkg(body)
+# Loading work.histogram_statistics_v2(rtl)#1
+# Loading work.hit_fifo(rtl)#1
+# Loading work.rr_arbiter(rtl)#1
+# Loading work.bin_divider(rtl)#1
+# Loading work.coalescing_queue(rtl)#1
+# Loading work.pingpong_sram(rtl)#1
+# Loading work.true_dual_port_ram_single_clock(rtl)#1
+# Compiling /tmp/yifeng@teferi.ethz.ch_dpi_7734/linux_x86_64_gcc-12/exportwrapper.c
+# Loading /tmp/yifeng@teferi.ethz.ch_dpi_7734/linux_x86_64_gcc-12/vsim_auto_compile.so
+# Loading /data1/questaone_sim/questasim/uvm-1.2/linux_x86_64/uvm_dpi.so
+# quietly set NumericStdNoWarnings 1
+#  quietly set StdArithNoWarnings 1
+#  run -all
+# UVM_INFO /data1/questaone_sim/questasim/verilog_src/uvm-1.2/src/base/uvm_root.svh(392) @ 0: reporter [UVM/RELNOTES]
+# ----------------------------------------------------------------
+# UVM-1.2
+# (C) 2007-2014 Mentor Graphics Corporation
+# (C) 2007-2014 Cadence Design Systems, Inc.
+# (C) 2006-2014 Synopsys, Inc.
+# (C) 2011-2013 Cypress Semiconductor Corp.
+# (C) 2013-2014 NVIDIA Corporation
+# ----------------------------------------------------------------
+#
+#   ***********       IMPORTANT RELEASE NOTES         ************
+#
+#   You are using a version of the UVM library that has been compiled
+#   with `UVM_NO_DEPRECATED undefined.
+#   See http://www.eda.org/svdb/view.php?id=3313 for more details.
+#
+#   You are using a version of the UVM library that has been compiled
+#   with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.
+#   See http://www.eda.org/svdb/view.php?id=3770 for more details.
+#
+#       (Specify +UVM_NO_RELNOTES to turn off this notice)
+#
+# UVM_INFO @ 0: reporter [RNTST] Running test hist_type0_interval_stress_test...
+# UVM_INFO tests/hist_type0_interval_stress_test.sv(157) @ 304116000: uvm_test_top [TYPE0_STRESS] expected_hits=1536 observed_accepts=1536 observed_drops=0 intervals=7 live_total=0 live_drop=0 last_total=0 last_drop=0 coal_status=0x00000100
+# UVM_INFO /data1/questaone_sim/questasim/verilog_src/uvm-1.2/src/base/uvm_objection.svh(1270) @ 304116000: reporter [TEST_DONE] 'run' phase is ready to proceed to the 'extract' phase
+# UVM_INFO /data1/questaone_sim/questasim/verilog_src/uvm-1.2/src/base/uvm_report_server.svh(847) @ 304116000: reporter [UVM/REPORT/SERVER]
+# --- UVM Report Summary ---
+#
+# ** Report counts by severity
+# UVM_INFO :    4
+# UVM_WARNING :    0
+# UVM_ERROR :    0
+# UVM_FATAL :    0
+# ** Report counts by id
+# [RNTST]     1
+# [TEST_DONE]     1
+# [TYPE0_STRESS]     1
+# [UVM/RELNOTES]     1
+#
+# ** Note: $finish    : /data1/questaone_sim/questasim/verilog_src/uvm-1.2/src/base/uvm_root.svh(517)
+#    Time: 304116 ns  Iteration: 78  Instance: /tb_top
+# End time: 10:17:18 on Jun 05,2026, Elapsed time: 0:00:04
+# Errors: 0, Warnings: 2

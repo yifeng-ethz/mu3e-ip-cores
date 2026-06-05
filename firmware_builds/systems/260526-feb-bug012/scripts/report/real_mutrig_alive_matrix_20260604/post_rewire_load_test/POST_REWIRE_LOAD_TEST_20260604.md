@@ -168,6 +168,24 @@ I did not load this new image because STA still reports setup timing not met in
 the LVDS `pll_sclk` domain: worst setup slack is `-6.063 ns` at the worst slow
 corner and `-0.473 ns` at the other failing slow corner.
 
+Timing follow-up on 2026-06-05 kept the 32-bit counters and FIFO depth 32, but
+returned `COAL_QUEUE_DEPTH` to `4`. The directed stress still passes with zero
+drops and `coal_status=0x00000100`, matching the evidence that the coalescer
+queue was not the bottleneck.
+
+Main outputs:
+
+- [default q4 Type0 stress log](hist_direct_sim_20260605/hist_type0_interval_stress_default_q4_seed11.log)
+- [default q4 direct Type0/Type1 regression log](hist_direct_sim_20260605/hist_v3_direct_input_default_q4_seed7.log)
+- [FEB q4 timing-fix rebuild transcript](hist_direct_sim_20260605/feb_make_flow_hist_q4_timingfix_20260605.log)
+
+The q4 rebuild completed full `make flow` successfully with 0 errors. Fitter
+completed on Arria V `5AGXBA7D4F31C5` at 77% ALM and 77% RAM utilization.
+TimeQuest closed timing with worst setup slack `+0.102 ns`, worst hold slack
+`+0.245 ns`, minimum pulse width slack `+0.160 ns`, and TNS `0.000`. The new
+FEB SOF SHA256 is
+`6ec67bec276c42a2f852821c71c057e718b4cd62efbeca92d659e994abdfa938`.
+
 ## Final Quiet State
 
 Final readback after the scan:
