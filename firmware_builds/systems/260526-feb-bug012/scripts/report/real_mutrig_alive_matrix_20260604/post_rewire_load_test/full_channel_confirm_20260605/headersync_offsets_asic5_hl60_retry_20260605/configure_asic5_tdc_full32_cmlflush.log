@@ -1,0 +1,6 @@
+phase=cml_start_0 asic=5 opcode=0x01150054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=cml_flush_8 asic=5 opcode=0x01150054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=cml_final_0 asic=5 opcode=0x01150054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+report=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/full_channel_confirm_20260605/headersync_offsets_asic5_hl60_retry_20260605/configure_asic5_tdc_full32_cmlflush.md
+json=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/full_channel_confirm_20260605/headersync_offsets_asic5_hl60_retry_20260605/configure_asic5_tdc_full32_cmlflush.json
+SUMMARY pass=3 fail=0

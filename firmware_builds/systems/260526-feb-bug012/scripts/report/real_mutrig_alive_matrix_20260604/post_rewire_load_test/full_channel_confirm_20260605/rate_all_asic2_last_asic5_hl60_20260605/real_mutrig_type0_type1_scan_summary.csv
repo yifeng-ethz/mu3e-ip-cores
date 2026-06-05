@@ -1,0 +1,4 @@
+interval,requested_hz,type0_occupied_bins,type0_bin_sum,type0_total,type0_last_interval,type1_occupied_bins,type1_bin_sum,type1_up_occupied_bins,type1_up_total,type1_up_last_interval,type1_down_occupied_bins,type1_down_total,type1_down_last_interval
+50000,2500.0,224,429267,3584,559609,224,558500,96,77952,240000,128,283054,318500
+12500,10000.0,224,1782451,91127,2238746,224,2230997,96,792960,960000,128,807221,1270997
+5000,25000.0,224,5068679,3953827,5599131,224,4378345,96,1920768,2400000,128,1528310,3175337

@@ -1,0 +1,4 @@
+asic,header_delay,expected_center_cycles,total,measured_hz,nonzero_bins,first_nonzero_center,last_nonzero_center,peak_center_cycles,peak_fraction,window_fraction_0_1000,p05_center_cycles,p95_center_cycles,p05_p95_width_cycles
+5,100,810,4395616,5494520.0,28,822,930,830,0.0625,1.0,826,926,100
+5,300,610,4017504,5021880.0,28,622,730,630,0.0625,1.0,626,726,100
+5,500,410,4395616,5494520.0,28,422,530,430,0.0625,1.0,426,526,100

@@ -1,0 +1,4 @@
+phase=main asic=4 opcode=0x01140054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+report=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/full_channel_confirm_20260605/headersync_offsets_100_300_500_20260605/configure_asic4_tdc_mask_off_after_measure.md
+json=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/full_channel_confirm_20260605/headersync_offsets_100_300_500_20260605/configure_asic4_tdc_mask_off_after_measure.json
+SUMMARY pass=1 fail=0

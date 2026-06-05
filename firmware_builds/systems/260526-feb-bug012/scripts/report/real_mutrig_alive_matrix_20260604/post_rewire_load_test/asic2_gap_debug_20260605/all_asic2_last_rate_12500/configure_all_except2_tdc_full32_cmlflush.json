@@ -1,0 +1,1110 @@
+{
+  "args": {
+    "allow_idle_after_config": true,
+    "asics": [
+      0,
+      1,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "bsp": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/toolkits/fe_scifi/system_console/lib/mutrig_controller_bsp.tcl",
+    "channel_enable_mask": 4294967295,
+    "cml_final_value": 0,
+    "cml_flush_after_config": true,
+    "cml_flush_set_cml_sc_zero": true,
+    "cml_flush_value": 8,
+    "cml_start_value": 0,
+    "dry_run": false,
+    "link": 2,
+    "set_channel": [
+      "recv_all=1",
+      "cml_sc=0"
+    ],
+    "set_header": [],
+    "set_tdc": [
+      "0:vncnt=48",
+      "0:vnhitlogic=40",
+      "0:vnvcodelay=18",
+      "3:vncnt=41",
+      "3:vnhitlogic=20",
+      "3:vnvcodelay=10",
+      "5:vncnt=42",
+      "5:vnhitlogic=40",
+      "5:vnvcodelay=20"
+    ],
+    "smb3_xml": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_test_system/trash_bin/good_ribbon_0/config_smb3_tdc.txt",
+    "smb5_xml": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_test_system/trash_bin/good_ribbon_0/config_smb5_tdc.txt",
+    "tdctest_channel_mask": 4294967295
+  },
+  "rows": [
+    {
+      "asic": 0,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 0,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 0,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 17825876,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 48,
+        "vnhitlogic": 40,
+        "vnvcodelay": 18
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 0
+    },
+    {
+      "asic": 1,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 1,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 1,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 17891412,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 3,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 3,
+        "open_frame_count": 0,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 3,
+        "open_frame_count": 0,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 18022484,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 41,
+        "vnhitlogic": 20,
+        "vnvcodelay": 10
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 3
+    },
+    {
+      "asic": 4,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 4,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 4,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18088020,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 0
+    },
+    {
+      "asic": 5,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18153556,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 42,
+        "vnhitlogic": 40,
+        "vnvcodelay": 20
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 6,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 6,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 6,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18219092,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 2
+    },
+    {
+      "asic": 7,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 7,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 7,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18284628,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 3
+    },
+    {
+      "asic": 0,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 0,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 0,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 17825876,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 48,
+        "vnhitlogic": 40,
+        "vnvcodelay": 18
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 0
+    },
+    {
+      "asic": 1,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 1,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 1,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 17891412,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 3,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 3,
+        "open_frame_count": 0,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 3,
+        "open_frame_count": 0,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 18022484,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 41,
+        "vnhitlogic": 20,
+        "vnvcodelay": 10
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 3
+    },
+    {
+      "asic": 4,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 4,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 4,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18088020,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 0
+    },
+    {
+      "asic": 5,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18153556,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 42,
+        "vnhitlogic": 40,
+        "vnvcodelay": 20
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 6,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 6,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 6,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18219092,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 2
+    },
+    {
+      "asic": 7,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 7,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 7,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18284628,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 3
+    },
+    {
+      "asic": 0,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 0,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 0,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 17825876,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 48,
+        "vnhitlogic": 40,
+        "vnvcodelay": 18
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 0
+    },
+    {
+      "asic": 1,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 1,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 1,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 17891412,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 3,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 3,
+        "open_frame_count": 0,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 3,
+        "open_frame_count": 0,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        335544320,
+        0
+      ],
+      "opcode": 18022484,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 41,
+        "vnhitlogic": 20,
+        "vnvcodelay": 10
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 3
+    },
+    {
+      "asic": 4,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 4,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 4,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18088020,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 0
+    },
+    {
+      "asic": 5,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18153556,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 42,
+        "vnhitlogic": 40,
+        "vnvcodelay": 20
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 6,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 6,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 6,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18219092,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 2
+    },
+    {
+      "asic": 7,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 7,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 7,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18284628,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {},
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 3
+    }
+  ],
+  "timestamp": "2026-06-05T16:39:17"
+}

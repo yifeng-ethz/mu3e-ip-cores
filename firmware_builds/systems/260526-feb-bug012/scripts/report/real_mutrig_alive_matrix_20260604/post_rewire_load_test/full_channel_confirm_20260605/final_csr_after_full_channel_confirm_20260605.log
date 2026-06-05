@@ -1,0 +1,21 @@
+inj_mode=0x00000000
+inj_header_delay=0x0000012c
+inj_header_interval=0x00000001
+inj_multiplicity=0x00000001
+inj_header_ch=0x00000001
+inj_pulse_interval=0x00001388
+inj_pulse_high=0x00000005
+runctl_status=0x00000003
+runctl_last_cmd=0x00000013
+hist_uid=0x48495354
+lvds_phy_losn=0x000001ff
+lvds_phy_dpa_locked=0x000000ca
+lvds_lane_go=0x000001ff
+frame_receiver[0].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[1].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[2].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[3].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[4].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[5].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[6].word0=0x31000001 crc=0x00000000 frames=0x00000001
+frame_receiver[7].word0=0x31000001 crc=0x00000000 frames=0x00000001

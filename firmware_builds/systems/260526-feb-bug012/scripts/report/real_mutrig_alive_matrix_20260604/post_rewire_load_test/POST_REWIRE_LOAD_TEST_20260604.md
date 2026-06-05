@@ -402,10 +402,49 @@ isolated delay confirmation, so this remaining failure is not ASIC2 silicon
 deadness or a PLL-lock failure by itself; it is a full-bank/path/config
 interaction after basic XML/SPI programming.
 
+## 2026-06-05 Full-Channel ASIC2-Last Confirmation
+
+The ASIC2 missing-window symptom was reproduced and then removed with a directed
+configuration-order test. ASIC2 alone produces Type0 and Type1 hits in bins
+`64..95`; full-bank operation also produces all ASIC2 bins when the bank is
+restored as mask-off, all ASICs except ASIC2, then ASIC2 last. The final clean
+configuration uses ASIC0 `vncnt/vnvcodelay/vnhitlogic = 48/18/40`, ASIC3
+`41/10/20`, ASIC5 `42/20/60`, and ASIC2 configured last.
+
+Main outputs only:
+
+- [Type0/Type1 full-channel rate scan, filled bins](full_channel_confirm_20260605/main_dislin_outputs_full_channel_20260605/real_mutrig_type0_type1_rate_histograms_filled_dislin.png)
+- [per-ASIC header-sync Type1 delay, three header offsets](full_channel_confirm_20260605/main_dislin_outputs_full_channel_20260605/real_mutrig_per_asic_headersync_offsets_overlay_dislin.png)
+
+The final rate scan is full-channel for both histogram paths:
+
+| Requested rate | Interval | Type0 occupancy | Type0 bin sum | Type1 occupancy | Type1 bin sum |
+|---:|---:|---:|---:|---:|---:|
+| `2.5 kHz/ch` | `50000` | `256/256` | `639781` | `256/256` | `513415` |
+| `10 kHz/ch` | `12500` | `256/256` | `2558911` | `256/256` | `2460227` |
+| `25 kHz/ch` | `5000` | `256/256` | `6395710` | `256/256` | `6378022` |
+
+The Type1 first two ASIC groups are lower at the lowest rate point, but they are
+occupied and the full 256-channel path is present. The delay plot overlays
+header delays `100`, `300`, and `500` in each ASIC panel, with the x-axis set to
+`[-1024,3096]` cycles and the y-scale expanded so the locked peaks are visible.
+All eight ASICs show compact header-sync peaks inside `[0,1000]`; ASIC5 uses the
+`vnhitlogic=60` retry because `vnhitlogic=40` produced no header-sync counts in
+the full eight-ASIC offset scan.
+
+Evidence:
+
+- [final rate JSON](full_channel_confirm_20260605/rate_all_clean_asic2_last_asic5_hl60_20260605/real_mutrig_type0_type1_scan.json)
+- [final rate summary CSV](full_channel_confirm_20260605/rate_all_clean_asic2_last_asic5_hl60_20260605/real_mutrig_type0_type1_scan_summary.csv)
+- [merged header-sync offset delay JSON](full_channel_confirm_20260605/headersync_offsets_final_20260605/real_mutrig_headersync_offset_delay_scan.json)
+- [merged header-sync offset delay summary CSV](full_channel_confirm_20260605/headersync_offsets_final_20260605/real_mutrig_headersync_offset_delay_summary.csv)
+- [ASIC2-only liveness JSON](asic2_gap_debug_20260605/asic2_only_rate_12500/real_mutrig_type0_type1_scan.json)
+- [ASIC2-last full-bank debug JSON](asic2_gap_debug_20260605/all_asic2_last_rate_12500/real_mutrig_type0_type1_scan.json)
+
 ## Final Quiet State
 
-Final readback after the tuned PLL confirmation and tuned full-bank Type0/Type1
-rate scan:
+Final readback after the full-channel ASIC2-last rate scan and three-offset
+header-sync delay confirmation:
 
 - `inj_mode=0x00000000`
 - `inj_header_delay=0x0000012c`
@@ -421,15 +460,19 @@ rate scan:
 - `lvds_phy_dpa_locked=0x000000ca`
 - `lvds_lane_go=0x000001ff`
 - `frame_receiver[0..7].word0=0x31000001`
-- [final CSR readback log](pll_tune_asic0_3_5_20260605/final_csr_after_tuned_pll_rate_scan_20260605.log)
+- [final CSR readback log](full_channel_confirm_20260605/final_csr_after_full_channel_confirm_20260605.log)
 
 The board was left with the injector disabled, run-control terminated, all
 frame receivers in short-hit mode, and the tuned full-bank MuTRiG configuration
-loaded for ASIC0/3/5.
+loaded with ASIC0 `48/18/40`, ASIC3 `41/10/20`, ASIC5 `42/20/60`, and ASIC2
+configured last in the clean restore sequence.
 
 ## Conclusion
 
 The previous real-MuTRiG no-hit condition is fixed by preserving the physical
 inject pulse timing/level and routing the FEB inject pins 1:1 from
 `mutrig_injector_0`. Short TDC mode now produces Type0 and Type1 histogram hits
-on the real MuTRiG path with clean frame CRC deltas.
+on the real MuTRiG path with clean frame CRC deltas. The final board run has
+full `256/256` Type0 and Type1 channel occupancy at `2.5`, `10`, and
+`25 kHz/ch`; the remaining ASIC2 issue is a full-bank configuration-order
+dependency solved by programming ASIC2 last.
