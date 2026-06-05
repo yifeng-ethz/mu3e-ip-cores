@@ -1,0 +1,6 @@
+phase=cml_start_0 asic=7 opcode=0x01170054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=cml_flush_8 asic=7 opcode=0x01170054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=cml_final_0 asic=7 opcode=0x01170054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+report=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/pll_tune_asic0_3_5_20260605/combined_tuned_delay_confirm_20260605/configure_asic7_tdc_full32_cmlflush.md
+json=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/pll_tune_asic0_3_5_20260605/combined_tuned_delay_confirm_20260605/configure_asic7_tdc_full32_cmlflush.json
+SUMMARY pass=3 fail=0

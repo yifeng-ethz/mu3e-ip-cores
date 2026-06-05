@@ -1,0 +1,4 @@
+phase=main asic=2 opcode=0x01120054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+report=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/pll_tune_asic0_3_5_20260605/combined_tuned_delay_confirm_20260605/configure_asic2_tdc_mask_off_after_measure.md
+json=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/pll_tune_asic0_3_5_20260605/combined_tuned_delay_confirm_20260605/configure_asic2_tdc_mask_off_after_measure.json
+SUMMARY pass=1 fail=0

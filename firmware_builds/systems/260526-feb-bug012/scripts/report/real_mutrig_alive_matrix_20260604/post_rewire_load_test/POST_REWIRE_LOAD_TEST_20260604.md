@@ -373,9 +373,39 @@ The per-ASIC header-sync scan used one pulse per frame. ASIC1/2/4/6/7 produce
 compact locked peaks inside `[0,1000]` with p05-p95 widths near `96..104`
 cycles for ASIC1/2/4/6/7, while ASIC0 remains sparse and ASIC3/5 remain broad.
 
+## 2026-06-05 ASIC0/3/5 PLL Parameter Tune Confirmation
+
+ASIC0, ASIC3, and ASIC5 were tuned one ASIC at a time in header-sync mode using
+the MUTRIG.md TDC parameter workflow. The selected settings are:
+
+| ASIC | `vncnt` | `vnvcodelay` | `vnhitlogic` | Header-sync result |
+|---:|---:|---:|---:|---|
+| 0 | `48` | `18` | `40` | p05-p95 `104` cycles, peak `646` cycles |
+| 3 | `41` | `10` | `20` | p05-p95 `104` cycles, peak `626` cycles |
+| 5 | `42` | `20` | `40` | p05-p95 `100` cycles, peak `630` cycles |
+
+The follow-up isolated per-ASIC confirmation scan applies these settings before
+each ASIC measurement. ASIC0/3/5 now all show compact header-sync peaks inside
+`[0,1000]`, so the earlier broad/no-lock symptom is not reproduced under the
+one-ASIC-at-a-time sequence.
+
+Main outputs only:
+
+- [Type0/Type1 rate scan, tuned full-bank filled bins](pll_tune_asic0_3_5_20260605/main_dislin_outputs_tuned_20260605/real_mutrig_type0_type1_rate_histograms_filled_dislin.png)
+- [per-ASIC periodic Type1 delay, tuned confirmation, 100 kHz per channel](pll_tune_asic0_3_5_20260605/main_dislin_outputs_tuned_20260605/real_mutrig_per_asic_periodic_delay_filled_dislin.png)
+- [per-ASIC header-sync Type1 delay, tuned confirmation, 1 pulse per frame](pll_tune_asic0_3_5_20260605/main_dislin_outputs_tuned_20260605/real_mutrig_per_asic_headersync_delay_filled_dislin.png)
+
+The tuned full-bank Type0/Type1 rate scan still has a fixed missing block:
+bins `64..95`, all 32 channels of ASIC2, are zero in both Type0 and Type1 for
+requested rates `2.5 kHz`, `10 kHz`, and `25 kHz`. ASIC2 is live in the
+isolated delay confirmation, so this remaining failure is not ASIC2 silicon
+deadness or a PLL-lock failure by itself; it is a full-bank/path/config
+interaction after basic XML/SPI programming.
+
 ## Final Quiet State
 
-Final readback after the filled-bin per-ASIC delay and Type0/Type1 rate scans:
+Final readback after the tuned PLL confirmation and tuned full-bank Type0/Type1
+rate scan:
 
 - `inj_mode=0x00000000`
 - `inj_header_delay=0x0000012c`
@@ -391,10 +421,11 @@ Final readback after the filled-bin per-ASIC delay and Type0/Type1 rate scans:
 - `lvds_phy_dpa_locked=0x000000ca`
 - `lvds_lane_go=0x000001ff`
 - `frame_receiver[0..7].word0=0x31000001`
-- [final CSR readback log](all_mutrig_per_asic_delay_rate_20260605/final_csr_after_filled_plot_scans_20260605.log)
+- [final CSR readback log](pll_tune_asic0_3_5_20260605/final_csr_after_tuned_pll_rate_scan_20260605.log)
 
 The board was left with the injector disabled, run-control terminated, all
-frame receivers in short-hit mode, and the all-ASIC TDC-test mask restored.
+frame receivers in short-hit mode, and the tuned full-bank MuTRiG configuration
+loaded for ASIC0/3/5.
 
 ## Conclusion
 

@@ -78,6 +78,30 @@ def parse_asics(text: str) -> list[int]:
     return sorted(dict.fromkeys(out))
 
 
+def parse_tdc_override(text: str) -> tuple[int, str, int]:
+    try:
+        asic_text, assignment = text.split(":", 1)
+        field, value_text = assignment.split("=", 1)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(
+            "TDC override must be ASIC:FIELD=VALUE, e.g. 0:vnvcodelay=18"
+        ) from exc
+    asic = int(asic_text, 0)
+    if asic < 0 or asic > 7:
+        raise argparse.ArgumentTypeError(f"ASIC out of range: {asic}")
+    field = field.strip()
+    if field not in {"vncnt", "vnvcodelay", "vnhitlogic"}:
+        raise argparse.ArgumentTypeError(f"unsupported TDC field: {field}")
+    return asic, field, int(value_text, 0)
+
+
+def tdc_override_map(items: list[tuple[int, str, int]]) -> dict[int, dict[str, int]]:
+    out: dict[int, dict[str, int]] = {}
+    for asic, field, value in items:
+        out.setdefault(asic, {})[field] = value
+    return out
+
+
 def run_config(
     out_dir: Path,
     label: str,
@@ -85,6 +109,7 @@ def run_config(
     asics: str,
     tdctest_mask: int,
     cml_flush: bool,
+    tdc_overrides: dict[int, dict[str, int]] | None = None,
 ) -> dict[str, Any]:
     log_path = out_dir / f"{label}.log"
     md_path = out_dir / f"{label}.md"
@@ -118,6 +143,9 @@ def run_config(
         "--json-output",
         str(json_path),
     ]
+    for asic, fields in sorted((tdc_overrides or {}).items()):
+        for name, value in sorted(fields.items()):
+            cmd.extend(["--set-tdc", f"{asic}:{name}={value}"])
     if cml_flush:
         cmd.extend([
             "--cml-flush-after-config",
@@ -128,7 +156,10 @@ def run_config(
             "--cml-final-value",
             "0",
         ])
-    print(f"# configure {label}: asics={asics} tdctest=0x{tdctest_mask:08x} cml={int(cml_flush)}")
+    print(
+        f"# configure {label}: asics={asics} tdctest=0x{tdctest_mask:08x} "
+        f"cml={int(cml_flush)} tdc_overrides={tdc_overrides or {}}"
+    )
     proc = subprocess.run(
         cmd,
         cwd=REPO_ROOT,
@@ -149,6 +180,7 @@ def run_config(
         "json": str(json_path),
         "returncode": proc.returncode,
         "summary": data.get("summary"),
+        "tdc_overrides": tdc_overrides or {},
     }
 
 
@@ -359,12 +391,14 @@ def main() -> int:
     parser.add_argument("--header-interval", type=int, default=1)
     parser.add_argument("--header-ch", type=int, default=1)
     parser.add_argument("--lvds-settle-s", type=float, default=1.0)
+    parser.add_argument("--set-tdc", action="append", type=parse_tdc_override, default=[])
     parser.add_argument("--no-config", action="store_true")
     parser.add_argument("--no-restore-all", action="store_true")
     parser.add_argument("--out-dir", type=Path, required=True)
     args = parser.parse_args()
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
+    tdc_overrides = tdc_override_map(args.set_tdc)
     config_steps: list[dict[str, Any]] = []
     rows: list[dict[str, Any]] = []
     try:
@@ -374,6 +408,7 @@ def main() -> int:
             )
         for asic in args.asics:
             if not args.no_config:
+                active_tdc_overrides = {asic: tdc_overrides[asic]} if asic in tdc_overrides else {}
                 config_steps.append(
                     run_config(
                         args.out_dir,
@@ -382,6 +417,7 @@ def main() -> int:
                         str(asic),
                         0xFFFFFFFF,
                         True,
+                        active_tdc_overrides,
                     )
                 )
             lvds = soft_reset_lvds(args.link, args.lvds_settle_s)
@@ -451,6 +487,7 @@ def main() -> int:
             "header_delay": args.header_delay,
             "header_interval": args.header_interval,
             "header_ch": args.header_ch,
+            "tdc_overrides": tdc_overrides,
         },
         "left": LEFT,
         "right": RIGHT,

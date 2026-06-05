@@ -1,0 +1,192 @@
+{
+  "args": {
+    "allow_idle_after_config": true,
+    "asics": [
+      5
+    ],
+    "bsp": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/toolkits/fe_scifi/system_console/lib/mutrig_controller_bsp.tcl",
+    "channel_enable_mask": 4294967295,
+    "cml_final_value": 0,
+    "cml_flush_after_config": true,
+    "cml_flush_set_cml_sc_zero": true,
+    "cml_flush_value": 8,
+    "cml_start_value": 0,
+    "dry_run": false,
+    "link": 2,
+    "set_channel": [
+      "recv_all=1",
+      "cml_sc=0"
+    ],
+    "set_header": [],
+    "set_tdc": [
+      "5:vncnt=40",
+      "5:vnhitlogic=60",
+      "5:vnvcodelay=20"
+    ],
+    "smb3_xml": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_test_system/trash_bin/good_ribbon_0/config_smb3_tdc.txt",
+    "smb5_xml": "/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/board_test_system/trash_bin/good_ribbon_0/config_smb5_tdc.txt",
+    "tdctest_channel_mask": 4294967295
+  },
+  "rows": [
+    {
+      "asic": 5,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18153556,
+      "pass": true,
+      "phase": "cml_start_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 40,
+        "vnhitlogic": 60,
+        "vnvcodelay": 20
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 5,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 8,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661379
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18153556,
+      "pass": true,
+      "phase": "cml_flush_8",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 40,
+        "vnhitlogic": 60,
+        "vnvcodelay": 20
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    },
+    {
+      "asic": 5,
+      "channel_enable_mask": 4294967295,
+      "channel_field_overrides": {
+        "cml": 0,
+        "cml_sc": 0,
+        "recv_all": 1
+      },
+      "crc_delta": 0,
+      "final_status": 0,
+      "first_words": [
+        4162846723,
+        2088239324,
+        4160753696,
+        1006661377
+      ],
+      "frame_after": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_before": {
+        "crc_err": 0,
+        "lane": 5,
+        "open_frame_count": 1,
+        "status_control": 822083585
+      },
+      "frame_delta": 0,
+      "header_overrides": {},
+      "idle_before": 0,
+      "last_words": [
+        0,
+        3563520,
+        3640655872,
+        0
+      ],
+      "opcode": 18153556,
+      "pass": true,
+      "phase": "cml_final_0",
+      "poll_sample_count": 1,
+      "poll_samples": [
+        0
+      ],
+      "tdc_overrides": {
+        "vncnt": 40,
+        "vnhitlogic": 60,
+        "vnvcodelay": 20
+      },
+      "tdctest_channel_mask": 4294967295,
+      "word_count": 84,
+      "xml_local_index": 1
+    }
+  ],
+  "timestamp": "2026-06-05T15:57:10"
+}
