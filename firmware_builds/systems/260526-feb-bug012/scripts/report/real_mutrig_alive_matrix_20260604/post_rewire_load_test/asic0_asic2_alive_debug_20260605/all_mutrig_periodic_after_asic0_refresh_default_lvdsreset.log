@@ -1,0 +1,8 @@
+# alive_probe label=all_mutrig_periodic_after_asic0_refresh_default_lvdsreset link=2 inject=periodic dwell=1.5s paths=['type0', 'type1_up', 'type1_down']
+# UIDs LVDS=1280722003 EMU=1162696020 HIST=1212765012 RUNCTL=1380142408 INJ=1296649802
+# LVDS after soft reset: LOSN=511 DPALOCK=511
+# all_mutrig_periodic_after_asic0_refresh_default_lvdsreset:type0 occ=223/256 sum= 2230000 hist_total=696652 last_interval=2230000 status=[49, 49, 49, 49, 49, 49, 49, 49] tx_mode=[4, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# all_mutrig_periodic_after_asic0_refresh_default_lvdsreset:type1_up occ= 96/256 sum=  960000 hist_total=933695 last_interval=959999 status=[49, 49, 49, 49, 49, 49, 49, 49] tx_mode=[4, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# all_mutrig_periodic_after_asic0_refresh_default_lvdsreset:type1_down occ=127/256 sum= 1265349 hist_total=267085 last_interval=1268791 status=[49, 49, 49, 49, 49, 49, 49, 49] tx_mode=[4, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# all_mutrig_periodic_after_asic0_refresh_default_lvdsreset:type1_combined occ=223/256 sum= 2225349
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/asic0_asic2_alive_debug_20260605/all_mutrig_periodic_after_asic0_refresh_default_lvdsreset.json

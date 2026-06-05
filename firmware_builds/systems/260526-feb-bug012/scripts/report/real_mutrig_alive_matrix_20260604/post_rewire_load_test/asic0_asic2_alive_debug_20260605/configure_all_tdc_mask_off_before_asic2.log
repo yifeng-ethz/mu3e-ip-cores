@@ -1,0 +1,11 @@
+phase=main asic=0 opcode=0x01100054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=1 opcode=0x01110054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=2 opcode=0x01120054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=3 opcode=0x01130054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=4 opcode=0x01140054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=5 opcode=0x01150054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=6 opcode=0x01160054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+phase=main asic=7 opcode=0x01170054 status=0x00000000 frame_delta=0 crc_delta=0 pass=1
+report=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/asic0_asic2_alive_debug_20260605/configure_all_tdc_mask_off_before_asic2.md
+json=firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/asic0_asic2_alive_debug_20260605/configure_all_tdc_mask_off_before_asic2.json
+SUMMARY pass=8 fail=0

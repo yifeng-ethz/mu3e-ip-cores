@@ -1,0 +1,7 @@
+# alive_probe label=all_mutrig_type1_lowrate_after_asic0_refresh_default_lvdsreset link=2 inject=periodic dwell=1.5s paths=['type1_up', 'type1_down']
+# UIDs LVDS=1280722003 EMU=1162696020 HIST=1212765012 RUNCTL=1380142408 INJ=1296649802
+# LVDS after soft reset: LOSN=511 DPALOCK=511
+# all_mutrig_type1_lowrate_after_asic0_refresh_default_lvdsreset:type1_up occ=128/256 sum=  319996 hist_total=55934 last_interval=319994 status=[49, 49, 49, 49, 49, 49, 49, 49] tx_mode=[4, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# all_mutrig_type1_lowrate_after_asic0_refresh_default_lvdsreset:type1_down occ=128/256 sum=  316031 hist_total=59866 last_interval=315895 status=[49, 49, 49, 49, 49, 49, 49, 49] tx_mode=[4, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# all_mutrig_type1_lowrate_after_asic0_refresh_default_lvdsreset:type1_combined occ=256/256 sum=  636027
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/asic0_asic2_alive_debug_20260605/all_mutrig_type1_lowrate_after_asic0_refresh_default_lvdsreset.json

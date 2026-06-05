@@ -1,0 +1,7 @@
+# alive_probe label=asic1_only_periodic_control link=2 inject=periodic dwell=1.5s paths=['type0', 'type1_up', 'type1_down']
+# UIDs LVDS=1280722003 EMU=1162696020 HIST=1212765012 RUNCTL=1380142408 INJ=1296649802
+# asic1_only_periodic_control:type0 occ= 33/256 sum=  320373 hist_total=63697 last_interval=340217 status=[0, 49, 49, 49, 49, 49, 49, 49] tx_mode=[0, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# asic1_only_periodic_control:type1_up occ= 33/256 sum=  321851 hist_total=243139 last_interval=322230 status=[0, 49, 49, 49, 49, 49, 49, 49] tx_mode=[0, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# asic1_only_periodic_control:type1_down occ=  0/256 sum=       0 hist_total=0 last_interval=0 status=[0, 49, 49, 49, 49, 49, 49, 49] tx_mode=[0, 4, 4, 4, 4, 4, 4, 4] crc_delta=[0, 0, 0, 0, 0, 0, 0, 0]
+# asic1_only_periodic_control:type1_combined occ= 33/256 sum=  321851
+# wrote firmware_builds/systems/260526-feb-bug012/scripts/report/real_mutrig_alive_matrix_20260604/post_rewire_load_test/asic0_asic2_alive_debug_20260605/asic1_only_periodic_control.json

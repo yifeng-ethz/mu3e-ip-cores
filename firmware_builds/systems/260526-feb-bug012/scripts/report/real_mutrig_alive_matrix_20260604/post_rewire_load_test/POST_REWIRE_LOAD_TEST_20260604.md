@@ -313,24 +313,59 @@ header-sync narrow cluster rather than the periodic plateau.
 After the isolated ASIC1 check, the all-ASIC TDC-test XML/mask was restored and
 the restore passed `24/24` CML start/flush/final operations.
 
+## 2026-06-05 ASIC0/ASIC2 Directed Liveness And Recovery
+
+ASIC0 and ASIC2 were rechecked because the all-MuTRiG rate scan missed bins
+`0..31` and `64..95`. The baseline frame-receiver read showed a split symptom:
+ASIC0 was at `word0=0x00000001` / status `0`, while ASIC2 was already at
+`word0=0x31000001` / status `49`. After reloading the known-good SMB3/SMB5 TDC
+XMLs, using CML flush `0 -> 8 -> 0`, and issuing an LVDS soft reset, both ASICs
+produce real Type0 and Type1 histogram hits.
+
+Evidence:
+
+- [baseline CSR/frame read log](asic0_asic2_alive_debug_20260605/baseline_csr_20260605_143242.log)
+- [ASIC1 isolated control JSON](asic0_asic2_alive_debug_20260605/asic1_only_periodic_control.json)
+- [ASIC0 isolated recovery JSON](asic0_asic2_alive_debug_20260605/asic0_only_periodic_default_cmlflush_lvdsreset.json)
+- [ASIC2 isolated recovery JSON](asic0_asic2_alive_debug_20260605/asic2_only_periodic_default_cmlflush_lvdsreset.json)
+- [all-ASIC low-rate Type0 JSON](asic0_asic2_alive_debug_20260605/all_mutrig_type0_lowrate_after_asic0_refresh_default_lvdsreset.json)
+- [all-ASIC low-rate Type1 JSON](asic0_asic2_alive_debug_20260605/all_mutrig_type1_lowrate_after_asic0_refresh_default_lvdsreset.json)
+
+| Test point | Path | ASIC0 occupied | ASIC2 occupied | Global occupancy | Note |
+|---|---|---:|---:|---:|---|
+| ASIC0 isolated, 10 kHz | Type0 | `32/32` | `0/32` | `33/256` | bins `0..31` full, small residual at bin `118` |
+| ASIC0 isolated, 10 kHz | Type1 combined | `32/32` | `0/32` | `33/256` | bins `0..31` full, small residual at bin `118` |
+| ASIC2 isolated, 10 kHz | Type0 | `0/32` | `32/32` | `33/256` | bins `64..95` full, small residual at bin `118` |
+| ASIC2 isolated, 10 kHz | Type1 combined | `0/32` | `32/32` | `33/256` | bins `64..95` full, small residual at bin `118` |
+| All ASICs, 2.5 kHz | Type0 | `32/32` | `32/32` | `255/256` | only ASIC7 channel 6 missing |
+| All ASICs, 2.5 kHz | Type1 combined | `32/32` | `32/32` | `256/256` | full Type1 liveness |
+
+At the all-ASIC 10 kHz point, one 32-channel ASIC window can still disappear
+depending on the latest per-ASIC refresh order; after refreshing ASIC0, ASIC0
+was present but ASIC2 dropped. Since both ASICs are alive in isolated mode and
+both are present together at 2.5 kHz, the 10 kHz all-source missing-window
+signature is a shared-rate/path symptom, not dead ASIC0 or ASIC2 silicon.
+
 ## Final Quiet State
 
-Final readback after the all-ASIC restore:
+Final readback after the ASIC0/ASIC2 recovery probes:
 
 - `inj_mode=0x00000000`
-- `inj_header_delay=0x000002bc`
+- `inj_header_delay=0x0000012c`
 - `inj_header_interval=0x00000001`
 - `inj_multiplicity=0x00000001`
 - `inj_header_ch=0x00000001`
-- `inj_pulse_interval=0x000030d4`
+- `inj_pulse_interval=0x0000c350`
 - `inj_pulse_high=0x00000005`
-- `runctl_status=0x00000002`
+- `runctl_status=0x00000003`
 - `runctl_last_cmd=0x00000013`
 - `hist_uid=0x48495354`
 - `lvds[0x400c..0x400e]=0x000001ff,0x000000ca,0x000001ff`
+- `frame_receiver[0..7].word0=0x31000001`
+- [final CSR readback log](asic0_asic2_alive_debug_20260605/final_csr_after_asic0_2_revive_20260605_144648.log)
 
-The board was left with the injector disabled, run-control terminated, and the
-all-ASIC TDC-test mask restored.
+The board was left with the injector disabled, run-control terminated, all
+frame receivers in short-hit mode, and the all-ASIC TDC-test mask restored.
 
 ## Conclusion
 

@@ -1,0 +1,605 @@
+# final CSR reads after ASIC0/ASIC2 revive probes
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0A900
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000A900
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 74 us
+  timing total        : 74 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x0A900
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000A900
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x48495354
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0400C
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000400C
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 75 us
+  timing total        : 75 us
+  secondary before    : 0x008E
+  secondary after     : 0x0095
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x008E
+  ring end            : 0x0095
+  type                : RD
+  link                : 2
+  addr                : 0x0400C
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000400C
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x000001FF
+  payload[1] = 0x000000CA
+  payload[2] = 0x000001FF
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x06C82
+  request length     : 7 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 11
+  expected reply words (declared) : 11
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00006C82
+  wmem[2] = 0x00000007
+  wmem[3] = 0x0000009C
+  timing main ready   : 59 us
+  timing matched      : 77 us
+  timing total        : 77 us
+  secondary before    : 0x1021
+  secondary after     : 0x102C
+  secondary delta     : 11 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x40000001
+info: observed packet:
+  ring start          : 0x1021
+  ring end            : 0x102C
+  type                : RD
+  link                : 2
+  addr                : 0x06C82
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 7
+  declared payload    : 7
+  actual payload      : 7
+  declared ring words : 11
+  actual ring words   : 11
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00006C82
+  raw len word        : 0x00010007
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000000
+  payload[1] = 0x0000012C
+  payload[2] = 0x00000001
+  payload[3] = 0x00000001
+  payload[4] = 0x00000001
+  payload[5] = 0x0000C350
+  payload[6] = 0x00000005
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C003
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C003
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 68 us
+  timing total        : 68 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x0C003
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C003
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000003
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x0C013
+  request length     : 1 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 5
+  expected reply words (declared) : 5
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x0000C013
+  wmem[2] = 0x00000001
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 72 us
+  timing total        : 72 us
+  secondary before    : 0x0000
+  secondary after     : 0x0005
+  secondary delta     : 5 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0005
+  type                : RD
+  link                : 2
+  addr                : 0x0C013
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 1
+  declared payload    : 1
+  actual payload      : 1
+  declared ring words : 5
+  actual ring words   : 5
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x0000C013
+  raw len word        : 0x00010001
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x00000013
+# frame receiver asic0 base=0x04428
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x04428
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00004428
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 59 us
+  timing matched      : 72 us
+  timing total        : 72 us
+  secondary before    : 0x019F
+  secondary after     : 0x01A6
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x019F
+  ring end            : 0x01A6
+  type                : RD
+  link                : 2
+  addr                : 0x04428
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00004428
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic1 base=0x04628
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x04628
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00004628
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 76 us
+  timing total        : 76 us
+  secondary before    : 0x0101
+  secondary after     : 0x0108
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0101
+  ring end            : 0x0108
+  type                : RD
+  link                : 2
+  addr                : 0x04628
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00004628
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic2 base=0x04A28
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x04A28
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00004A28
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 75 us
+  timing total        : 75 us
+  secondary before    : 0x19D8
+  secondary after     : 0x19DF
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x19D8
+  ring end            : 0x19DF
+  type                : RD
+  link                : 2
+  addr                : 0x04A28
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00004A28
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic3 base=0x04E28
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x04E28
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00004E28
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 70 us
+  timing total        : 70 us
+  secondary before    : 0x0000
+  secondary after     : 0x0007
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0000
+  ring end            : 0x0007
+  type                : RD
+  link                : 2
+  addr                : 0x04E28
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00004E28
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic4 base=0x05228
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x05228
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00005228
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 60 us
+  timing matched      : 75 us
+  timing total        : 75 us
+  secondary before    : 0x00FE
+  secondary after     : 0x0105
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x00FE
+  ring end            : 0x0105
+  type                : RD
+  link                : 2
+  addr                : 0x05228
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00005228
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic5 base=0x05628
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x05628
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00005628
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 69 us
+  timing total        : 69 us
+  secondary before    : 0x1EB2
+  secondary after     : 0x1EB9
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x1EB2
+  ring end            : 0x1EB9
+  type                : RD
+  link                : 2
+  addr                : 0x05628
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00005628
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic6 base=0x05A28
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x05A28
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00005A28
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 69 us
+  timing total        : 69 us
+  secondary before    : 0x0081
+  secondary after     : 0x0088
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0081
+  ring end            : 0x0088
+  type                : RD
+  link                : 2
+  addr                : 0x05A28
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00005A28
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
+# frame receiver asic7 base=0x05E28
+board:
+  PLL_LOCKED_REGISTER_R      = 0x00000000
+  LINK_LOCKED_HIGH_REGISTER_R= 0x00000000
+  RESET_LINK_STATUS_REGISTER_R = 0x00000000
+info: request summary:
+  type               : RD
+  link               : 2
+  addr               : 0x05E28
+  request length     : 3 word(s)
+  main length reg    : 2
+  expected reply words (actual)   : 7
+  expected reply words (declared) : 7
+info: request words written to SC main:
+  wmem[0] = 0x1C0002BC
+  wmem[1] = 0x00005E28
+  wmem[2] = 0x00000003
+  wmem[3] = 0x0000009C
+  timing main ready   : 58 us
+  timing matched      : 70 us
+  timing total        : 70 us
+  secondary before    : 0x0397
+  secondary after     : 0x039E
+  secondary delta     : 7 word(s)
+  SC main status      : 0x00000001
+  SC state            : 0x20000001
+info: observed packet:
+  ring start          : 0x0397
+  ring end            : 0x039E
+  type                : RD
+  link                : 2
+  addr                : 0x05E28
+  rsp                 : OK (0)
+  ack                 : 1
+  echoed length       : 3
+  declared payload    : 3
+  actual payload      : 3
+  declared ring words : 7
+  actual ring words   : 7
+  raw header          : 0x1C0002BC
+  raw addr word       : 0x00005E28
+  raw len word        : 0x00010003
+  raw trailer         : 0x0000009C
+info: packet payload:
+  payload[0] = 0x31000001
+  payload[1] = 0x00000000
+  payload[2] = 0x00000001
