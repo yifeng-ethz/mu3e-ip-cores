@@ -48,35 +48,35 @@ python3 scripts/update_ip_table.py
 
 | IP | Description | Version | Last Updated | Tracked Branch | Current Branch | Used In | Signoff | HEAD |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| [**Altera Temperature Sensor Controller**](https://github.com/yifeng-ethz/alt_temp_sense_controller) | Wraps the on-chip alt_temp_sense IP on 28 nm devices and stores the last temperature result. | `1.1` | 2026-04-27 | `master` | `master` | FEB-SciFi | `ddf0332d` | `ddf0332d` |
-| [**Board Test System**](https://github.com/yifeng-ethz/board_test_system) | DAQ bring-up and management-plane test system for exercising FPGA registers, links, and board services during validation. | `Prototype` | 2025-12-17 | `master` | `master` | — | `8c6c9aae` | `8c6c9aae` |
-| [**CAM (Content Addressable Memory)**](https://github.com/yifeng-ethz/CAM) | Primitive content-addressable memory core. Use as a building block for caches, correlators and address decoders. | `Prototype` | 2024-08-22 | `master` | `master` | — | `0cebc03e` | `0cebc03e` |
-| [**Charge Injection (MuTRiG Injector)**](https://github.com/yifeng-ethz/charge_injection) | Generates calibration pulses and digital/analog stimuli for MuTRiG injection tests. | `26.0.3.0429` | 2026-04-29 | `master` | `master` | FEB-SciFi | `78d780e7` | `78d780e7` |
-| [**FEB MAX10 Communication Bridge**](https://github.com/yifeng-ethz/feb_max10_comm) | FEB-side Arria V bridge that stages one flash page, crosses it into the MAX10 link domain, and preserves the downstream FEBSPI programming contract. | `Prototype` | 2026-04-27 | `main` | `main` | FEB-SciFi | `419010a0` | `419010a0` |
-| [**Firefly Transceiver I2C Master**](https://github.com/yifeng-ethz/firefly_xcvr_i2c_master) | Interfaces with the Samtec Firefly optical transceiver module via I2C. Periodically reads temperature and RX power and can be halted. | `26.0.330` | 2026-04-27 | `master` | `master` | FEB-SciFi | `28658f08` | `28658f08` |
-| [**Frontend-Board Frame Assembly**](https://github.com/yifeng-ethz/feb_frame_assembly) | Assembles time-interleaved subframes from the ring-buffer CAM into Mu3e-standard data frames and schedules packet transmission. | `26.0.328` | 2026-04-27 | `master` | `master` | FEB-SciFi | `2e94a89f` | `2e94a89f` |
-| [**High Performance Counter Array**](https://github.com/yifeng-ethz/high_performance_counter_array) | Parallel counters supporting concurrent inputs with Avalon-MM readout. Features synchronous clear and reset. | `1.4.1` | 2026-04-27 | `master` | `master` | FEB-SciFi | `2f9e12f2` | `2f9e12f2` |
-| [**Histogram Statistics**](https://github.com/yifeng-ethz/histogram_statistics) | Builds histograms from a selected data stream using SAR bin calculation and DP-RAM counters. | `26.0.2.0425` | 2026-04-29 | `master` | `master` | FEB-SciFi | `c035c35a` | `c035c35a` |
-| [**IP 8b/10b Decoder**](https://github.com/yifeng-ethz/ip_8b10b_decoder) | Standard 8b/10b decoder for parallel LVDS rxout data. Derives parity and decoding errors. | `Prototype` | 2024-08-23 | `master` | `master` | FEB-SciFi | `5d6dfcd0` | `5d6dfcd0` |
-| [**LVDS Error Counter Fabric**](https://github.com/yifeng-ethz/lvds_error_counter_fabric) | Accumulates parity and decode error counts from the LVDS receiver sideband. | `Prototype` | 2024-08-23 | `master` | `master` | FEB-SciFi | `24977182` | `24977182` |
-| [**Mu3e LVDS Controller**](https://github.com/yifeng-ethz/mu3e_lvds_controller) | Provides high-speed LVDS links to the MuPix sensors using FPGA vendor IP. Includes 28 nm LVDS RX and Pro variants. | `26.2.1.0506` | 2026-05-06 | `master` | `master` | FEB-SciFi | `1a7e96a2` | `1a7e96a2` |
-| [**MuPix Inbound**](https://github.com/yifeng-ethz/mupix_inbound) | Deserializes data from MuPix chips, decodes and buffers hits. | `Prototype` | 2025-06-30 | `master` | `master` | — | `618cb636` | `618cb636` |
-| [**MuTRiG Channel Counter Fabric**](https://github.com/yifeng-ethz/mutrig_channel_counter_fabric) | Connects hit type 0 from the frame deassembly IP to the counter array. Decodes channel IDs into one-hot update signals. | `1.0.0` | 2026-04-27 | `master` | `master` | FEB-SciFi | `67b1d86e` | `67b1d86e` |
-| [**MuTRiG Controller**](https://github.com/yifeng-ethz/mutrig_controller) | SPI master for configuring MuTRiG ASICs. Automatically scans T- and E-thresholds and stores results locally. | `24.0.817` | 2026-04-27 | `master` | `master` | FEB-SciFi | `6f33fc1a` | `6f33fc1a` |
-| [**MuTRiG Emulator**](https://github.com/yifeng-ethz/emulator_mutrig) | FPGA emulator of MuTRiG 3 ASIC digital output. Produces 8b/1k frames bit-compatible with real ASIC output for FPGA-internal verification. | `26.1.13.0425` | 2026-05-10 | `main` | `main` | FEB-SciFi | `8152797e` | `8152797e` |
-| [**MuTRiG Frame Deassembly**](https://github.com/yifeng-ethz/mutrig_frame_deassembly) | Parses MuTRiG frames into header and hit payloads and flags individual hit errors and frame CRC errors. | `26.1.0.0506` | 2026-05-06 | `master` | `master` | FEB-SciFi | `d61762a8` | `d61762a8` |
-| [**MuTRiG Reset Controller**](https://github.com/yifeng-ethz/mutrig_reset_controller) | Issues reset pulses for the MuTRiG based on run-state changes. Provides programmable phase shift via alt_pll_reconfig. | `1.0.8` | 2026-04-29 | `master` | `master` | FEB-SciFi | `16eb065c` | `16eb065c` |
-| [**MuTRiG Timestamp Processor**](https://github.com/yifeng-ethz/mutrig_timestamp_processor) | Tracks MuTRiG timestamp overflow and maps MuTRiG-local timestamps to global timestamps. | `26.1.0.0506` | 2026-05-10 | `master` | `master` | FEB-SciFi | `4d800456` | `4d800456` |
-| [**Onewire Temperature Sensor Controller**](https://github.com/yifeng-ethz/onewire_temp_sense) | Periodically polls 1-Wire temperature sensors; implements reset, presence detect and bit-level timing. | `26.2.1` | 2026-04-28 | `master` | `master` | FEB-SciFi | `501ade8d` | `501ade8d` |
-| [**Packet Scheduler**](https://github.com/yifeng-ethz/packet_scheduler) | Orders packets via an interface adapter and ordered-priority queues to achieve deterministic DAQ multiplexing. | `26.5.1.0509` | 2026-05-10 | `master` | `master` | SWB | `d487f955` | `d487f955` |
-| [**rdma_cq_pusher**](https://github.com/yifeng-ethz/rdma_cq_pusher) | Completion-queue descriptor poster for the Mu3e SWB rdma_subsystem. Writes 64-byte CQEs back to host DRAM after each DMA job completes. | `Prototype` | 2026-05-11 | `main` | `main` | — | `3625b1d5` | `cf4c9a5` |
-| [**rdma_dma_engine**](https://github.com/yifeng-ethz/rdma_dma_engine) | OPQ-egress to host DRAM DMA writer for the Mu3e SWB. Packs 32-bit hits into 256-bit AXI4 bursts and drains under RQE-driven host control. | `Prototype` | 2026-05-11 | `main` | `main` | — | `e89045a8` | `912c210` |
-| [**rdma_run_manager**](https://github.com/yifeng-ethz/rdma_run_manager) | Run-state coordinator plus BAR1 AXI4-Lite CSR slave for the Mu3e SWB rdma_subsystem. Owns the IDLE PREPARING RUNNING STOPPING STOPPED FSM. | `26.1.0.0510` | 2026-05-11 | `main` | `main` | — | `24ed5f5c` | `b27ef68` |
-| [**rdma_rq_fetcher**](https://github.com/yifeng-ethz/rdma_rq_fetcher) | Receive-queue descriptor puller for the Mu3e SWB rdma_subsystem. Reads 64-byte RQEs from host DRAM via AXI4 master and dispatches jobs. | `Prototype` | 2026-05-11 | `main` | `main` | — | `eaca75f3` | `b350004` |
-| [**rdma_subsystem**](https://github.com/yifeng-ethz/rdma_subsystem) | Mu3e SWB post-OPQ datapath supercore integrating rdma_dma_engine plus rdma_rq_fetcher plus rdma_cq_pusher plus rdma_run_manager into one Qsys system. | `26.1.0` | 2026-05-11 | `main` | `main` | — | `74a71c8a` | `edf8787` |
-| [**Ring-buffer CAM**](https://github.com/yifeng-ethz/ring-buffer_cam) | Circular buffer variant of CAM with push-to-stack write semantics and cache-like read-through. Used to build the hit stack. | `26.2.7.0506` | 2026-05-08 | `master` | `master` | FEB-SciFi | `b9672f61` | `b9672f61` |
-| [**Run-Control Management**](https://github.com/yifeng-ethz/run-control_mgmt) | Manages run-state transitions for Mu3e subsystems and issues control signals. v26 adds the CSR LOCAL_CMD command-injection window and a readyless 9-bit fanout. | `26.3.0.0505` | 2026-05-05 | `master` | `master` | FEB-SciFi | `1c668a8e` | `1c668a8e` |
-| [**Slow-Control Hub**](https://github.com/yifeng-ethz/slow-control_hub) | Converts Mu3e slow-control packets into Avalon Memory-Mapped transactions and handles burst count, address and response timing. | `26.6.9.0414` | 2026-04-27 | `master` | `master` | FEB-SciFi | `0c0fb5dd` | `0c0fb5dd` |
+| [**Altera Temperature Sensor Controller**](https://github.com/yifeng-ethz/alt_temp_sense_controller) | Wraps the on-chip alt_temp_sense IP on 28 nm devices and stores the last temperature result. | `1.1` | 2026-08-20 | `master` | `master` | FEB-SciFi | `68472f97` | `68472f97` |
+| [**Board Test System**](https://github.com/yifeng-ethz/board_test_system) | DAQ bring-up and management-plane test system for exercising FPGA registers, links, and board services during validation. | `Prototype` | 2026-08-20 | `master` | `master` | — | `43361257` | `43361257` |
+| [**CAM (Content Addressable Memory)**](https://github.com/yifeng-ethz/CAM) | Primitive content-addressable memory core. Use as a building block for caches, correlators and address decoders. | `Prototype` | 2026-08-20 | `master` | `master` | — | `fc1bd931` | `fc1bd931` |
+| [**Charge Injection (MuTRiG Injector)**](https://github.com/yifeng-ethz/charge_injection) | Generates calibration pulses and digital/analog stimuli for MuTRiG injection tests. | `26.0.3.0429` | 2026-08-20 | `master` | `master` | FEB-SciFi | `0d19c9a5` | `0d19c9a5` |
+| [**FEB MAX10 Communication Bridge**](https://github.com/yifeng-ethz/feb_max10_comm) | FEB-side Arria V bridge that stages one flash page, crosses it into the MAX10 link domain, and preserves the downstream FEBSPI programming contract. | `Prototype` | 2026-08-20 | `main` | `main` | FEB-SciFi | `90943a19` | `90943a19` |
+| [**Firefly Transceiver I2C Master**](https://github.com/yifeng-ethz/firefly_xcvr_i2c_master) | Interfaces with the Samtec Firefly optical transceiver module via I2C. Periodically reads temperature and RX power and can be halted. | `26.0.330` | 2026-08-20 | `master` | `master` | FEB-SciFi | `7894579b` | `7894579b` |
+| [**Frontend-Board Frame Assembly**](https://github.com/yifeng-ethz/feb_frame_assembly) | Assembles time-interleaved subframes from the ring-buffer CAM into Mu3e-standard data frames and schedules packet transmission. | `26.0.0.0518` | 2026-08-20 | `master` | `master` | FEB-SciFi | `a578cbf0` | `a578cbf0` |
+| [**High Performance Counter Array**](https://github.com/yifeng-ethz/high_performance_counter_array) | Parallel counters supporting concurrent inputs with Avalon-MM readout. Features synchronous clear and reset. | `1.4.1` | 2026-08-20 | `master` | `master` | FEB-SciFi | `1e7ce296` | `1e7ce296` |
+| [**Histogram Statistics**](https://github.com/yifeng-ethz/histogram_statistics) | Builds histograms from a selected data stream using SAR bin calculation and DP-RAM counters. | `26.5.0.0713` | 2026-08-20 | `master` | `master` | FEB-SciFi | `2b55e7ee` | `2b55e7ee` |
+| [**IP 8b/10b Decoder**](https://github.com/yifeng-ethz/ip_8b10b_decoder) | Standard 8b/10b decoder for parallel LVDS rxout data. Derives parity and decoding errors. | `Prototype` | 2026-08-20 | `master` | `master` | FEB-SciFi | `231647cd` | `231647cd` |
+| [**LVDS Error Counter Fabric**](https://github.com/yifeng-ethz/lvds_error_counter_fabric) | Accumulates parity and decode error counts from the LVDS receiver sideband. | `Prototype` | 2026-08-20 | `master` | `master` | FEB-SciFi | `b72e9efe` | `b72e9efe` |
+| [**Mu3e LVDS Controller**](https://github.com/yifeng-ethz/mu3e_lvds_controller) | Provides high-speed LVDS links to the MuPix sensors using FPGA vendor IP. Includes 28 nm LVDS RX and Pro variants. | `26.2.9.0525` | 2026-08-20 | `master` | `master` | FEB-SciFi | `1adea8b6` | `1adea8b6` |
+| [**MuPix Inbound**](https://github.com/yifeng-ethz/mupix_inbound) | Deserializes data from MuPix chips, decodes and buffers hits. | `Prototype` | 2026-08-20 | `master` | `master` | — | `3f5674cf` | `3f5674cf` |
+| [**MuTRiG Channel Counter Fabric**](https://github.com/yifeng-ethz/mutrig_channel_counter_fabric) | Connects hit type 0 from the frame deassembly IP to the counter array. Decodes channel IDs into one-hot update signals. | `1.0.0` | 2026-08-20 | `master` | `master` | FEB-SciFi | `c3f1ab6f` | `c3f1ab6f` |
+| [**MuTRiG Controller**](https://github.com/yifeng-ethz/mutrig_controller) | SPI master for configuring MuTRiG ASICs. Automatically scans T- and E-thresholds and stores results locally. | `24.0.817` | 2026-08-20 | `master` | `master` | FEB-SciFi | `60f3d52b` | `60f3d52b` |
+| [**MuTRiG Emulator**](https://github.com/yifeng-ethz/emulator_mutrig) | FPGA emulator of MuTRiG 3 ASIC digital output. Produces 8b/1k frames bit-compatible with real ASIC output for FPGA-internal verification. | `26.1.13.0425` | 2026-08-20 | `main` | `main` | FEB-SciFi | `36a0a2b6` | `36a0a2b6` |
+| [**MuTRiG Frame Deassembly**](https://github.com/yifeng-ethz/mutrig_frame_deassembly) | Parses MuTRiG frames into header and hit payloads and flags individual hit errors and frame CRC errors. | `26.1.0.0506` | 2026-08-20 | `master` | `master` | FEB-SciFi | `2f803229` | `2f803229` |
+| [**MuTRiG Reset Controller**](https://github.com/yifeng-ethz/mutrig_reset_controller) | Issues reset pulses for the MuTRiG based on run-state changes. Provides programmable phase shift via alt_pll_reconfig. | `1.0.8` | 2026-08-20 | `master` | `master` | FEB-SciFi | `3c47f8cc` | `3c47f8cc` |
+| [**MuTRiG Timestamp Processor**](https://github.com/yifeng-ethz/mutrig_timestamp_processor) | Tracks MuTRiG timestamp overflow and maps MuTRiG-local timestamps to global timestamps. | `26.6.0.0716` | 2026-08-20 | `master` | `master` | FEB-SciFi | `7087fe9b` | `7087fe9b` |
+| [**Onewire Temperature Sensor Controller**](https://github.com/yifeng-ethz/onewire_temp_sense) | Periodically polls 1-Wire temperature sensors; implements reset, presence detect and bit-level timing. | `26.2.1` | 2026-08-20 | `master` | `master` | FEB-SciFi | `9cff54a8` | `9cff54a8` |
+| [**Packet Scheduler**](https://github.com/yifeng-ethz/packet_scheduler) | Orders packets via an interface adapter and ordered-priority queues to achieve deterministic DAQ multiplexing. | `26.5.1.0509` | 2026-08-20 | `master` | `master` | SWB | `c35f096a` | `c35f096a` |
+| [**rdma_cq_pusher**](https://github.com/yifeng-ethz/rdma_cq_pusher) | Completion-queue descriptor poster for the Mu3e SWB rdma_subsystem. Writes 64-byte CQEs back to host DRAM after each DMA job completes. | `Prototype` | 2026-08-20 | `main` | `main` | — | `359904bd` | `359904bd` |
+| [**rdma_dma_engine**](https://github.com/yifeng-ethz/rdma_dma_engine) | OPQ-egress to host DRAM DMA writer for the Mu3e SWB. Packs 32-bit hits into 256-bit AXI4 bursts and drains under RQE-driven host control. | `Prototype` | 2026-08-20 | `main` | `main` | — | `de32f4ab` | `de32f4ab` |
+| [**rdma_rq_fetcher**](https://github.com/yifeng-ethz/rdma_rq_fetcher) | Receive-queue descriptor puller for the Mu3e SWB rdma_subsystem. Reads 64-byte RQEs from host DRAM via AXI4 master and dispatches jobs. | `Prototype` | 2026-08-20 | `main` | `main` | — | `a7ac46d7` | `a7ac46d7` |
+| [**rdma_run_manager**](https://github.com/yifeng-ethz/rdma_run_manager) | Run-state coordinator plus BAR1 AXI4-Lite CSR slave for the Mu3e SWB rdma_subsystem. Owns the IDLE PREPARING RUNNING STOPPING STOPPED FSM. | `26.1.0.0510` | 2026-08-20 | `main` | `main` | — | `7e6d6c30` | `7e6d6c30` |
+| [**rdma_subsystem**](https://github.com/yifeng-ethz/rdma_subsystem) | Mu3e SWB post-OPQ datapath supercore integrating rdma_dma_engine plus rdma_rq_fetcher plus rdma_cq_pusher plus rdma_run_manager into one Qsys system. | `26.1.0` | 2026-08-20 | `main` | `main` | — | `03bb41ee` | `03bb41ee` |
+| [**Ring-buffer CAM**](https://github.com/yifeng-ethz/ring-buffer_cam) | Circular buffer variant of CAM with push-to-stack write semantics and cache-like read-through. Used to build the hit stack. | `26.2.13.0516` | 2026-08-20 | `master` | `master` | FEB-SciFi | `8ed25b81` | `8ed25b81` |
+| [**Run-Control Management**](https://github.com/yifeng-ethz/run-control_mgmt) | Manages run-state transitions for Mu3e subsystems and issues control signals. v26 adds the CSR LOCAL_CMD command-injection window and a readyless 9-bit fanout. | `26.3.3.0525` | 2026-08-20 | `master` | `master` | FEB-SciFi | `1f5e482c` | `1f5e482c` |
+| [**Slow-Control Hub**](https://github.com/yifeng-ethz/slow-control_hub) | Converts Mu3e slow-control packets into Avalon Memory-Mapped transactions and handles burst count, address and response timing. | `26.6.9.0414` | 2026-08-20 | `master` | `master` | FEB-SciFi | `717e3d23` | `717e3d23` |
 
 <!-- IP-TABLE:END -->
 
@@ -124,30 +124,36 @@ The current Phase-5 parent checkpoint on `main` tracks these submodule revisions
 
 | IP | Parent-tracked revision | Version surface |
 |---|---:|---|
-| `CAM` | [`0cebc03e4f94`](https://github.com/yifeng-ethz/CAM/tree/0cebc03e4f94aa2f86e95ad392ed83dc724e4c30) | `17.0.2` |
-| `alt_temp_sense_controller` | [`ddf0332df480`](https://github.com/yifeng-ethz/alt_temp_sense_controller/tree/ddf0332df480a906701871bf6bcdc370150dee41) | `1.1` |
-| `board_test_system` | [`8c6c9aae05e9`](https://github.com/yifeng-ethz/board_test_system/tree/8c6c9aae05e98b20f51a93e4699c0f575015defe) | Prototype / no VERSION surface |
-| `charge_injection` | [`78d780e7d013`](https://github.com/yifeng-ethz/charge_injection/tree/78d780e7d0133e8c02dd21f7e61af32c713005b7) | MuTRiG injector `26.0.3.0429` |
-| `emulator_mutrig` | [`d20aa6ab4d13`](https://github.com/yifeng-ethz/emulator_mutrig/tree/d20aa6ab4d130c435c4e0adaa587dbe0dd7299d4) | emulator package `26.1.13.0425` |
-| `feb_frame_assembly` | [`2e94a89fee64`](https://github.com/yifeng-ethz/feb_frame_assembly/tree/2e94a89fee64cb79b2bc121701ebdd10b5af0284) | `26.0.328` |
-| `feb_max10_comm` | [`419010a0a2fa`](https://github.com/yifeng-ethz/feb_max10_comm/tree/419010a0a2fad73ef382cfb7cb084b96862792cd) | `0.1.0` |
-| `firefly_xcvr_i2c_master` | [`28658f080900`](https://github.com/yifeng-ethz/firefly_xcvr_i2c_master/tree/28658f080900d399bfd31edf7dab0746ed5e05c5) | `26.2.423` |
-| `high_performance_counter_array` | [`2f9e12f27910`](https://github.com/yifeng-ethz/high_performance_counter_array/tree/2f9e12f27910ceb849714f5e6b6e6242de9689ad) | `1.4.1` |
-| `histogram_statistics` | [`c035c35a9647`](https://github.com/yifeng-ethz/histogram_statistics/tree/c035c35a96478387e21d692c2a17554bcff20806) | histogram statistics `26.1.6.0429` |
-| `ip_8b10b_decoder` | [`5d6dfcd046fa`](https://github.com/yifeng-ethz/ip_8b10b_decoder/tree/5d6dfcd046fa5f0ab0d904aa994b861d7b21487d) | `1.3.1` |
-| `lvds_error_counter_fabric` | [`24977182e4cc`](https://github.com/yifeng-ethz/lvds_error_counter_fabric/tree/24977182e4cc0f30c85d02ffdbb15d5e0cd7c4c8) | `1.0.5` |
-| `mu3e_lvds_controller` | [`f4e5d1349fb9`](https://github.com/yifeng-ethz/mu3e_lvds_controller/tree/f4e5d1349fb95250266a80bd4966deb5e9222c25) | LVDS RX controller Pro `25.1.0631` |
-| `mupix_inbound` | [`618cb636cfce`](https://github.com/yifeng-ethz/mupix_inbound/tree/618cb636cfcecc285fcddc3a3901e8c67b5abb8a) | Prototype / no VERSION surface |
-| `mutrig_channel_counter_fabric` | [`67b1d86e08f1`](https://github.com/yifeng-ethz/mutrig_channel_counter_fabric/tree/67b1d86e08f1ffbda820c846dea41a6e710523f7) | `1.0.12` |
-| `mutrig_controller` | [`6f33fc1a6db1`](https://github.com/yifeng-ethz/mutrig_controller/tree/6f33fc1a6db1097403d756c0baa5e199a162bd59) | `24.1.423` |
-| `mutrig_frame_deassembly` | [`92ef8fe50e9e`](https://github.com/yifeng-ethz/mutrig_frame_deassembly/tree/92ef8fe50e9e0b0e9d2911f3b747f385157f6cfb) | `26.0.6.0418` |
-| `mutrig_reset_controller` | [`16eb065c2502`](https://github.com/yifeng-ethz/mutrig_reset_controller/tree/16eb065c250250c5e99caf0e47faea9f6ba61ee6) | `1.0.8` |
-| `mutrig_timestamp_processor` | [`16c0282748d3`](https://github.com/yifeng-ethz/mutrig_timestamp_processor/tree/16c0282748d3f2bd59a5d7759238e652ae14b9d8) | `26.0.8.0427` |
-| `onewire_temp_sense` | [`501ade8d93be`](https://github.com/yifeng-ethz/onewire_temp_sense/tree/501ade8d93bee11eb9e18ca9ea9382ed3aa609e0) | 1-Wire controller `26.2.1.0428` |
-| `packet_scheduler` | [`ed249da8c251`](https://github.com/yifeng-ethz/packet_scheduler/tree/ed249da8c251cebcde33d69e0b1fb35fc03fc232) | OPQ package `26.5.0.0430` |
-| `ring-buffer_cam` | [`d40779350403`](https://github.com/yifeng-ethz/ring-buffer_cam/tree/d40779350403be8862fb1e57f5c9f8d449081b2b) | `26.2.6.0422` |
-| `run-control_mgmt` | [`f3e2222614d7`](https://github.com/yifeng-ethz/run-control_mgmt/tree/f3e2222614d7cbb6ba65d726b69793f959a712e9) | `26.2.6.0425` |
-| `slow-control_hub` | [`0c0fb5ddc20f`](https://github.com/yifeng-ethz/slow-control_hub/tree/0c0fb5ddc20fb7051e54b59c550b1fe08f76c68c) | `26.6.10.0423` |
+| `alt_temp_sense_controller` | [`68472f973a6b`](https://github.com/yifeng-ethz/alt_temp_sense_controller/tree/68472f973a6bf81c8ffedbe912d9e0e9ee11008d) | `1.1` |
+| `board_test_system` | [`43361257d9fd`](https://github.com/yifeng-ethz/board_test_system/tree/43361257d9fdf51b1a45e250305b5248a5ce7355) | Prototype / no VERSION surface |
+| `CAM` | [`fc1bd93183d8`](https://github.com/yifeng-ethz/CAM/tree/fc1bd93183d8dbef34e1894cde7975645e97dbb8) | `17.0.2` |
+| `charge_injection` | [`0d19c9a58453`](https://github.com/yifeng-ethz/charge_injection/tree/0d19c9a584536a8851dfff4a85eacd24bab13ae1) | `26.1.2.0517` |
+| `emulator_mutrig` | [`36a0a2b6c6f0`](https://github.com/yifeng-ethz/emulator_mutrig/tree/36a0a2b6c6f0c155b1713ab9beeb342cab89c810) | `26.3.6.0520` |
+| `feb_frame_assembly` | [`a578cbf01d88`](https://github.com/yifeng-ethz/feb_frame_assembly/tree/a578cbf01d8812a68f8f73a8903bfc87efc4c703) | `26.0.328` |
+| `feb_max10_comm` | [`90943a1904b0`](https://github.com/yifeng-ethz/feb_max10_comm/tree/90943a1904b015bafd46fa6d3d4998119f9e3e7c) | `0.1.0` |
+| `firefly_xcvr_i2c_master` | [`7894579bd3d8`](https://github.com/yifeng-ethz/firefly_xcvr_i2c_master/tree/7894579bd3d8dd3732fac04ef08aa7b6d15c5df0) | `26.2.423` |
+| `high_performance_counter_array` | [`1e7ce2968780`](https://github.com/yifeng-ethz/high_performance_counter_array/tree/1e7ce29687806421a3dde6fe0e728b80af9546af) | `1.4.1` |
+| `histogram_statistics` | [`2b55e7eeae04`](https://github.com/yifeng-ethz/histogram_statistics/tree/2b55e7eeae04e961d2d55767ee1238b1ca5e3b0b) | `26.5.0.0713` |
+| `ip_8b10b_decoder` | [`231647cd6731`](https://github.com/yifeng-ethz/ip_8b10b_decoder/tree/231647cd673170c8752b816662fe711f91dce4a1) | `1.3.1` |
+| `lvds_error_counter_fabric` | [`b72e9efef2c5`](https://github.com/yifeng-ethz/lvds_error_counter_fabric/tree/b72e9efef2c5f0bed71d300b22eeb278f5fc50d3) | `1.0.5` |
+| `mu3e_lvds_controller` | [`1adea8b6cf42`](https://github.com/yifeng-ethz/mu3e_lvds_controller/tree/1adea8b6cf42c560b18deb58b984b12d94efc870) | `26.2.9.0x525` |
+| `mupix_inbound` | [`3f5674cf383f`](https://github.com/yifeng-ethz/mupix_inbound/tree/3f5674cf383f27296d2d0872eec86377c93dd514) | Prototype / no VERSION surface |
+| `mutrig_channel_counter_fabric` | [`c3f1ab6f5698`](https://github.com/yifeng-ethz/mutrig_channel_counter_fabric/tree/c3f1ab6f5698a36e63d6aa65ee855d88d55fc358) | `1.0.12` |
+| `mutrig_controller` | [`60f3d52bbe19`](https://github.com/yifeng-ethz/mutrig_controller/tree/60f3d52bbe19298343cf23b917ab329e3c1f5a81) | `24.1.423` |
+| `mutrig_frame_deassembly` | [`2f80322948a0`](https://github.com/yifeng-ethz/mutrig_frame_deassembly/tree/2f80322948a091d3ba6d2b10cd4d29958711c766) | `26.2.0.0511` |
+| `mutrig_reset_controller` | [`3c47f8ccd6bd`](https://github.com/yifeng-ethz/mutrig_reset_controller/tree/3c47f8ccd6bdd3e9f604faee69a88a2e852b3639) | `26.0.0.0518` |
+| `mutrig_timestamp_processor` | [`7087fe9b4332`](https://github.com/yifeng-ethz/mutrig_timestamp_processor/tree/7087fe9b4332a889d19dff67267369e426803dbf) | `26.6.0.0716` |
+| `onewire_temp_sense` | [`9cff54a8f636`](https://github.com/yifeng-ethz/onewire_temp_sense/tree/9cff54a8f6362894fb039224fd56c21e7c6564a0) | `26.2.1.0428` |
+| `packet_scheduler` | [`c35f096a5a5d`](https://github.com/yifeng-ethz/packet_scheduler/tree/c35f096a5a5d0968b29df29aa331ad5a3e7c75e4) | `26.5.1.0509` |
+| `rdma_cq_pusher` | [`359904bda269`](https://github.com/yifeng-ethz/rdma_cq_pusher/tree/359904bda26916a02b1039fdab760f641d9160bf) | Prototype / no VERSION surface |
+| `rdma_dma_engine` | [`de32f4abf98a`](https://github.com/yifeng-ethz/rdma_dma_engine/tree/de32f4abf98a9903bde703149bc4ff5e7990685c) | Prototype / no VERSION surface |
+| `rdma_rq_fetcher` | [`a7ac46d7e88c`](https://github.com/yifeng-ethz/rdma_rq_fetcher/tree/a7ac46d7e88c0598be5d08b13c8c4cec7eee56db) | `26.1.0.0510` |
+| `rdma_run_manager` | [`7e6d6c3094dd`](https://github.com/yifeng-ethz/rdma_run_manager/tree/7e6d6c3094ddb0c52a685edd982118164dd2ec76) | `26.1.0.0510` |
+| `rdma_subsystem` | [`03bb41ee169e`](https://github.com/yifeng-ethz/rdma_subsystem/tree/03bb41ee169e89ea253841c425a65e8b00b9fd7c) | `26.1.0.0510` |
+| `ring-buffer_cam` | [`8ed25b81429b`](https://github.com/yifeng-ethz/ring-buffer_cam/tree/8ed25b81429b2a79a17adc5eb747d453b720db5f) | `26.2.13.0516` |
+| `run-control_mgmt` | [`1f5e482c9f3e`](https://github.com/yifeng-ethz/run-control_mgmt/tree/1f5e482c9f3e6925b2d0568437092135b6b0e82d) | `26.3.3.0525` |
+| `slow-control_hub` | [`717e3d23da3e`](https://github.com/yifeng-ethz/slow-control_hub/tree/717e3d23da3eacf585bfb2b8f27a6f3fb755c3ba) | `26.6.10.0423` |
+
 
 Before pushing a parent commit that changes gitlinks, run `scripts/check_ip_lib_update.py --check-remote`, `git submodule status`, and `git push --recurse-submodules=check origin main`. If Git reports local-only submodule commits, push those submodule branches first or keep the parent pointer unpublished.
 
@@ -305,13 +311,16 @@ For simulation, the subdirectories include VHDL testbenches and Python scripts d
 ## Contributing
 
 Contributions to the Mu3e IP Library are welcome under the Apache License 2.0.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the complete contribution and
+[Developer Certificate of Origin](DCO) sign-off requirements.
 
 1. Scope — Contributions for research, validation, reproducibility, and production use are welcome.
 2. Fork and Branch — Fork this repository and create a feature branch (for example, `feature/my_lab_fix`).
 3. Document Clearly — Use descriptive commit messages and include a concise technical summary of the changes.
 4. Commit Authorship — Commits must use the responsible human or institutional author identity. Do not add automated assistants, generated-session identities, or assistant co-author trailers as contribution credit.
-5. Submit a Pull Request — Open a PR describing the improvement, test results, or bug fix.
-6. Contributor Licensing — By submitting a contribution, you agree that it may be distributed under the Apache License 2.0 and certify that you have the right to submit it.
+5. DCO Sign-off — Sign every commit with `git commit --signoff` to certify that you have the right to submit it under the [Developer Certificate of Origin 1.1](DCO).
+6. Submit a Pull Request — Open a PR describing the improvement, test results, or bug fix.
+7. Contributor Licensing — By submitting a contribution, you agree that it may be distributed under the Apache License 2.0.
 
 For collaboration or technology-transfer discussions, please contact one of us:
 
@@ -326,9 +335,12 @@ For collaboration or technology-transfer discussions, please contact one of us:
 
 ## License
 
-Copyright (c) 2025 Yifeng Wang. Authored solely by Yifeng Wang for the Mu3e experiment.
+Copyright (c) 2025-2026 ETH Zurich.
 
-Licensed under the [Apache License, Version 2.0](LICENSE). You may not use this repository except in compliance with the License.
+Sole creator: Yifeng Wang. Developed for the Mu3e experiment.
+
+Licensed under the [Apache License, Version 2.0](LICENSE). Attribution and
+third-party licensing information is recorded in [NOTICE](NOTICE).
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an **AS IS** BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations.
 
