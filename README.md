@@ -326,7 +326,7 @@ For collaboration or technology-transfer discussions, please contact one of us:
 
 ## License
 
-Copyright (c) 2025 Mu3e Collaboration, Yifeng Wang, et al.
+Copyright (c) 2025 Yifeng Wang. Authored solely by Yifeng Wang for the Mu3e experiment.
 
 Licensed under the [Apache License, Version 2.0](LICENSE). You may not use this repository except in compliance with the License.
 
