@@ -4,7 +4,7 @@
 # Mu3e IP Library
 <p>
   <a href="#license">
-    <img src="https://img.shields.io/badge/license-Academic%20Evaluation-lightgrey.svg" alt="License badge" height="30" />
+    <img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License badge" height="30" />
   </a>
   <a href="#">
     <img src="https://img.shields.io/badge/build-passing-brightgreen.svg" alt="Build status badge" height="30" />
@@ -304,21 +304,16 @@ For simulation, the subdirectories include VHDL testbenches and Python scripts d
 
 ## Contributing
 
-Contributions to the Mu3e IP Library are welcome for academic and research purposes under the Academic Evaluation License.
+Contributions to the Mu3e IP Library are welcome under the Apache License 2.0.
 
-As several cores and algorithms are under active patent filing, contributions must follow the rules below:
+1. Scope — Contributions for research, validation, reproducibility, and production use are welcome.
+2. Fork and Branch — Fork this repository and create a feature branch (for example, `feature/my_lab_fix`).
+3. Document Clearly — Use descriptive commit messages and include a concise technical summary of the changes.
+4. Commit Authorship — Commits must use the responsible human or institutional author identity. Do not add automated assistants, generated-session identities, or assistant co-author trailers as contribution credit.
+5. Submit a Pull Request — Open a PR describing the improvement, test results, or bug fix.
+6. Contributor Licensing — By submitting a contribution, you agree that it may be distributed under the Apache License 2.0 and certify that you have the right to submit it.
 
-1.	Scope — Contributions are accepted for research, validation, and reproducibility. Commercial or derivative use is not permitted without written consent.
-2.	Fork and Branch — Fork this repository under your academic or institutional account. Create a feature branch (e.g., feature/my_lab_fix).
-3.	Document Clearly — Use descriptive commit messages. Include a concise technical summary of changes and your institutional affiliation.
-4.	Commit Authorship — Commits must use the responsible human or institutional author identity. Do not add automated assistants, generated-session identities, or assistant co-author trailers as contribution credit.
-5.	Submit a Pull Request — Open a PR describing your improvement, test results, or bug fix. The maintainer will review for technical compatibility and possible overlap with ongoing patent filings.
-6.	Contributor Agreement — By submitting a contribution, you agree that:
-	- You retain copyright of your original code.
-	- You grant us a perpetual, non-exclusive right to incorporate, modify, or relicense your contribution under the same Academic Evaluation License.
-	- You acknowledge that no patent rights are transferred or implied and that underlying Mu3e IP patent rights remain solely with us.
-
-For commercial collaboration or technology-transfer discussions, please contact one of us:
+For collaboration or technology-transfer discussions, please contact one of us:
 
   yifenwan@phys.ethz.ch \
   rwallny@phys.ethz.ch \
@@ -331,31 +326,11 @@ For commercial collaboration or technology-transfer discussions, please contact 
 
 ## License
 
-Mu3e IP Cores — Academic Evaluation License
-Copyright (c) 2025 Mu3e Collaboration, Yifeng Wang, et al. All rights reserved.
+Copyright (c) 2025 Mu3e Collaboration, Yifeng Wang, et al.
 
-Permission is hereby granted, free of charge, to academic researchers,
-universities, and non-commercial institutions to use and evaluate this
-source code for research, teaching, and internal experimental purposes only.
+Licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0). You may not use this repository except in compliance with the License.
 
-The following conditions apply:
-
-1. Redistribution of this source code, in whole or in part, is prohibited.
-2. Use, modification, or integration of this source code or any derivative
-   work in a commercial product, service, or hardware design is strictly
-   prohibited without prior written consent from the copyright holder.
-3. Any publication, report, or presentation using results obtained from
-   this code must include the acknowledgment:
-       “Mu3e IP Cores © 2025 Mu3e Collaboration, used under Academic Evaluation License.”
-4. No patent rights are granted, explicitly or implicitly. All patent rights
-   related to the algorithms, architectures, and designs implemented in this
-   repository are fully reserved by the author. Patent filings are ongoing.
-5. This software is provided “AS IS”, without warranty of any kind,
-   express or implied, including but not limited to the warranties of
-   merchantability, fitness for a particular purpose, and non-infringement.
-
-For commercial licensing, technology transfer, or collaboration inquiries,
-please contact yifenwan@phys.ethz.ch or visit https://transfer.ethz.ch 
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an **AS IS** BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations.
 
 ---
 
